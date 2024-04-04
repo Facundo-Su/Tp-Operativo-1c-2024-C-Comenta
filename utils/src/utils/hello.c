@@ -138,7 +138,6 @@ void liberar_conexion(int socket_cliente)
 }
 
 
-logger 
 
 int iniciar_servidor(char *puerto)
 {

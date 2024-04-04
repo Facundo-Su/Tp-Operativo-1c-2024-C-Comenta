@@ -47,15 +47,24 @@ typedef struct
 	op_code codigo_operacion;
 	t_buffer* buffer;
 } t_paquete;
-
 typedef enum{
 	NEW,
 	READY,
 	RUNNING,
 	WAITING,
-	TERMINATED,
+	TERMINATED
 }t_estado;
 
+typedef struct{
+	int pid;
+	int pc;
+	int quantum;
+}t_contexto_ejecucion;
+typedef struct
+{
+	t_contexto_ejecucion * contexto;
+	t_estado * estado;
+}t_pcb;
 
 
 void* serializar_paquete(t_paquete* , int );
