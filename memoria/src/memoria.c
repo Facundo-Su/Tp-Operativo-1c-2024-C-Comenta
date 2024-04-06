@@ -67,7 +67,7 @@ void procesar_conexion(void* socket){
 	            case MENSAJE:
 	                recibir_mensaje(cliente_fd);
 	                log_info(logger_memoria,"hola como estas capo");
-	                enviar_mensaje("hola", cliente_fd);
+					enviar_mensaje_instrucciones("recibi el mensaje", cliente_fd, MENSAJE);
 	                break;
 	            case PAQUETE:
 	                lista = recibir_paquete(cliente_fd);
