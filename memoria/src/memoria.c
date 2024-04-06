@@ -8,6 +8,7 @@ int main(int argc, char* argv[]) {
 
 	//Se declara e inicializa el logger de memoria
     logger_memoria = log_create("memoria.log", "Memoria", 1, LOG_LEVEL_DEBUG);
+	logger = log_create("./memoria_principal.log", "CPU", true, LOG_LEVEL_INFO);
     log_info(logger_memoria, "Soy la Memoria!");
 
 	//Se levanta el archivo de configuracion y se guardan sus datos
@@ -71,7 +72,11 @@ void procesar_conexion(void* socket){
 	                log_info(logger_memoria, "Me llegaron los siguientes valores:\n");
 	                list_iterate(lista, (void*) iterator);
 	                break;
-
+				case CREAR_PCB:
+					lista = recibir_paquete(cliente_fd);
+					t_contexto_ejecucion* contexto = desempaquetar_pcb(lista);
+					mostrar_contexto_ejecucion(contexto);
+					break;
 	            case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");
 	                close(cliente_fd);

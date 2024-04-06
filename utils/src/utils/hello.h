@@ -42,7 +42,8 @@ typedef enum
 	ENVIARREGISTROCPU,
 	INSTRUCCIONES_A_MEMORIA,
 	MANDAME_PAGINA,
-    FINALIZAR
+    FINALIZAR,
+	CREAR_PCB
 }op_code;
 
 typedef struct
@@ -75,7 +76,7 @@ typedef struct{
 	int pid;
 	int pc;
 	int quantum;
-	t_registros_pcb registros;
+	t_registros_pcb* registros;
 }t_contexto_ejecucion;
 typedef struct
 {
@@ -102,5 +103,14 @@ int iniciar_servidor(char* puerto);
 int esperar_cliente(int socket_servidor);
 void recibir_mensaje(int socket_servidor);
 void enviar_mensaje_instrucciones(char* mensaje, int socket_cliente,op_code operacion);
+
+void empaquetar_registro(t_paquete* paquete, t_registros_pcb* regisroPCB);
+void empaquetar_pcb(t_paquete* paquete, t_contexto_ejecucion* contexto);
+
+void mostrar_contexto_ejecucion(t_contexto_ejecucion* contexto_ejecucion);
+t_contexto_ejecucion* desempaquetar_pcb(t_list* paquete);
+t_registros_pcb* desempaquetar_registros(t_list* paquete, int* posicion);
+void enviar_pcb(t_pcb* pcb, int socket_cliente,op_code operacion);
+
 
 #endif

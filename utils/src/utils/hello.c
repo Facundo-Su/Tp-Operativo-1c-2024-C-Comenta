@@ -252,3 +252,72 @@ t_config* cargar_config(char *ruta){
     }
     return config;
 }
+
+//------------------------------------------------------------------------------------------------------------
+
+void empaquetar_pcb(t_paquete* paquete, t_contexto_ejecucion* contexto){
+
+	agregar_a_paquete(paquete, &(contexto->pid), sizeof(int));
+	agregar_a_paquete(paquete, &(contexto->pc), sizeof(int));
+
+	empaquetar_registro(paquete, contexto->registros);
+}
+
+void empaquetar_registro(t_paquete* paquete, t_registros_pcb* regisroPCB){
+	agregar_a_paquete(paquete,&(regisroPCB->ax), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(regisroPCB->bx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(regisroPCB->cx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(regisroPCB->dx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(regisroPCB->eax), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(regisroPCB->ebx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(regisroPCB->ecx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(regisroPCB->edx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(regisroPCB->si), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(regisroPCB->di), sizeof(uint32_t));
+}
+//==========================================================================================================
+
+t_contexto_ejecucion* desempaquetar_pcb(t_list* paquete){
+	t_contexto_ejecucion* contexto_ejecucion = malloc(sizeof(t_contexto_ejecucion));
+	int * pid = list_get(paquete, 0);
+	contexto_ejecucion->pid = *pid;
+	int posicion = 1;
+	int *puntero_posicion = &posicion;
+
+	int *pc = list_get(paquete, (*puntero_posicion)++);
+
+	t_registros_pcb* registros = desempaquetar_registros(paquete, puntero_posicion);
+	contexto_ejecucion->registros = registros;
+
+	return contexto_ejecucion;
+}
+
+t_registros_pcb* desempaquetar_registros(t_list* paquete, int* posicion) {
+    t_registros_pcb* registro = malloc(sizeof(t_registros_pcb));
+
+    registro->ax = *((uint32_t*)list_get(paquete, (*posicion)++));
+    registro->bx = *((uint32_t*)list_get(paquete, (*posicion)++));
+    registro->cx = *((uint32_t*)list_get(paquete, (*posicion)++));
+    registro->dx = *((uint32_t*)list_get(paquete, (*posicion)++));
+	registro->eax = *((uint32_t*)list_get(paquete, (*posicion)++));
+	registro->ebx = *((uint32_t*)list_get(paquete, (*posicion)++));
+	registro->ecx = *((uint32_t*)list_get(paquete, (*posicion)++));
+	registro->edx = *((uint32_t*)list_get(paquete, (*posicion)++));
+	registro->si = *((uint32_t*)list_get(paquete, (*posicion)++));
+	registro->di = *((uint32_t*)list_get(paquete, (*posicion)++));
+    return registro;
+}
+
+void enviar_pcb(t_pcb* pcb, int conexion,op_code operacion){
+	t_paquete* paquete = crear_paquete(operacion);
+	empaquetar_pcb(paquete, pcb->contexto);
+	enviar_paquete(paquete, conexion);
+	eliminar_paquete(paquete);
+}
+//mostrar el contexto_ejecucion
+void mostrar_contexto_ejecucion(t_contexto_ejecucion* contexto_ejecucion){
+	log_info(logger, "PID: %d", contexto_ejecucion->pid);
+	log_info(logger, "PC: %d", contexto_ejecucion->pc);
+	log_info(logger, "AX: %d", contexto_ejecucion->registros->ax);
+
+}

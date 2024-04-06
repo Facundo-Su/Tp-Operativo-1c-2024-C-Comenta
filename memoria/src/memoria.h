@@ -12,6 +12,7 @@ useconds_t retardo_respuesta;
 int auxiliar;
 
 t_log* logger_memoria;
+t_log* logger;
 t_config* config;
 
 

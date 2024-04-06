@@ -99,15 +99,45 @@ void crear_proceso(){
 	contador_pcb++;
 	//log_pcb_info(pcb);
 	log_info(logger,"Se crea el proceso %i en NEW",pcb->contexto->pid);
-	agregar_cola_new(pcb);
+	//agregar_cola_new(pcb);
 
 }
+
+t_pcb* retorno_pcb(){
+    t_pcb* pcb = malloc(sizeof(t_pcb));
+	pcb->estado =NEW;
+    pcb->contexto = crear_contexto();
+	contador_pcb++;
+	//log_pcb_info(pcb);
+	log_info(logger,"Se crea el proceso %i en NEW",pcb->contexto->pid);
+	//agregar_cola_new(pcb);
+    return pcb;
+}
+
+
 t_contexto_ejecucion * crear_contexto(){
     t_contexto_ejecucion * contexto = malloc(sizeof(t_contexto_ejecucion));
     contexto->pid = contador_pcb;
     contexto->pc =0;
+    t_registros_pcb* registro = crear_registro();
+    contexto->registros = registro;
     return contexto;
 }
+t_registros_pcb* crear_registro(){
+    t_registros_pcb* reg = malloc(sizeof(t_registros_pcb));
+    reg->ax = 0;
+    reg->bx = 0;
+    reg->cx = 0;
+    reg->dx = 0;
+    reg->eax = 0;
+    reg->ebx = 0;
+    reg->ecx = 0;
+    reg->edx = 0;
+    reg->si = 0;
+    reg->di = 0;
+    return reg;
+}
+
 
 void liberar_proceso(t_pcb * pcb){
 	char* estado_anterior = estado_a_string(pcb->estado);
