@@ -6,23 +6,19 @@
 
 int main(int argc, char* argv[]) {
 
+	//Se declara e inicializa el logger de memoria
+    logger_memoria = log_create("memoria.log", "Memoria", 1, LOG_LEVEL_DEBUG);
+    log_info(logger_memoria, "Soy la Memoria!");
+
+	//Se levanta el archivo de configuracion y se guardan sus datos
 	char *rutaConfig = "./memoria.config";
-    logger = log_create("memoria2.log", "Memoria", 1, LOG_LEVEL_DEBUG);
-
 	config = cargar_config(rutaConfig);
-
     obtener_configuraciones();
 
     //iniciar_recursos();
     //inicializar_memoria();
-
-    logger_memoria = log_create("memoria.log", "Memoria", 1, LOG_LEVEL_DEBUG);
-
-    log_info(logger_memoria, "Soy el Memoria!");
-
     //iniciar_consola();
 	iniciar_servidor_memoria(puerto_escucha);
-    // Limpieza y terminación
 
     return EXIT_SUCCESS;
 }
@@ -31,10 +27,11 @@ int main(int argc, char* argv[]) {
 
 void obtener_configuraciones() {
     puerto_escucha = config_get_string_value(config,"PUERTO_ESCUCHA");
-    path_instrucciones =config_get_string_value(config,"PATH_INSTRUCCIONES");
-    tam_memoria = config_get_int_value(config,"TAM_MEMORIA");
+	tam_memoria = config_get_int_value(config,"TAM_MEMORIA");
     tam_pagina = config_get_int_value(config,"TAM_PAGINA");
+    path_instrucciones =config_get_string_value(config,"PATH_INSTRUCCIONES");
     strcat(path_instrucciones,"/");
+	auxiliar = config_get_int_value(config,"RETARDO_RESPUESTA");
     auxiliar = auxiliar* 1000;
     retardo_respuesta = (useconds_t) auxiliar;
 }
