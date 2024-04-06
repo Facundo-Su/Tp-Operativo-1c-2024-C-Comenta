@@ -13,7 +13,6 @@ int auxiliar;
 
 t_log* logger_memoria;
 t_config* config;
-t_log* logger;
 
 
 void obtener_configuraciones();
