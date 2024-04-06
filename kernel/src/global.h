@@ -58,6 +58,7 @@ extern pthread_t hilo_planificador_corto_plazo;
 extern pthread_t hilo_conexion_memoria;
 extern pthread_t hilo_conexion_cpu;
 extern pthread_t hilo_conexion_cpu_interrupt;
+extern t_pcb * running;
 
 //
 

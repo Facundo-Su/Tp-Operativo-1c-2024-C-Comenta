@@ -27,6 +27,7 @@ pthread_t hilo_conexion_cpu;
 pthread_t hilo_conexion_cpu_interrupt;
 t_config* config;
 t_log* logger;
+t_pcb * running;
 void obtener_configuracion(){
     char *ruta_config = "kernel.config";
 	config = cargar_config(ruta_config);
@@ -56,6 +57,7 @@ void asignar_algoritmo(char *algoritmo){
 	}
 }
 void inicializar_estructuras(){
+    running = NULL;
     logger = log_create("./kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
     detener = false;
     contador_pcb = 0;

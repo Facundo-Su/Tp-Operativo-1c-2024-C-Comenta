@@ -1,18 +1,13 @@
 #include "kernel.h"
 
 int main(int argc, char* argv[]) {
-
-
-
-
-    
-    log_info(logger, "Soy el Kernel!");
     //iniciar_recurso();
 	iniciar();
+	
 	generar_conexion();
 
     iniciar_consola();
-
+	inciar_planificadores();
     return EXIT_SUCCESS;
 }
 

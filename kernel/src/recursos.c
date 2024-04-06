@@ -51,7 +51,7 @@ void ejecutar_signal(char*nombre,t_pcb*pcb){
 				quitar_recurso_pcb(pcb->contexto->pid,nombre);
 				log_info(logger,"PID: %i - Signal: %s - Instancias: %i",pcb->contexto->pid,recurso->nombre,recurso->instancias);
 				//enviar_pcb(pcb,conexion_cpu,RECIBIR_PCB);
-				if(!queue_is_empty(recurso->cola_bloqueados)){
+				if(!queue_is_empty(recurso->cola_bloqueados->cola)){
 					t_pcb* pcb_bloqueado = quitar_cola_bloqueados_recurso(recurso);
 					agregar_cola_ready(pcb_bloqueado);
 					sem_post(&sem_ready);
@@ -148,7 +148,6 @@ void liberar_recursos(int pid){
 
 	t_list_iterator* iterador = list_iterator_create(lista_recursos);
 
-		int j=0;
 		while(list_iterator_has_next(iterador)){
 			t_recurso* recurso = (t_recurso*)list_iterator_next(iterador);
 			t_recurso_pcb * recurso_pcb = buscar_recurso_pcb(recurso->nombre,pid);

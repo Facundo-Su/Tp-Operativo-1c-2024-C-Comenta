@@ -3,6 +3,7 @@
 
 #include <utils/hello.h>
 #include "global.h"
+#include "planificadores.h"
 void generar_conexion();
 void procesar_conexion(void *);
 void iniciar_consola();
