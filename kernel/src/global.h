@@ -4,7 +4,9 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include "utils/hello.h"
-#include "recursos.h"
+#include <commons/collections/list.h> 
+
+
 typedef struct
 {
     t_queue *cola;
@@ -27,6 +29,7 @@ typedef enum{
 	RR,
 	VRR
 }t_planificador;
+
 extern sem_t sem_new;
 extern sem_t sem_ready;
 extern sem_t sem_grado_multiprogramacion;
@@ -41,7 +44,7 @@ extern int contador_pcb;
 extern bool detener;
 extern t_log* logger;
 extern t_config* config;
-extern t_planificador * planificador;
+extern t_planificador planificador;
 extern int conexion_memoria;
 extern int conexion_cpu;
 extern int conexion_cpu_interrupt;
@@ -50,12 +53,23 @@ extern char ** recursos_config;
 extern char ** instancias_recursos_config;
 extern t_list * lista_recursos;
 extern t_list * lista_recursos_pcb;
+extern pthread_t hilo_planificador_largo_plazo;
+extern pthread_t hilo_planificador_corto_plazo;
+extern pthread_t hilo_conexion_memoria;
+extern pthread_t hilo_conexion_cpu;
+extern pthread_t hilo_conexion_cpu_interrupt;
 
-void asignar_algoritmo(char *algoritmo);
+//
+
+void asignar_algoritmo(char *);
 void obtener_configuracion();
-
-void iniciar_recurso();
+void inicializar_recursos();
 void recibir_mensaje(int);
 t_cola * inicializar_cola();
 void inicializar_estructuras();
+void crear_proceso();
+t_contexto_ejecucion * crear_contexto();
+void liberar_proceso(t_pcb * );
+char* estado_a_string(t_estado );
+
 #endif

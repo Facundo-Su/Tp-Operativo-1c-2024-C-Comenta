@@ -3,12 +3,12 @@
 int main(int argc, char* argv[]) {
 
 
-	char *rutaConfig = "kernel.config";
-	config = cargar_config(rutaConfig);
 
-    logger = log_create("./kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
+
+    
     log_info(logger, "Soy el Kernel!");
     //iniciar_recurso();
+	iniciar();
 	generar_conexion();
 
     iniciar_consola();
@@ -22,11 +22,11 @@ void iniciar_consola(){
 	char* variable;
 	while(1){
 		log_info(logger_consola,"ingrese la operacion que deseas realizar"
-				"\n 1. Iniciar Proceso"
-				"\n 2. Finalizar proceso"
-				"\n 3. Iniciar Planificacion"
+				"\n 1. Ejecutar script"
+				"\n 2. Iniciar proceso"
+				"\n 3. Finalizar proceso"
 				"\n 4. Detener Planificacion"
-				"\n 5. Modificar Grado Multiprogramacion"
+				"\n 5. Iniciar Planificacion"
 				"\n 6. Listar Procesos por Estado"
 				"\n 7. Terminar Programa");
 		variable = readline(">");
@@ -36,31 +36,24 @@ void iniciar_consola(){
 				enviar_mensaje("hola",conexion_memoria);
 				break;
 			case '2':
-				log_info(logger_consola, "Ingrese pid");
-				char* valor = readline(">");
-				int valorNumero = atoi(valor);
+				log_info(logger_consola, "Ingrese el path");
+				char* script = readline(">");
 				break;
 			case '3':
-				log_info(logger,"INICIO DE PLANIFICACIÓN");
-				//iniciar_planificacion();
-
+				log_info(logger_consola, "Ingrese el pid de proceso a finalizar");
+				char* valor = readline(">");
+				int pid_finalizar = atoi(valor);
 				break;
 			case '4':
-				log_info(logger,"PAUSA DE PLANIFICACIÓN");
-				//detener_planificacion_corto_largo();
-				//detenido = true;
+				log_info(logger,"PAUSA DE LA PLANIFICACIÓN");
+				detener = true;
 				break;
 			case '5':
-				char* valor2 = readline(">");
-				int nuevo_grado = atoi(valor2);
-				log_info(logger,"Grado Anterior: %i - Grado Actual: %i",grado_multiprogramacion_ini,nuevo_grado);
-				//grado_multiprogramacion_ini = nuevo_grado;
-				//sem_destroy(&grado_multiprogramacion);
-				//sem_init(&grado_multiprogramacion, 0, grado_multiprogramacion_ini);
-				//modificar_grado_multiprogramacion();
+				log_info(logger,"INICIO DE LA PLANIFICACIÓN");
+				pthread_mutex_unlock(&sem_detener);
+				
 				break;
 			case '6':
-				//listar_proceso_estado();
 				//listar_proceso_estado();
 				break;
 			case '7':
@@ -78,15 +71,10 @@ void iniciar_consola(){
 
 
 
-void generar_conexion(){
-	pthread_t conexion_memoria_hilo;
-	//pthread_t conexion_file_system_hilo;
-	pthread_t conexion_cpu_hilo;
-	pthread_t conexion_cpu_interrupt_hilo;
 
-	conexion_memoria = crear_conexion(ip_memoria, puerto_memoria);
-	pthread_create(&conexion_memoria_hilo,NULL,(void*) procesar_conexion,(void *)&conexion_memoria);
-	pthread_detach(conexion_memoria_hilo);
+void generar_conexion(){
+
+	pthread_create(&hilo_conexion_memoria,NULL,(void*) procesar_conexion,(void *)&conexion_memoria);
 	// conexion_cpu = crear_conexion(ip_cpu, puerto_cpu_dispatch);
 	// pthread_create(&conexion_cpu_hilo,NULL,(void*) procesar_conexion,(void *)&conexion_cpu);
 	// pthread_detach(conexion_cpu_hilo);

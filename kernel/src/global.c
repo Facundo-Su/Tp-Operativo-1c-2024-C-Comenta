@@ -13,12 +13,23 @@ int grado_multiprogramacion_ini;
 int contador_pcb;
 char ** recursos_config;
 char ** instancias_recursos_config;
+int conexion_memoria;
+int conexion_cpu;
+int conexion_cpu_interrupt;
+bool detener;
 t_list * lista_recursos;
 t_list * lista_recursos_pcb;
-t_planificador * planificador;
-
-
+t_planificador planificador;
+pthread_t hilo_planificador_largo_plazo;
+pthread_t hilo_planificador_corto_plazo;
+pthread_t hilo_conexion_memoria;
+pthread_t hilo_conexion_cpu;
+pthread_t hilo_conexion_cpu_interrupt;
+t_config* config;
+t_log* logger;
 void obtener_configuracion(){
+    char *ruta_config = "kernel.config";
+	config = cargar_config(ruta_config);
     char * puerto_escucha = config_get_string_value(config, "PUERTO_ESCUCHA");
     char * ip_memoria = config_get_string_value(config, "IP_MEMORIA");
     char * puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
@@ -26,11 +37,12 @@ void obtener_configuracion(){
     char * puerto_cpu_dispatch = config_get_string_value(config, "PUERTO_CPU_DISPATCH");
     char * puerto_cpu_interrupt = config_get_string_value(config, "PUERTO_CPU_INTERRUPT");
     char * algoritmo = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
-    asignar_algoritmo(algoritmo);
     quantum = config_get_int_value(config, "QUANTUM");
     recursos_config = config_get_array_value(config, "RECURSOS");
     instancias_recursos_config = config_get_array_value(config, "INSTANCIAS_RECURSOS");
     grado_multiprogramacion_ini = config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
+    asignar_algoritmo(algoritmo);
+    conexion_memoria = crear_conexion(ip_memoria, puerto_memoria);
 }
 void asignar_algoritmo(char *algoritmo){
 	if (strcmp(algoritmo, "FIFO") == 0) {
@@ -44,6 +56,8 @@ void asignar_algoritmo(char *algoritmo){
 	}
 }
 void inicializar_estructuras(){
+    logger = log_create("./kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
+    detener = false;
     contador_pcb = 0;
     cola_new = inicializar_cola();
     cola_ready = inicializar_cola();
@@ -80,10 +94,10 @@ void crear_proceso(){
     t_pcb* pcb = malloc(sizeof(t_pcb));
 	pcb->estado =NEW;
     pcb->contexto = crear_contexto();
-	contador_pid++;
+	contador_pcb++;
 	//log_pcb_info(pcb);
-	log_info(logger_consola,"Se crea el proceso %i en NEW",pcb->pid);
-	agregar_a_cola_new(pcb);
+	log_info(logger,"Se crea el proceso %i en NEW",pcb->contexto->pid);
+	agregar_cola_new(pcb);
 
 }
 t_contexto_ejecucion * crear_contexto(){
@@ -93,17 +107,16 @@ t_contexto_ejecucion * crear_contexto(){
     return contexto;
 }
 
-void terminar_proceso(t_pcb * pcb){
+void liberar_proceso(t_pcb * pcb){
 	char* estado_anterior = estado_a_string(pcb->estado);
 	pcb->estado = TERMINATED;
 	log_info(logger,"PID: %i - Estado Anterior: %s - Estado Actual: TERMINATED",pcb->contexto->pid,estado_anterior);
-	liberar_recursos(pcb->pid);
-	enviar_pcb(pcb,conexion_memoria,FINALIZAR);
-	sem_post(&sem_ready);
+	//liberar_recursos(pcb->contexto->pid);
+	//enviar_pcb(pcb,conexion_memoria,FINALIZAR);
 	pthread_mutex_unlock(&sem_exec);
 	sem_post(&sem_grado_multiprogramacion);
 }
-char* estado_a_string(t_estado * estado) {
+char* estado_a_string(t_estado estado) {
     switch (estado) {
         case NEW:
             return "NEW";
@@ -119,3 +132,9 @@ char* estado_a_string(t_estado * estado) {
             return "Estado desconocido";
     }
 }
+void iniciar(){
+    obtener_configuracion();
+    inicializar_estructuras();
+    inicializar_recursos();
+}
+

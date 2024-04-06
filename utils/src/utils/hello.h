@@ -63,7 +63,7 @@ typedef struct{
 typedef struct
 {
 	t_contexto_ejecucion * contexto;
-	t_estado * estado;
+	t_estado estado;
 }t_pcb;
 
 
