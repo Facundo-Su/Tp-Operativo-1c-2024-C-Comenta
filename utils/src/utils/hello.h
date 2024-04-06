@@ -39,6 +39,9 @@ typedef enum
 	MENSAJE,
 	PAQUETE,
     RECIBIR_PCB,
+	ENVIARREGISTROCPU,
+	INSTRUCCIONES_A_MEMORIA,
+	MANDAME_PAGINA,
     FINALIZAR
 }op_code;
 
@@ -56,9 +59,23 @@ typedef enum{
 }t_estado;
 
 typedef struct{
+	uint32_t ax;
+	uint32_t bx;
+	uint32_t cx;
+	uint32_t dx;
+	uint32_t eax;
+	uint32_t ebx;
+	uint32_t ecx;
+	uint32_t edx;
+	uint32_t si;
+	uint32_t di;
+}t_registros_pcb;
+
+typedef struct{
 	int pid;
 	int pc;
 	int quantum;
+	t_registros_pcb registros;
 }t_contexto_ejecucion;
 typedef struct
 {
@@ -84,5 +101,6 @@ t_config* cargar_config(char* path);
 int iniciar_servidor(char* puerto);
 int esperar_cliente(int socket_servidor);
 void recibir_mensaje(int socket_servidor);
+void enviar_mensaje_instrucciones(char* mensaje, int socket_cliente,op_code operacion);
 
 #endif
