@@ -259,36 +259,34 @@ void empaquetar_pcb(t_paquete* paquete, t_contexto_ejecucion* contexto){
 
 	agregar_a_paquete(paquete, &(contexto->pid), sizeof(int));
 	agregar_a_paquete(paquete, &(contexto->pc), sizeof(int));
-
 	empaquetar_registro(paquete, contexto->registros);
 }
 
-void empaquetar_registro(t_paquete* paquete, t_registros_pcb* regisroPCB){
-	agregar_a_paquete(paquete,&(regisroPCB->ax), sizeof(uint32_t));
-	agregar_a_paquete(paquete,&(regisroPCB->bx), sizeof(uint32_t));
-	agregar_a_paquete(paquete,&(regisroPCB->cx), sizeof(uint32_t));
-	agregar_a_paquete(paquete,&(regisroPCB->dx), sizeof(uint32_t));
-	agregar_a_paquete(paquete,&(regisroPCB->eax), sizeof(uint32_t));
-	agregar_a_paquete(paquete,&(regisroPCB->ebx), sizeof(uint32_t));
-	agregar_a_paquete(paquete,&(regisroPCB->ecx), sizeof(uint32_t));
-	agregar_a_paquete(paquete,&(regisroPCB->edx), sizeof(uint32_t));
-	agregar_a_paquete(paquete,&(regisroPCB->si), sizeof(uint32_t));
-	agregar_a_paquete(paquete,&(regisroPCB->di), sizeof(uint32_t));
+void empaquetar_registro(t_paquete* paquete, t_registros_pcb* registros){
+	agregar_a_paquete(paquete,&(registros->ax), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(registros->bx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(registros->cx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(registros->dx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(registros->eax), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(registros->ebx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(registros->ecx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(registros->edx), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(registros->si), sizeof(uint32_t));
+	agregar_a_paquete(paquete,&(registros->di), sizeof(uint32_t));
 }
 //==========================================================================================================
 
 t_contexto_ejecucion* desempaquetar_pcb(t_list* paquete){
+
 	t_contexto_ejecucion* contexto_ejecucion = malloc(sizeof(t_contexto_ejecucion));
 	int * pid = list_get(paquete, 0);
 	contexto_ejecucion->pid = *pid;
 	int posicion = 1;
 	int *puntero_posicion = &posicion;
-
 	int *pc = list_get(paquete, (*puntero_posicion)++);
-
+	contexto_ejecucion->pc = *pc;
 	t_registros_pcb* registros = desempaquetar_registros(paquete, puntero_posicion);
 	contexto_ejecucion->registros = registros;
-
 	return contexto_ejecucion;
 }
 

@@ -4,7 +4,8 @@ void finalizar_pcb(t_pcb * pcb){
     liberar_proceso(pcb);
 }
 void eliminar_pcb(int pid){
-
+    t_pcb * pcb = encontrar_pcb(pid);
+    finalizar_pcb(pcb);
 }
 
 t_pcb*buscar_pcb_bloqueados(int pid){

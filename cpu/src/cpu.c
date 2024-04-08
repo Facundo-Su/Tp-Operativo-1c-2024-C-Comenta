@@ -123,3 +123,4 @@ void obtener_configuracion(){
 	puerto_escucha_interrupt = config_get_string_value(config,"PUERTO_ESCUCHA_INTERRUPT");
 }
 
+

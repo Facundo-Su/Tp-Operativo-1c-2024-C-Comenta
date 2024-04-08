@@ -18,7 +18,7 @@ void iniciar_consola(){
 	while(1){
 		log_info(logger_consola,"ingrese la operacion que deseas realizar"
 				"\n 1. Ejecutar script"
-				"\n 2. Iniprocesociar "
+				"\n 2. Iniciar proceso "
 				"\n 3. Finalizar proceso"
 				"\n 4. Detener Planificacion"
 				"\n 5. Iniciar Planificacion"
@@ -31,6 +31,7 @@ void iniciar_consola(){
 				enviar_mensaje_instrucciones("hola",conexion_memoria,MENSAJE);
 				break;
 			case '2':
+
 				t_pcb* pcb_aux = retorno_pcb();
 				enviar_pcb(pcb_aux,conexion_memoria,CREAR_PCB);
 				break;
@@ -38,6 +39,7 @@ void iniciar_consola(){
 				log_info(logger_consola, "Ingrese el pid de proceso a finalizar");
 				char* valor = readline(">");
 				int pid_finalizar = atoi(valor);
+				eliminar_pcb(pid_finalizar);
 				break;
 			case '4':
 				log_info(logger,"PAUSA DE LA PLANIFICACIÓN");
