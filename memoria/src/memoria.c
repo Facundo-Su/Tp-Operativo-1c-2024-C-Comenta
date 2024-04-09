@@ -65,13 +65,17 @@ void procesar_conexion(void* socket){
 	                break;
 				case CREAR_PCB:
 					lista = recibir_paquete(cliente_fd);
-					t_contexto_ejecucion* contexto = desempaquetar_pcb(lista);
-					mostrar_contexto_ejecucion(contexto);
-					cargar_lista_instruccion(ruta,size,prioridad,*pid);
+					//t_contexto_ejecucion* contexto = desempaquetar_pcb(lista);
+					char * aux =list_get(lista,0);
+					int* pid = list_get(lista,1);
+					char *ruta = obtener_ruta(aux);
+					log_info(logger_memoria,"%s", aux);
+					//mostrar_contexto_ejecucion(contexto);
+					cargar_lista_instruccion(ruta,*pid);
 					break;
 	    		case INSTRUCCIONES_A_MEMORIA:
-	    			usleep(retardo_respuesta);
-	    			t_list* lista;
+					log_info(logger_memoria, "LLegue hasta aca");
+	    			//usleep(retardo_respuesta);
 	    			lista = recibir_paquete(cliente_fd);
 	    			int* pc_recibido = list_get(lista,0);
 	    			int* pid_recibido = list_get(lista,1);
@@ -94,7 +98,7 @@ void procesar_conexion(void* socket){
 	    		        // Luego puedes realizar las operaciones que necesites con 'instrucciones'
 	    		    } else {
 	    		        // No se encontraron instrucciones que cumplan con la condición
-//	    		        log_info(logger, "No se encontraron instrucciones para el PID %i", *pid_recibido);
+							log_info(logger_memoria, "No se encontraron instrucciones para el PID %i", *pid_recibido);
 	    		    }
 			break;
 	            case -1:

@@ -17,6 +17,7 @@ int conexion_memoria;
 int conexion_cpu;
 int conexion_cpu_interrupt;
 bool detener;
+bool primero;
 t_list * lista_recursos;
 t_list * lista_recursos_pcb;
 t_planificador planificador;
@@ -44,6 +45,9 @@ void obtener_configuracion(){
     grado_multiprogramacion_ini = config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
     asignar_algoritmo(algoritmo);
     conexion_memoria = crear_conexion(ip_memoria, puerto_memoria);
+    conexion_cpu = crear_conexion(ip_cpu, puerto_cpu_dispatch);
+    conexion_cpu_interrupt = crear_conexion(ip_cpu, puerto_cpu_interrupt);
+
 }
 void asignar_algoritmo(char *algoritmo){
 	if (strcmp(algoritmo, "FIFO") == 0) {
@@ -60,6 +64,7 @@ void inicializar_estructuras(){
     running = NULL;
     logger = log_create("./kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
     detener = false;
+    primero = true;
     contador_pcb = 0;
     cola_new = inicializar_cola();
     cola_ready = inicializar_cola();
@@ -162,6 +167,18 @@ char* estado_a_string(t_estado estado) {
             return "TERMINATED";
         default:
             return "Estado desconocido";
+    }
+}
+char* planificador_a_string(t_planificador planificador) {
+    switch (planificador) {
+        case VRR:
+            return "VRR";
+        case RR:
+            return "RR";
+        case FIFO:
+            return "FIFO";
+        default:
+            return "Planificador desconocido";
     }
 }
 void iniciar(){

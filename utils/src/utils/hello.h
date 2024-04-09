@@ -93,6 +93,7 @@ typedef struct{
 	op_instrucciones nombre;
     t_list* parametros;
 }t_instruccion;
+
 typedef struct{
 	uint32_t ax;
 	uint32_t bx;

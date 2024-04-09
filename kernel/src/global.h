@@ -42,6 +42,7 @@ extern t_cola * cola_blocked;
 extern int grado_multiprogramacion_ini;
 extern int contador_pcb;
 extern bool detener;
+extern bool primero;
 extern t_log* logger;
 extern t_config* config;
 extern t_planificador planificador;

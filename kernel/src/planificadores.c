@@ -10,6 +10,7 @@ void agregar_cola_ready(t_pcb * pcb){
     pthread_mutex_lock(&(cola_ready->sem_mutex));
     queue_push(cola_ready->cola, pcb);
     pthread_mutex_unlock(&(cola_ready->sem_mutex));
+    sem_post(&sem_ready);
 }
 t_pcb * quitar_cola_ready(){
     pthread_mutex_lock(&(cola_ready->sem_mutex));
@@ -26,14 +27,18 @@ t_pcb * quitar_cola_new(){
 void planificador_largo_plazo(){
     while (1)
     {
+        log_info(logger,"hasta aca llegue 1");
         sem_wait(&sem_new);
+        log_info(logger,"hasta aca llegue 2");
         sem_wait(&sem_grado_multiprogramacion);
         if(detener){
             pthread_mutex_lock(&sem_detener);
         }
         t_pcb * pcb = quitar_cola_new();
         pcb->estado = READY;
+        log_info(logger,"Se agreggo el proceso %i a la cola READY",pcb->contexto->pid);
         agregar_cola_ready(pcb);
+
     }
     
 }
@@ -45,6 +50,7 @@ void planificador_corto_plazo(){
 	}
     while (1)
     {
+        log_info(logger,"hasta aca llegue 3");
         sem_wait(&sem_ready);
         pthread_mutex_lock(&sem_exec);
         if(detener){
@@ -88,7 +94,7 @@ void enviar_por_dispatch(t_pcb* pcb) {
 	char * estado_anterior = estado_a_string(pcb->estado);
 	log_info(logger, "PID: %i - Estado Anterior: %s - Estado Actual: RUNNING",pcb->contexto->pid,estado_anterior);
     pcb->estado=RUNNING;
-    //enviar_pcb(pcb,conexion_cpu,RECIBIR_PCB);
+    enviar_pcb(pcb->contexto,conexion_cpu,RECIBIR_PCB);
 }
 
 void inciar_planificadores(){

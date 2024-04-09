@@ -11,7 +11,8 @@ int main(int argc, char* argv[]) {
 
     logger = log_create("./cpu.log", "CPU", true, LOG_LEVEL_INFO);
     log_info(logger, "Soy la cpu!");
-
+	instruccion_a_realizar = malloc(sizeof(t_instruccion));
+	instruccion_a_realizar->parametros= list_create();
     //iniciar configuraciones
 	obtener_configuracion();
 	//iniciar_recurso();
@@ -107,6 +108,7 @@ void procesar_conexion(void *conexion1){
 			transformar_en_instrucciones(auxiliar);
 //			hayInterrupcion = false;
 			recibi_archivo=true;
+			log_info(logger, "Recibi las instrucciones");
 			sem_post(&contador_instruccion);
 			break;
 		case PAQUETE:
@@ -124,7 +126,7 @@ void procesar_conexion(void *conexion1){
 		case RECIBIR_PCB:
 			log_info(logger, "Estoy por recibir un PCB");
 			t_list * paquete = recibir_paquete(cliente_fd);
-			//contexto_ejecucion = desempaquetar_contexto_ejecucion(paquete);
+			pcb = desempaquetar_pcb(paquete);
 			//recibir_pcb(cliente_fd);
 			hayInterrupcion = false;
 			hay_finalizar = false;
@@ -174,7 +176,7 @@ void fetch(int cliente_fd){
 	log_info(logger, "PID: %i - FETCH - Program Counter: %i.",pid,pc);
 	solicitar_instruccion_ejecutar_segun_pc(pc, pid);
 	sem_wait(&contador_instruccion);
-	pcb+=1;
+	pcb->pc+=1;
 	decode(instruccion_a_realizar,cliente_fd);
 
 }
@@ -184,6 +186,7 @@ void solicitar_instruccion_ejecutar_segun_pc(int pc,int pid){
 	agregar_a_paquete(paquete, &pc, sizeof(int));
 	agregar_a_paquete(paquete, &pid, sizeof(int));
 	enviar_paquete(paquete, conexion_memoria);
+	log_info(logger,"Solicite instrucciones");
 
 }
 
@@ -437,7 +440,6 @@ void obtener_configuracion(){
 
 
 void transformar_en_instrucciones(char* auxiliar){
-	instruccion_a_realizar->parametros= list_create();
 	int cantidad_parametros=0;
 	log_error(logger,"el valor recibido es %s",auxiliar);
 	char** instruccion_parseada = parsear_instruccion(auxiliar);

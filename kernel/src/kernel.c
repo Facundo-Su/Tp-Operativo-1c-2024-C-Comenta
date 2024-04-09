@@ -3,11 +3,11 @@
 int main(int argc, char* argv[]) {
     //iniciar_recurso();
 	iniciar();
-	
+	char * e = planificador_a_string(planificador);
+	log_info(logger, "%s",e);
 	generar_conexion();
-
-    iniciar_consola();
 	inciar_planificadores();
+    iniciar_consola();
     return EXIT_SUCCESS;
 }
 
@@ -28,12 +28,28 @@ void iniciar_consola(){
 
 		switch (*variable) {
 			case '1':
-				enviar_mensaje_instrucciones("hola",conexion_memoria,MENSAJE);
+			
+				//enviar_mensaje_instrucciones("hola",conexion_memoria,MENSAJE);
+				
 				break;
 			case '2':
+				log_info(logger_consola, "Ingrese la ruta");
+				char* ruta = readline(">");
+				
+				t_pcb* pcb = retorno_pcb();
+				t_paquete* paquete =crear_paquete(CREAR_PCB);
+				agregar_a_paquete(paquete, ruta, strlen(ruta) + 1);
+				agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
+				enviar_paquete(paquete, conexion_memoria);
+				eliminar_paquete(paquete);
+				
 
-				t_pcb* pcb_aux = retorno_pcb();
-				enviar_pcb(pcb_aux,conexion_memoria,CREAR_PCB);
+				agregar_cola_new(pcb);
+				if(primero = true){
+					pthread_mutex_unlock(&sem_exec);
+				}
+				primero = false;
+				//enviar_pcb(pcb_aux,conexion_memoria,CREAR_PCB);
 				break;
 			case '3':
 				log_info(logger_consola, "Ingrese el pid de proceso a finalizar");
@@ -72,12 +88,12 @@ void iniciar_consola(){
 void generar_conexion(){
 
 	pthread_create(&hilo_conexion_memoria,NULL,(void*) procesar_conexion,(void *)&conexion_memoria);
-	// conexion_cpu = crear_conexion(ip_cpu, puerto_cpu_dispatch);
-	// pthread_create(&conexion_cpu_hilo,NULL,(void*) procesar_conexion,(void *)&conexion_cpu);
-	// pthread_detach(conexion_cpu_hilo);
-	// conexion_cpu_interrupt = crear_conexion(ip_cpu, puerto_cpu_interrupt);
-	// pthread_create(&conexion_cpu_interrupt_hilo, NULL, (void*) procesar_conexion, (void *)&conexion_cpu_interrupt);
-	// pthread_detach(conexion_cpu_interrupt_hilo);
+	//conexion_cpu = crear_conexion(ip_cpu, puerto_cpu_dispatch);
+	pthread_create(&hilo_conexion_cpu,NULL,(void*) procesar_conexion,(void *)&conexion_cpu);
+	pthread_detach(hilo_conexion_cpu);
+	//conexion_cpu_interrupt = crear_conexion(ip_cpu, puerto_cpu_interrupt);
+	pthread_create(&hilo_conexion_cpu_interrupt, NULL, (void*) procesar_conexion, (void *)&conexion_cpu_interrupt);
+	pthread_detach(hilo_conexion_cpu_interrupt);
 }
 
 
