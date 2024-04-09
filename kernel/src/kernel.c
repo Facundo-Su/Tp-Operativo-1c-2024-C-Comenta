@@ -102,6 +102,8 @@ void generar_conexion(){
 void procesar_conexion(void *conexion1){
 	int *conexion = (int*)conexion1;
 	int cliente_fd = *conexion;
+	t_contexto_ejecucion * contexto;
+	t_paquete * paquete;
 	while (1) {
 		int cod_op = recibir_operacion(cliente_fd);
 		switch (cod_op) {
@@ -153,7 +155,12 @@ void procesar_conexion(void *conexion1){
 //			sem_post(&sem_ok_archivo_creado);
 //			break;
 		case FINALIZAR:
-
+			paquete = recibir_paquete(cliente_fd);
+			contexto = desempaquetar_pcb(paquete);
+			running->contexto = contexto;
+			finalizar_pcb(running);
+			log_warning(logger, "Finaliza el proceso %i - Motivo: SUCCES",running->contexto->pid);
+			running = NULL;
 			break;
 
 		case -1:

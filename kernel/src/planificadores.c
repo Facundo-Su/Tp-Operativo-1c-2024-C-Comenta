@@ -94,6 +94,7 @@ void enviar_por_dispatch(t_pcb* pcb) {
 	char * estado_anterior = estado_a_string(pcb->estado);
 	log_info(logger, "PID: %i - Estado Anterior: %s - Estado Actual: RUNNING",pcb->contexto->pid,estado_anterior);
     pcb->estado=RUNNING;
+    running= pcb;
     enviar_pcb(pcb->contexto,conexion_cpu,RECIBIR_PCB);
 }
 

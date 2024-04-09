@@ -27,5 +27,5 @@ extern t_config* config;
 
 
 void obtener_configuraciones();
-t_list* leer_pseudocodigo(FILE* pseudocodigo);
+void inicializar_estructuras();
 #endif

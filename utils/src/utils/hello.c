@@ -1,6 +1,5 @@
 #include <utils/hello.h>
 
-
 int crear_conexion(char *ip, char* puerto)
 {
 	struct addrinfo hints;
@@ -162,7 +161,7 @@ int iniciar_servidor(char *puerto)
 	// Escuchamos las conexiones entrantes
 	listen(socket_servidor, SOMAXCONN);
 	freeaddrinfo(servinfo);
-	log_trace(logger, "Listo para escuchar a mi cliente");
+	//log_trace(logger, "Listo para escuchar a mi cliente");
 	return socket_servidor;
 }
 
