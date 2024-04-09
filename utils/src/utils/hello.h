@@ -43,7 +43,11 @@ typedef enum
 	INSTRUCCIONES_A_MEMORIA,
 	MANDAME_PAGINA,
     FINALIZAR,
-	CREAR_PCB
+	CREAR_PCB,
+	ENVIAR_DESALOJAR,
+	ENVIAR_FINALIZAR,
+	EJECUTAR_WAIT,
+	EJECUTAR_SIGNAL
 }op_code;
 
 typedef struct
@@ -59,6 +63,36 @@ typedef enum{
 	TERMINATED
 }t_estado;
 
+
+
+
+
+typedef enum
+{
+    SET,
+	MOV_IN,
+	MOV_OUT,
+	SUB,
+	SUM,
+	JNZ,
+	RESIZE,
+	COPY_STRING,
+	WAIT,
+	SIGNAL,
+	I0_GEN_SLEEP,
+	IO_STDIN_READ,
+	IO_STDOUT_WRITE,
+	IO_FS_CREATE,
+	IO_FS_DELETE,
+	IO_FS_TRUNCATE,
+	IO_FS_WRITE,
+	IO_FS_READ,
+	EXIT
+}op_instrucciones;
+typedef struct{
+	op_instrucciones nombre;
+    t_list* parametros;
+}t_instruccion;
 typedef struct{
 	uint32_t ax;
 	uint32_t bx;
@@ -110,7 +144,7 @@ void empaquetar_pcb(t_paquete* paquete, t_contexto_ejecucion* contexto);
 void mostrar_contexto_ejecucion(t_contexto_ejecucion* contexto_ejecucion);
 t_contexto_ejecucion* desempaquetar_pcb(t_list* paquete);
 t_registros_pcb* desempaquetar_registros(t_list* paquete, int* posicion);
-void enviar_pcb(t_pcb* pcb, int socket_cliente,op_code operacion);
+void enviar_pcb(t_contexto_ejecucion* pcb, int socket_cliente,op_code operacion);
 
 
 #endif

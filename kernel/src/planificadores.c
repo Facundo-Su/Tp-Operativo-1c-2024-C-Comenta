@@ -76,6 +76,7 @@ void de_ready_a_round_robin(){
 }
 void *interrupcion_quantum(){
     while(1){
+        
         if(!queue_is_empty(cola_ready)){
             //enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
             usleep(quantum * 1000);

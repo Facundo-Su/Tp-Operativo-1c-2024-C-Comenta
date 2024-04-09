@@ -306,9 +306,9 @@ t_registros_pcb* desempaquetar_registros(t_list* paquete, int* posicion) {
     return registro;
 }
 
-void enviar_pcb(t_pcb* pcb, int conexion,op_code operacion){
+void enviar_pcb(t_contexto_ejecucion* pcb, int conexion,op_code operacion){
 	t_paquete* paquete = crear_paquete(operacion);
-	empaquetar_pcb(paquete, pcb->contexto);
+	empaquetar_pcb(paquete, pcb);
 	enviar_paquete(paquete, conexion);
 	eliminar_paquete(paquete);
 }
