@@ -62,6 +62,9 @@ void procesar_conexion(void* socket){
 					t_contexto_ejecucion* pcb = desempaquetar_pcb(paquete);
 					finalizar_proceso(pcb->pid);
 					break;
+				case MANDAME_PAGINA:
+	            	mandar_pagina(cliente_fd);
+	            	break;
 	    		case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");
 	                close(cliente_fd);
