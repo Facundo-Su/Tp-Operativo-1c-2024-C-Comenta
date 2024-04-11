@@ -1,5 +1,6 @@
 #include "global.h"
 
+t_memoria* memoria;
 t_list *lista_instrucciones;
 char *puerto_escucha;
 int tam_memoria;

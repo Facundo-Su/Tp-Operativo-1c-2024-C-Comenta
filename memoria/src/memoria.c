@@ -57,6 +57,11 @@ void procesar_conexion(void* socket){
 	    			usleep(retardo_respuesta);
 					enviar_instrucciones(cliente_fd);
 					break;
+				case FINALIZAR: //TODO Todavia no esta terminado ni testeado
+					t_list* paquete = recibir_paquete(cliente_fd);
+					t_contexto_ejecucion* pcb = desempaquetar_pcb(paquete);
+					finalizar_proceso(pcb->pid);
+					break;
 	    		case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");
 	                close(cliente_fd);

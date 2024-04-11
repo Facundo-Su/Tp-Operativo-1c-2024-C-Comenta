@@ -12,6 +12,40 @@ typedef struct{
 	t_list* instrucciones;
 }t_instrucciones;
 
+typedef struct {
+	int num_marco;
+    int p;
+    int m;
+    int num_pagina;
+	bool ocupada;
+} t_pagina;
+
+typedef struct {
+	int num_marco;
+    int base;
+    bool is_free;
+    int llegada_fifo;
+    int last_time_lru;
+    int pid;
+} t_marco;
+
+typedef struct {
+	int pid;
+    t_list * paginas;
+    int tamanio_proceso;
+    int paginas_necesarias;
+}t_tabla_paginas;
+
+typedef struct{
+	void * espacio_usuario;
+	t_list * marcos;
+	t_list  * lista_tabla_paginas;
+	int tamanio_marcos;
+	int cantidad_marcos;
+}t_memoria;
+
+extern t_memoria* memoria;
+
 extern t_list *lista_instrucciones;
 extern char *puerto_escucha;
 extern int tam_memoria;
