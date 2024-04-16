@@ -51,7 +51,7 @@ void procesar_conexion(void* socket){
 	                list_iterate(lista, (void*) iterator);
 	                break;
 				case CREAR_PCB:
-					cargar_lista_instruccion(cliente_fd);
+					crear_pcb(cliente_fd);
 					break;
 	    		case INSTRUCCIONES_A_MEMORIA:
 	    			usleep(retardo_respuesta);

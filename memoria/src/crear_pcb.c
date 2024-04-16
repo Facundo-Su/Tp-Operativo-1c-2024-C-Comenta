@@ -1,13 +1,18 @@
-#include "carga_instrucciones.h"
+#include "crear_pcb.h"
 
-void cargar_lista_instruccion(int cliente_fd) {
-	t_list * lista = recibir_paquete(cliente_fd);
-	char * aux =list_get(lista,0);
+void crear_pcb (int cliente_fd){
+    t_list* lista = recibir_paquete(cliente_fd);
+	char* aux =list_get(lista,0);
 	int* pid = list_get(lista,1);
-	char *ruta = obtener_ruta(aux);
+	char*ruta = obtener_ruta(aux);
 
+	cargar_lista_instruccion(pid, ruta);
+    guardar_proceso_en_memoria(pid);
+}
+
+void cargar_lista_instruccion(int pid, char* ruta) {
     t_instrucciones* instruccion = malloc(sizeof(t_instruccion));
-    instruccion->pid = *pid;
+    instruccion->pid = pid;
     instruccion->instrucciones = list_create();
     FILE* archivo = fopen(ruta, "r");
 
@@ -99,3 +104,4 @@ void enviar_instrucciones(int cliente_fd){
     }
 }
 
+void guardar_proceso_en_memoria(int pid) {}
