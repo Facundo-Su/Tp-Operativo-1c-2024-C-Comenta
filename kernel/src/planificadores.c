@@ -1,5 +1,6 @@
 
 #include "planificadores.h"
+
 void agregar_cola_new(t_pcb * pcb){
     pthread_mutex_lock(&(cola_new->sem_mutex));
     queue_push(cola_new->cola, pcb);
@@ -36,7 +37,7 @@ void planificador_largo_plazo(){
         }
         t_pcb * pcb = quitar_cola_new();
         pcb->estado = READY;
-        log_info(logger,"Se agreggo el proceso %i a la cola READY",pcb->contexto->pid);
+        log_info(logger,"Se agrego el proceso %i a la cola READY",pcb->contexto->pid);
         agregar_cola_ready(pcb);
 
     }
@@ -56,6 +57,7 @@ void planificador_corto_plazo(){
         if(detener){
             pthread_mutex_lock(&sem_detener);
         }
+        log_info(logger,"hasta aca llegue 4");
         switch (planificador)
         {
         case FIFO:
@@ -81,10 +83,11 @@ void de_ready_a_round_robin(){
     de_ready_a_fifo();
 }
 void *interrupcion_quantum(){
+    log_info(logger, "LLEGUE AL HILO");
     while(1){
-        
-        if(!queue_is_empty(cola_ready)){
-            //enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
+        if(!queue_is_empty(cola_ready->cola)){
+            log_error(logger,"SE TIENE QUE INTERRUMPIR");
+            enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
             usleep(quantum * 1000);
         }
         usleep(200 * 1000);

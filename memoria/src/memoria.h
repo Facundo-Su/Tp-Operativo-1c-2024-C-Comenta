@@ -3,6 +3,8 @@
 
 #include <utils/hello.h>
 #include "global.h"
+#include "crear_pcb.h"
+#include "finaliza_proceso.h"
 
 
 

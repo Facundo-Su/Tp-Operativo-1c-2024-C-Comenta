@@ -71,7 +71,6 @@ void inicializar_estructuras(){
     cola_blocked = inicializar_cola();
     sem_init(&sem_new, 0, 0);
     sem_init(&sem_ready, 0, 0);
-    
     sem_init(&sem_grado_multiprogramacion, 0, grado_multiprogramacion_ini);
     pthread_mutex_init(&sem_detener, NULL);
     pthread_mutex_init(&sem_exec, NULL);
@@ -142,7 +141,6 @@ t_registros_pcb* crear_registro(){
     reg->di = 0;
     return reg;
 }
-
 
 void liberar_proceso(t_pcb * pcb){
 	char* estado_anterior = estado_a_string(pcb->estado);

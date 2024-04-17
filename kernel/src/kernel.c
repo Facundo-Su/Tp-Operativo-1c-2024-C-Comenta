@@ -5,6 +5,7 @@ int main(int argc, char* argv[]) {
 	iniciar();
 	char * e = planificador_a_string(planificador);
 	log_info(logger, "%s",e);
+	log_info(logger,"%i", quantum);
 	generar_conexion();
 	inciar_planificadores();
     iniciar_consola();
@@ -42,10 +43,9 @@ void iniciar_consola(){
 				agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
 				enviar_paquete(paquete, conexion_memoria);
 				eliminar_paquete(paquete);
-				
-
 				agregar_cola_new(pcb);
-				if(primero = true){
+
+				if(primero == true){
 					pthread_mutex_unlock(&sem_exec);
 				}
 				primero = false;
@@ -153,14 +153,22 @@ void procesar_conexion(void *conexion1){
 //			tam_archivo = *tam_archivo_recibido_creado;
 //			log_error(logger,"llegue a respuesta crear archivo");
 //			sem_post(&sem_ok_archivo_creado);
-//			break;
+		//			break;
+		case ENVIAR_DESALOJAR:
+		paquete = recibir_paquete(cliente_fd);
+		contexto= desempaquetar_pcb(paquete);
+		running->contexto = contexto;
+		//log_pcb_info(pcb_aux);
+		agregar_cola_ready(running);
+		pthread_mutex_unlock(&sem_exec);
+
+		break;
 		case FINALIZAR:
 			paquete = recibir_paquete(cliente_fd);
 			contexto = desempaquetar_pcb(paquete);
 			running->contexto = contexto;
 			finalizar_pcb(running);
 			log_warning(logger, "Finaliza el proceso %i - Motivo: SUCCES",running->contexto->pid);
-			running = NULL;
 			break;
 
 		case -1:

@@ -6,12 +6,12 @@ void crear_pcb (int cliente_fd){
 	int* pid = list_get(lista,1);
 	char*ruta = obtener_ruta(aux);
 
-	cargar_lista_instruccion(pid, ruta);
-    guardar_proceso_en_memoria(pid);
+	cargar_lista_instruccion(*pid, ruta);
+    //guardar_proceso_en_memoria(pid);
 }
 
 void cargar_lista_instruccion(int pid, char* ruta) {
-    t_instrucciones* instruccion = malloc(sizeof(t_instruccion));
+    t_instrucciones* instruccion = malloc(sizeof(t_instrucciones));
     instruccion->pid = pid;
     instruccion->instrucciones = list_create();
     FILE* archivo = fopen(ruta, "r");
@@ -85,16 +85,23 @@ t_list* leer_pseudocodigo(FILE* pseudocodigo){
     return instrucciones_del_pcb;
 
 }
+
 void enviar_instrucciones(int cliente_fd){
     t_list * lista = recibir_paquete(cliente_fd);
     int* pc_recibido = list_get(lista,0);
     int* pid_recibido = list_get(lista,1);
+    log_info(logger_memoria,"%i", *pid_recibido);
+    log_info(logger_memoria,"%i", *pc_recibido);
     bool encontrar_instrucciones(void * instruccion){
         t_instrucciones* un_instruccion = (t_instrucciones*)instruccion;
             int valor_comparar =un_instruccion->pid;
+            log_info(logger_memoria, "%i", valor_comparar);
             return valor_comparar == *pid_recibido;
     }
-    t_instrucciones* instrucciones = list_find(lista_instrucciones, encontrar_instrucciones);
+    t_instrucciones * instrucciones = list_find(lista_instrucciones, encontrar_instrucciones);
+    log_info(logger_memoria, "%i", list_size(lista_instrucciones));
+    log_info(logger_memoria, "%i", list_size(instrucciones->instrucciones));
+
 
     if (instrucciones != NULL) {
         char*valor_obtenido = list_get(instrucciones->instrucciones,*pc_recibido);
