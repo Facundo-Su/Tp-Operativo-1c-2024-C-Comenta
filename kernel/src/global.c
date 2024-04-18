@@ -5,6 +5,8 @@ sem_t sem_ready;
 sem_t sem_grado_multiprogramacion;
 pthread_mutex_t sem_detener;
 pthread_mutex_t sem_exec;
+pthread_mutex_t sem_detener_largo;
+pthread_mutex_t sem_interrupcion;
 t_cola * cola_new;
 t_cola * cola_ready;
 t_cola * cola_blocked;
@@ -73,7 +75,13 @@ void inicializar_estructuras(){
     sem_init(&sem_ready, 0, 0);
     sem_init(&sem_grado_multiprogramacion, 0, grado_multiprogramacion_ini);
     pthread_mutex_init(&sem_detener, NULL);
+    pthread_mutex_init(&sem_detener_largo, NULL);
     pthread_mutex_init(&sem_exec, NULL);
+    pthread_mutex_init(&sem_interrupcion, NULL);
+    pthread_mutex_lock(&sem_interrupcion);
+    pthread_mutex_lock(&sem_detener);
+    pthread_mutex_lock(&sem_detener_largo);
+
     lista_recursos = list_create();
     lista_recursos_pcb = list_create();
     

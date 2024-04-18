@@ -35,7 +35,7 @@ void iniciar_servidor_cpu(){
 	log_info(logger, "Servidor listo para recibir al cliente");
 	generar_conexion_memoria();
 	log_info(logger, "genere conexion con memoria");
-	enviar_mensaje_instrucciones("genere conexion con memoria",conexion_memoria,MENSAJE);
+	//enviar_mensaje_instrucciones("genere conexion con memoria",conexion_memoria,MENSAJE);
 
 	while(1){
 	    int cliente_fd = esperar_cliente(cpu_fd);

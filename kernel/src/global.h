@@ -35,6 +35,8 @@ extern sem_t sem_ready;
 extern sem_t sem_grado_multiprogramacion;
 extern pthread_mutex_t sem_exec;
 extern pthread_mutex_t sem_detener;
+extern pthread_mutex_t sem_detener_largo;
+extern pthread_mutex_t sem_interrupcion;
 extern t_cola * cola_new;
 extern t_cola * cola_ready;
 extern t_cola * cola_blocked;

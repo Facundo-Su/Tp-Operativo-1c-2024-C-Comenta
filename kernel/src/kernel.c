@@ -3,8 +3,8 @@
 int main(int argc, char* argv[]) {
     //iniciar_recurso();
 	iniciar();
-	char * e = planificador_a_string(planificador);
-	log_info(logger, "%s",e);
+	//char * e = planificador_a_string(planificador);
+	//log_info(logger, "%s",e);
 	log_info(logger,"%i", quantum);
 	generar_conexion();
 	inciar_planificadores();
@@ -63,9 +63,10 @@ void iniciar_consola(){
 				break;
 			case '5':
 				log_info(logger,"INICIO DE LA PLANIFICACIÓN");
-				
-				pthread_mutex_unlock(&sem_detener);
 				detener = false;
+				pthread_mutex_unlock(&sem_detener_largo);
+				pthread_mutex_unlock(&sem_detener);
+				
 				break;
 			case '6':
 				//listar_proceso_estado();
