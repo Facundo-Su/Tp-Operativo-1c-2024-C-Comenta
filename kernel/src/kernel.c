@@ -63,8 +63,9 @@ void iniciar_consola(){
 				break;
 			case '5':
 				log_info(logger,"INICIO DE LA PLANIFICACIÓN");
-				pthread_mutex_unlock(&sem_detener);
 				
+				pthread_mutex_unlock(&sem_detener);
+				detener = false;
 				break;
 			case '6':
 				//listar_proceso_estado();
@@ -88,6 +89,7 @@ void iniciar_consola(){
 void generar_conexion(){
 
 	pthread_create(&hilo_conexion_memoria,NULL,(void*) procesar_conexion,(void *)&conexion_memoria);
+	pthread_detach(hilo_conexion_memoria);
 	//conexion_cpu = crear_conexion(ip_cpu, puerto_cpu_dispatch);
 	pthread_create(&hilo_conexion_cpu,NULL,(void*) procesar_conexion,(void *)&conexion_cpu);
 	pthread_detach(hilo_conexion_cpu);
@@ -111,8 +113,23 @@ void procesar_conexion(void *conexion1){
 			recibir_mensaje(cliente_fd);
 			break;
 		case RECIBIR_PCB:
+			paquete = recibir_paquete(cliente_fd);
+			contexto= desempaquetar_pcb(paquete);
+			running->contexto = contexto;
 			recv(cliente_fd,&cod_op,sizeof(op_code),0);
 			switch(cod_op){
+				case EJECUTAR_WAIT:
+					paquete = recibir_paquete(cliente_fd);
+					char *nombre_recurso_wait =list_get(paquete,0);
+					log_error(logger,"%s", nombre_recurso_wait);
+					ejecutar_wait(nombre_recurso_wait,running);
+				break;
+				case EJECUTAR_SIGNAL:
+					paquete = recibir_paquete(cliente_fd);
+					char * nombre_recurso_signal =list_get(paquete,0);
+					log_error(logger,"%s", nombre_recurso_signal);
+					ejecutar_signal(nombre_recurso_signal,running);
+				break;
 			default:
 				//log_error(logger, "che no se que me mandaste");
 				break;

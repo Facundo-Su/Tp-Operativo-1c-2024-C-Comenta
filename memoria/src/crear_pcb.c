@@ -99,9 +99,6 @@ void enviar_instrucciones(int cliente_fd){
             return valor_comparar == *pid_recibido;
     }
     t_instrucciones * instrucciones = list_find(lista_instrucciones, encontrar_instrucciones);
-    log_info(logger_memoria, "%i", list_size(lista_instrucciones));
-    log_info(logger_memoria, "%i", list_size(instrucciones->instrucciones));
-
 
     if (instrucciones != NULL) {
         char*valor_obtenido = list_get(instrucciones->instrucciones,*pc_recibido);

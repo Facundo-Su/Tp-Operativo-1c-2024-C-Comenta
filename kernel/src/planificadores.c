@@ -8,6 +8,7 @@ void agregar_cola_new(t_pcb * pcb){
     sem_post(&sem_new);
 }
 void agregar_cola_ready(t_pcb * pcb){
+    pcb->estado = READY;
     pthread_mutex_lock(&(cola_ready->sem_mutex));
     queue_push(cola_ready->cola, pcb);
     pthread_mutex_unlock(&(cola_ready->sem_mutex));
@@ -32,11 +33,10 @@ void planificador_largo_plazo(){
         sem_wait(&sem_new);
         log_info(logger,"hasta aca llegue 2");
         sem_wait(&sem_grado_multiprogramacion);
-        if(detener){
+        /*if(detener){
             pthread_mutex_lock(&sem_detener);
-        }
+        }*/
         t_pcb * pcb = quitar_cola_new();
-        pcb->estado = READY;
         log_info(logger,"Se agrego el proceso %i a la cola READY",pcb->contexto->pid);
         agregar_cola_ready(pcb);
 
@@ -83,12 +83,13 @@ void de_ready_a_round_robin(){
     de_ready_a_fifo();
 }
 void *interrupcion_quantum(){
-    log_info(logger, "LLEGUE AL HILO");
     while(1){
-        if(!queue_is_empty(cola_ready->cola)){
-            log_error(logger,"SE TIENE QUE INTERRUMPIR");
-            enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
-            usleep(quantum * 1000);
+        if(!detener){
+            if(!queue_is_empty(cola_ready->cola)){
+                log_error(logger,"SE TIENE QUE INTERRUMPIR");
+                enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
+                usleep(quantum * 1000);
+            }
         }
         usleep(200 * 1000);
     }
