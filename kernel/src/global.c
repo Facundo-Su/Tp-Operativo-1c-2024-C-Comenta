@@ -130,6 +130,7 @@ t_pcb* retorno_pcb(){
 t_contexto_ejecucion * crear_contexto(){
     t_contexto_ejecucion * contexto = malloc(sizeof(t_contexto_ejecucion));
     contexto->pid = contador_pcb;
+    //log_info(logger,"%i", contexto->pid);
     contexto->pc =0;
     t_registros_pcb* registro = crear_registro();
     contexto->registros = registro;

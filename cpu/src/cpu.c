@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 	pthread_t servidor_dispatch;
 	pthread_create(&servidor_interrupt,NULL,(void*)iniciar_servidor_interrupt,(void *) puerto_escucha_interrupt);
 	pthread_create(&servidor_dispatch,NULL,(void*)iniciar_servidor_cpu,NULL);
-	iniciar_servidor_cpu();
+	//iniciar_servidor_cpu();
 
 	pthread_join(servidor_dispatch,NULL);
 	pthread_join(servidor_interrupt, NULL);

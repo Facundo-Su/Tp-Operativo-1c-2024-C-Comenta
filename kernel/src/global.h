@@ -76,5 +76,6 @@ t_contexto_ejecucion * crear_contexto();
 void liberar_proceso(t_pcb * );
 char* estado_a_string(t_estado );
 t_registros_pcb* crear_registro();
+t_pcb* retorno_pcb();
 
 #endif

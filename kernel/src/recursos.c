@@ -14,6 +14,7 @@ void ejecutar_wait(char*nombre,t_pcb*pcb){
 				recurso->instancias--;
 				agregar_recurso_pcb(pcb->contexto->pid,nombre);
 				log_info(logger,"PID: %i - Wait: %s - Instancias: %i",pcb->contexto->pid,recurso->nombre,recurso->instancias);
+				pthread_mutex_unlock(&sem_interrupcion);
 				enviar_pcb(pcb->contexto,conexion_cpu,RECIBIR_PCB);
 				break;
 			}else{
@@ -50,11 +51,12 @@ void ejecutar_signal(char*nombre,t_pcb*pcb){
 				recurso->instancias++;
 				quitar_recurso_pcb(pcb->contexto->pid,nombre);
 				log_info(logger,"PID: %i - Signal: %s - Instancias: %i",pcb->contexto->pid,recurso->nombre,recurso->instancias);
+				pthread_mutex_unlock(&sem_interrupcion);
 				enviar_pcb(pcb->contexto,conexion_cpu,RECIBIR_PCB);
 				if(!queue_is_empty(recurso->cola_bloqueados->cola)){
 					t_pcb* pcb_bloqueado = quitar_cola_bloqueados_recurso(recurso);
+					log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
 					agregar_cola_ready(pcb_bloqueado);
-					
 				}
 			}else{
 				liberar_proceso(pcb);

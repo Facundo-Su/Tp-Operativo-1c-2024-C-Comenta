@@ -39,12 +39,19 @@ void iniciar_consola(){
 				
 				t_pcb* pcb = retorno_pcb();
 				t_paquete* paquete =crear_paquete(CREAR_PCB);
+				int pid = pcb->contexto->pid;
+				log_info(logger_consola, "%i", pid);
+				log_info(logger_consola, "llegue 1");
 				agregar_a_paquete(paquete, ruta, strlen(ruta) + 1);
-				agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
+				log_info(logger_consola, "llegue 2");
+				agregar_a_paquete(paquete, &(pid), sizeof(int));
+				log_info(logger_consola, "llegue 3");
 				enviar_paquete(paquete, conexion_memoria);
+				log_info(logger_consola, "llegue 4");
 				eliminar_paquete(paquete);
+				log_info(logger_consola, "llegue 5");
 				agregar_cola_new(pcb);
-
+				log_info(logger_consola, "llegue 6");
 				if(primero == true){
 					pthread_mutex_unlock(&sem_exec);
 				}
