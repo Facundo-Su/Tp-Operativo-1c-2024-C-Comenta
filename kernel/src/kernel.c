@@ -3,8 +3,8 @@
 int main(int argc, char* argv[]) {
     //iniciar_recurso();
 	iniciar();
-	char * e = planificador_a_string(planificador);
-	log_info(logger, "%s",e);
+	//char * e = planificador_a_string(planificador);
+	//log_info(logger, "%s",e);
 	log_info(logger,"%i", quantum);
 	generar_conexion();
 	inciar_planificadores();
@@ -39,12 +39,19 @@ void iniciar_consola(){
 				
 				t_pcb* pcb = retorno_pcb();
 				t_paquete* paquete =crear_paquete(CREAR_PCB);
+				int pid = pcb->contexto->pid;
+				log_info(logger_consola, "%i", pid);
+				log_info(logger_consola, "llegue 1");
 				agregar_a_paquete(paquete, ruta, strlen(ruta) + 1);
-				agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
+				log_info(logger_consola, "llegue 2");
+				agregar_a_paquete(paquete, &(pid), sizeof(int));
+				log_info(logger_consola, "llegue 3");
 				enviar_paquete(paquete, conexion_memoria);
+				log_info(logger_consola, "llegue 4");
 				eliminar_paquete(paquete);
+				log_info(logger_consola, "llegue 5");
 				agregar_cola_new(pcb);
-
+				log_info(logger_consola, "llegue 6");
 				if(primero == true){
 					pthread_mutex_unlock(&sem_exec);
 				}
@@ -63,6 +70,8 @@ void iniciar_consola(){
 				break;
 			case '5':
 				log_info(logger,"INICIO DE LA PLANIFICACIÓN");
+				detener = false;
+				pthread_mutex_unlock(&sem_detener_largo);
 				pthread_mutex_unlock(&sem_detener);
 				
 				break;
@@ -88,6 +97,7 @@ void iniciar_consola(){
 void generar_conexion(){
 
 	pthread_create(&hilo_conexion_memoria,NULL,(void*) procesar_conexion,(void *)&conexion_memoria);
+	pthread_detach(hilo_conexion_memoria);
 	//conexion_cpu = crear_conexion(ip_cpu, puerto_cpu_dispatch);
 	pthread_create(&hilo_conexion_cpu,NULL,(void*) procesar_conexion,(void *)&conexion_cpu);
 	pthread_detach(hilo_conexion_cpu);
@@ -111,8 +121,23 @@ void procesar_conexion(void *conexion1){
 			recibir_mensaje(cliente_fd);
 			break;
 		case RECIBIR_PCB:
+			paquete = recibir_paquete(cliente_fd);
+			contexto= desempaquetar_pcb(paquete);
+			running->contexto = contexto;
 			recv(cliente_fd,&cod_op,sizeof(op_code),0);
 			switch(cod_op){
+				case EJECUTAR_WAIT:
+					paquete = recibir_paquete(cliente_fd);
+					char *nombre_recurso_wait =list_get(paquete,0);
+					log_error(logger,"%s", nombre_recurso_wait);
+					ejecutar_wait(nombre_recurso_wait,running);
+				break;
+				case EJECUTAR_SIGNAL:
+					paquete = recibir_paquete(cliente_fd);
+					char * nombre_recurso_signal =list_get(paquete,0);
+					log_error(logger,"%s", nombre_recurso_signal);
+					ejecutar_signal(nombre_recurso_signal,running);
+				break;
 			default:
 				//log_error(logger, "che no se que me mandaste");
 				break;

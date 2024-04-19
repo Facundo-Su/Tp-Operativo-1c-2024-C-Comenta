@@ -12,7 +12,6 @@ int main(int argc, char* argv[]) {
     logger = log_create("./cpu.log", "CPU", true, LOG_LEVEL_INFO);
     log_info(logger, "Soy la cpu!");
 	instruccion_a_realizar = malloc(sizeof(t_instruccion));
-	instruccion_a_realizar->parametros= list_create();
     //iniciar configuraciones
 	obtener_configuracion();
 	//iniciar_recurso();
@@ -22,7 +21,7 @@ int main(int argc, char* argv[]) {
 	pthread_t servidor_dispatch;
 	pthread_create(&servidor_interrupt,NULL,(void*)iniciar_servidor_interrupt,(void *) puerto_escucha_interrupt);
 	pthread_create(&servidor_dispatch,NULL,(void*)iniciar_servidor_cpu,NULL);
-	iniciar_servidor_cpu();
+	//iniciar_servidor_cpu();
 
 	pthread_join(servidor_dispatch,NULL);
 	pthread_join(servidor_interrupt, NULL);
@@ -36,7 +35,7 @@ void iniciar_servidor_cpu(){
 	log_info(logger, "Servidor listo para recibir al cliente");
 	generar_conexion_memoria();
 	log_info(logger, "genere conexion con memoria");
-	enviar_mensaje_instrucciones("genere conexion con memoria",conexion_memoria,MENSAJE);
+	//enviar_mensaje_instrucciones("genere conexion con memoria",conexion_memoria,MENSAJE);
 
 	while(1){
 	    int cliente_fd = esperar_cliente(cpu_fd);
@@ -104,7 +103,7 @@ void procesar_conexion(void *conexion1){
 			break;
 		case INSTRUCCIONES_A_MEMORIA:
 			char* auxiliar =recibir_instruccion(cliente_fd);
-			//log_info(logger_consola_cpu,"me llego la siguiente instruccion %s",auxiliar);
+			log_info(logger,"me llego la siguiente instruccion %s",auxiliar);
 			transformar_en_instrucciones(auxiliar);
 //			hayInterrupcion = false;
 			recibi_archivo=true;
@@ -174,10 +173,12 @@ void fetch(int cliente_fd){
 	int pc = pcb->pc;
 	int pid = pcb->pid;
 	log_info(logger, "PID: %i - FETCH - Program Counter: %i.",pid,pc);
+
 	solicitar_instruccion_ejecutar_segun_pc(pc, pid);
 	sem_wait(&contador_instruccion);
 	pcb->pc+=1;
 	decode(instruccion_a_realizar,cliente_fd);
+	
 
 }
 
@@ -203,6 +204,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	uint32_t valor_origen;
 	uint32_t resultado;
 	//int valor_int;
+	//log_warning(logger,"%i",instrucciones->nombre);
 	switch(instrucciones->nombre){
 	case SET:
 
@@ -440,10 +442,11 @@ void obtener_configuracion(){
 
 
 void transformar_en_instrucciones(char* auxiliar){
+	instruccion_a_realizar->parametros= list_create();
 	int cantidad_parametros=0;
 	log_error(logger,"el valor recibido es %s",auxiliar);
 	char** instruccion_parseada = parsear_instruccion(auxiliar);
-
+			log_warning(logger,"%s",instruccion_parseada[0]);
 	        if (strcmp(instruccion_parseada[0], "SET") == 0) {
 	        	instruccion_a_realizar->nombre = SET;
 	            cantidad_parametros = 2;
@@ -518,6 +521,7 @@ void transformar_en_instrucciones(char* auxiliar){
 	    	t_list* parametros = list_create();
 
 	        for(int i=1;i<cantidad_parametros+1;i++){
+				log_error(logger, "%s", instruccion_parseada[i]);
 	            list_add(parametros,instruccion_parseada[i]);
 	        }
 
