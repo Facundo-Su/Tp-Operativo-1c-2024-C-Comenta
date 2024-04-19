@@ -9,39 +9,75 @@ int main(int argc, char* argv[]) {
     logger = log_create("./entradasalida.log", "I/O", true, LOG_LEVEL_INFO);
     log_info(logger, "Soy el I/O!");
     obtener_configuracion();
-	generar_conexion();
-
-    // iniciar_consola();
+	iniciar_consola();
 
     return EXIT_SUCCESS;
 }
 
 
-void iniciar_consola(){
+void iniciar_consola(){ 
 	t_log * logger_consola = log_create("./entradaSalidaConsole.log", "consola", 1, LOG_LEVEL_INFO);
-	char* variable;
-	while(1){
-		log_info(
-            logger_consola,
-            "ingrese la operacion que deseas realizar"
-            "\n 1. Iniciar Conexion con memoria"
-            "\n 2. Iniciar Conexion con kernel"
-        );
-		variable = readline(">");
+	char* interfaz;
+	char* path_configuracion;
 
-        switch (*variable) {
-			case '1':
-                log_info(logger_consola,"conexion iniciada con memoria");
-				enviar_mensaje("hola",conexion_memoria);
-				break;
-            case '2':
-                log_info(logger_consola,"conexion iniciada con kernel");
-                enviar_mensaje("hola",conexion_kernel);
-            default:
-                log_info(logger_consola,"Operacion no reconocida");
-        };
+	log_info(
+		logger_consola,
+		"Seleccione el tipo de interfaz"
+		"\n 1. Generica"
+		"\n 2. STDIN"
+		"\n 3. STDOUT"
+		"\n 4 DialFS"
+	);
+	interfaz = readline(">");
+	log_info(logger_consola,"Ingrese la ubicacion del archivo de configuracion");
+	path_configuracion = readline(">");
+
+	switch (*interfaz)
+	{
+		case '1':
+			iniciar_interfaz_generica();
+			break;
+		case '2':
+			iniciar_interfaz_stdin();
+			break;
+		case '3':
+			iniciar_interfaz_stdout();
+			break;
+		case '4':
+			iniciar_interfaz_dialfs();
+			break;
+		default:
+			log_error(logger_consola,"Error interfaz: no conocida");
+			break;
 	}
+}
 
+void iniciar_interfaz_generica() {
+    log_info(logger, "Ingreso a la interfaz Generica");
+	int interfaz_fd = iniciar_servidor(8005);
+
+	while (1) {
+        int cliente_fd = esperar_cliente(interfaz_fd);
+		pthread_t atendiendo;
+		pthread_create(&atendiendo,NULL,(void*)procesar_conexion,(void *) &cliente_fd);
+		pthread_detach(atendiendo);
+
+    }
+}
+
+void iniciar_interfaz_stdin() {
+    log_info(logger, "Ingreso a la interfaz STDIN");
+	generar_conexion();
+}
+
+void iniciar_interfaz_stdout() {
+    log_info(logger, "Ingreso a la interfaz STDOUT");
+	generar_conexion();
+}
+
+void iniciar_interfaz_dialfs() {
+    log_info(logger, "Ingreso a la interfaz DialFs");
+	generar_conexion();
 }
 
 void obtener_configuracion(){
@@ -55,6 +91,7 @@ void obtener_configuracion(){
     path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
     block_size = config_get_int_value(config, "BLOCK_SIZE");
     block_count = config_get_int_value(config, "BLOCK_COUNT");
+	retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
 }
 
 void generar_conexion(){
@@ -79,14 +116,6 @@ void procesar_conexion(void *conexion1){
 		switch (cod_op) {
 		case MENSAJE:
 			recibir_mensaje(cliente_fd);
-			break;
-		case RECIBIR_PCB:
-			recv(cliente_fd,&cod_op,sizeof(op_code),0);
-			switch(cod_op){
-			default:
-				log_error(logger, "che no se que me mandaste");
-				break;
-			}
 			break;
 		case FINALIZAR:
 

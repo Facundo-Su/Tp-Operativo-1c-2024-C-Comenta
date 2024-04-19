@@ -12,6 +12,8 @@ char* puerto_memoria;
 char* path_base_dialfs;
 int block_size;
 int block_count;
+int retraso_compactacion;
+
 
 t_log* logger;
 t_config* config;
@@ -24,6 +26,10 @@ int conexion_memoria;
 void asignar_algoritmo(char *algoritmo);
 void obtener_configuracion();
 void iniciar_consola();
+void iniciar_interfaz_generica();
+void iniciar_interfaz_stdin();
+void iniciar_interfaz_stdout();
+void iniciar_interfaz_dialfs();
 void iniciar_recurso();
 void generar_conexion();
 void procesar_conexion(void *);
