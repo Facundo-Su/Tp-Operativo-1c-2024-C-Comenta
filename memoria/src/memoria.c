@@ -42,8 +42,8 @@ void procesar_conexion(void* socket){
 	            switch (cod_op) {
 	            case MENSAJE:
 	                recibir_mensaje(cliente_fd);
-	                //log_info(logger_memoria,"hola como estas capo");
-					///enviar_mensaje_instrucciones("recibi el mensaje", cliente_fd, MENSAJE);
+	                log_info(logger_memoria,"hola como estas capo");
+					enviar_mensaje_instrucciones("recibi el mensaje", cliente_fd, MENSAJE);
 	                break;
 	            case PAQUETE:
 	                lista = recibir_paquete(cliente_fd);

@@ -37,6 +37,8 @@ extern pthread_mutex_t sem_exec;
 extern pthread_mutex_t sem_detener;
 extern pthread_mutex_t sem_detener_largo;
 extern pthread_mutex_t sem_interrupcion;
+extern pthread_mutex_t sem_detener_conexion;
+
 extern t_cola * cola_new;
 extern t_cola * cola_ready;
 extern t_cola * cola_blocked;
@@ -52,6 +54,7 @@ extern int conexion_memoria;
 extern int conexion_cpu;
 extern int conexion_cpu_interrupt;
 extern int quantum;
+extern char* puerto_escucha;
 extern char ** recursos_config;
 extern char ** instancias_recursos_config;
 extern t_list * lista_recursos;

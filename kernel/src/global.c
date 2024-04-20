@@ -7,6 +7,9 @@ pthread_mutex_t sem_detener;
 pthread_mutex_t sem_exec;
 pthread_mutex_t sem_detener_largo;
 pthread_mutex_t sem_interrupcion;
+pthread_mutex_t sem_detener_conexion;
+
+
 t_cola * cola_new;
 t_cola * cola_ready;
 t_cola * cola_blocked;
@@ -18,6 +21,7 @@ char ** instancias_recursos_config;
 int conexion_memoria;
 int conexion_cpu;
 int conexion_cpu_interrupt;
+char *puerto_escucha;
 bool detener;
 bool primero;
 t_list * lista_recursos;
@@ -28,13 +32,14 @@ pthread_t hilo_planificador_corto_plazo;
 pthread_t hilo_conexion_memoria;
 pthread_t hilo_conexion_cpu;
 pthread_t hilo_conexion_cpu_interrupt;
+
 t_config* config;
 t_log* logger;
 t_pcb * running;
 void obtener_configuracion(){
     char *ruta_config = "kernel.config";
 	config = cargar_config(ruta_config);
-    char * puerto_escucha = config_get_string_value(config, "PUERTO_ESCUCHA");
+    puerto_escucha = config_get_string_value(config, "PUERTO_ESCUCHA");
     char * ip_memoria = config_get_string_value(config, "IP_MEMORIA");
     char * puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
     char * ip_cpu = config_get_string_value(config, "IP_CPU");
@@ -78,9 +83,11 @@ void inicializar_estructuras(){
     pthread_mutex_init(&sem_detener_largo, NULL);
     pthread_mutex_init(&sem_exec, NULL);
     pthread_mutex_init(&sem_interrupcion, NULL);
+    pthread_mutex_init(&sem_detener_conexion, NULL);
     pthread_mutex_lock(&sem_interrupcion);
     pthread_mutex_lock(&sem_detener);
     pthread_mutex_lock(&sem_detener_largo);
+    pthread_mutex_lock(&sem_detener_conexion);
 
     lista_recursos = list_create();
     lista_recursos_pcb = list_create();

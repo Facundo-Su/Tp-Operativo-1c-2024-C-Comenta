@@ -27,6 +27,7 @@ void iniciar_consola(){
 		"\n 2. STDIN"
 		"\n 3. STDOUT"
 		"\n 4 DialFS"
+		"\n 5 enviar mensaje a kernel"
 	);
 	interfaz = readline(">");
 	log_info(logger_consola,"Ingrese la ubicacion del archivo de configuracion");
@@ -45,6 +46,10 @@ void iniciar_consola(){
 			break;
 		case '4':
 			iniciar_interfaz_dialfs();
+			break;
+		case '5':
+			generar_conexion();
+			enviar_mensaje_instrucciones("hola soy entrada salida",conexion_kernel,MENSAJE);
 			break;
 		default:
 			log_error(logger_consola,"Error interfaz: no conocida");

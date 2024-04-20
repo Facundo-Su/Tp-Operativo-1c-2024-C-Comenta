@@ -8,9 +8,29 @@ int main(int argc, char* argv[]) {
 	log_info(logger,"%i", quantum);
 	generar_conexion();
 	inciar_planificadores();
+	pthread_t iniciando_server;
+	pthread_create(&iniciando_server,NULL,(void*)iniciar_servidor_kernel,NULL);
+	pthread_detach(iniciando_server);
     iniciar_consola();
     return EXIT_SUCCESS;
 }
+
+
+void iniciar_servidor_kernel(){
+
+	int kernel_fd = iniciar_servidor(puerto_escucha);
+	log_info(logger, "Servidor listo para recibir al cliente");
+	//generar_conexion_memoria();
+	//log_info(logger, "genere conexion con memoria");
+
+	while(1){
+	    int cliente_fd = esperar_cliente(kernel_fd);
+		pthread_t atendiendo_kernel;
+		pthread_create(&atendiendo_kernel,NULL,(void*)procesar_conexion,(void *) &cliente_fd);
+		pthread_detach(atendiendo_kernel);
+	}
+}
+
 
 
 void iniciar_consola(){
@@ -73,6 +93,7 @@ void iniciar_consola(){
 				detener = false;
 				pthread_mutex_unlock(&sem_detener_largo);
 				pthread_mutex_unlock(&sem_detener);
+				pthread_mutex_unlock(&sem_detener_conexion);
 				
 				break;
 			case '6':
@@ -125,11 +146,16 @@ void procesar_conexion(void *conexion1){
 			contexto= desempaquetar_pcb(paquete);
 			running->contexto = contexto;
 			recv(cliente_fd,&cod_op,sizeof(op_code),0);
+			if (detener == true)
+			{
+				pthread_mutex_lock(&sem_detener_conexion);
+			}
 			switch(cod_op){
 				case EJECUTAR_WAIT:
 					paquete = recibir_paquete(cliente_fd);
 					char *nombre_recurso_wait =list_get(paquete,0);
 					log_error(logger,"%s", nombre_recurso_wait);
+					
 					ejecutar_wait(nombre_recurso_wait,running);
 				break;
 				case EJECUTAR_SIGNAL:

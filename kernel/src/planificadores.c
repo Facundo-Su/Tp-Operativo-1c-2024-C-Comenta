@@ -86,7 +86,7 @@ void *interrupcion_quantum(){
         //if(!queue_is_empty(cola_ready->cola)){
                 pthread_mutex_lock(&sem_interrupcion);
                 usleep(quantum * 1000);
-                log_error(logger,"SE TIENE QUE INTERRUMPIR");
+                log_error(logger,"INTERRUPCION POR QUANTUM");
                 enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
                 
             }

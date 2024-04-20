@@ -90,12 +90,9 @@ void enviar_instrucciones(int cliente_fd){
     t_list * lista = recibir_paquete(cliente_fd);
     int* pc_recibido = list_get(lista,0);
     int* pid_recibido = list_get(lista,1);
-    log_info(logger_memoria,"%i", *pid_recibido);
-    log_info(logger_memoria,"%i", *pc_recibido);
     bool encontrar_instrucciones(void * instruccion){
         t_instrucciones* un_instruccion = (t_instrucciones*)instruccion;
             int valor_comparar =un_instruccion->pid;
-            log_info(logger_memoria, "%i", valor_comparar);
             return valor_comparar == *pid_recibido;
     }
     t_instrucciones * instrucciones = list_find(lista_instrucciones, encontrar_instrucciones);
