@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 	instruccion_a_realizar = malloc(sizeof(t_instruccion));
     //iniciar configuraciones
 	obtener_configuracion();
-	//iniciar_recurso();
+	iniciar_recurso();
 	//iniciar_consola();
 	log_info(logger, "se inicio el servidor\n");
 	pthread_t servidor_interrupt;
@@ -27,6 +27,12 @@ int main(int argc, char* argv[]) {
 	pthread_join(servidor_interrupt, NULL);
 	//terminar_programa(conexion_memoria, logger, config);
     return 0;
+}
+
+void iniciar_recurso(){
+	sem_init(&contador_marco_obtenido,0,0);
+	pthread_mutex_init(&contador_marco_obtenido,NULL);
+	pthread_mutex_lock(&contador_marco_obtenido);
 }
 
 void iniciar_servidor_cpu(){
@@ -44,6 +50,9 @@ void iniciar_servidor_cpu(){
 		pthread_detach(atendiendo_cpu);
 	}
 }
+
+
+
 
 
 void iniciar_servidor_interrupt(char * puerto){
@@ -90,10 +99,11 @@ void iniciar_servidor_interrupt(char * puerto){
 void procesar_conexion(void *conexion1){
 	int *conexion = (int*)conexion1;
 	int cliente_fd = *conexion;
+	int* enteros;
 	t_list* lista;
 	while (1) {
 		int cod_op = recibir_operacion(cliente_fd);
-
+		t_list* paquete;
 		t_pcb* pcb_aux;
 		switch (cod_op) {
 		case MENSAJE:
@@ -116,15 +126,14 @@ void procesar_conexion(void *conexion1){
 			//list_iterate(lista, (void*) iterator);
 			break;
 		case ENVIARREGISTROCPU:
-			t_list* valores_cpu = list_create();
-			valores_cpu= recibir_paquete(cliente_fd);
+			lista= recibir_paquete(cliente_fd);
 			//log_info(logger, "ME LLEGARON");
 			break;
 			//TODO
 			//preguntar porque si lo meto dentro de una funcion no me reconoce
 		case RECIBIR_PCB:
 			log_info(logger, "Estoy por recibir un PCB");
-			t_list * paquete = recibir_paquete(cliente_fd);
+			lista = recibir_paquete(cliente_fd);
 			pcb = desempaquetar_pcb(paquete);
 			//recibir_pcb(cliente_fd);
 			hayInterrupcion = false;
@@ -133,6 +142,19 @@ void procesar_conexion(void *conexion1){
 			//log_pcb_info(pcb);
 			ejecutar_ciclo_de_instruccion(cliente_fd);
 
+			break;
+		case OBTENER_MARCO:
+			lista = recibir_paquete(cliente_fd);
+			int *auxiliar2 = list_get(lista,0);
+			marco_obtenido = *auxiliar2;
+			//log_info(logger, "el valor del marco es %i",marco_obtenido);
+			pthread_mutex_unlock(&contador_marco_obtenido);
+			break;
+		case MANDAME_PAGINA:
+			lista= recibir_paquete(cliente_fd);
+			enteros= list_get(lista,0);
+			tamanio_pagina= *enteros;
+			log_warning(logger, "El tamanio de la pagina es %i",tamanio_pagina);
 			break;
 		case -1:
 			log_error(logger, "el cliente se desconecto. Terminando servidor");
@@ -224,9 +246,6 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		registro_aux = devolver_registro(parametro);
 		registro_aux2 = devolver_registro(parametro2);
 		//restar(pcb,registro_aux ,registro_aux2);
-
-
-
 		    if (registro_aux == AX) {
 		    	valor_destino = pcb->registros->ax;
 		    } else if (registro_aux == BX) {
@@ -402,7 +421,6 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_recurso_a_kernel(recurso,EJECUTAR_SIGNAL,cliente_fd);
 		break;
-
 	case EXIT:
 		hayInterrupcion = true;
 		log_info(logger,"PID: %i - Ejecutando EXIT:",pcb->pid);
@@ -414,6 +432,33 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	recibi_archivo = false;
 	instruccion_ejecutando= false;
 }
+
+t_traduccion* mmu_traducir(int dir_logica){
+
+	t_traduccion* traducido= malloc(sizeof(t_traduccion));
+	int nro_pagina =  floor(dir_logica / tamanio_pagina);
+	obtener_el_marco(nro_pagina,OBTENER_MARCO);
+	pthread_mutex_lock(&contador_marco_obtenido);
+	int desplazamiento = dir_logica - nro_pagina * tamanio_pagina;
+
+	traducido->marco= marco_obtenido;
+	traducido->desplazamiento= desplazamiento;
+	traducido->nro_pagina = nro_pagina;
+
+
+	return traducido;
+}
+
+
+void obtener_el_marco(int nro_pagina,op_code operacion){
+	//log_error(logger, "%i", nro_pagina,pcb->pid);
+	t_paquete* paquete = crear_paquete(operacion);
+	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
+	agregar_a_paquete(paquete, &nro_pagina, sizeof(int));
+	enviar_paquete(paquete, conexion_memoria);
+	eliminar_paquete(paquete);
+}
+
 
 void enviar_recurso_a_kernel(char* recurso,op_code operacion,int cliente_fd){
 	t_paquete* paquete = crear_paquete(operacion);
@@ -429,7 +474,7 @@ void generar_conexion_memoria(){
 	conexion_memoria = crear_conexion(ip_memoria, puerto_memoria);
 	pthread_create(&conexion_memoria_hilo_cpu,NULL,(void*) procesar_conexion,(void *)&conexion_memoria);
     pthread_detach(conexion_memoria_hilo_cpu);
-	//enviar_mensaje_instrucciones("mandame las instrucciones plz ",conexion_memoria,MANDAME_PAGINA);
+	enviar_mensaje_instrucciones("mandame las instrucciones plz ",conexion_memoria,MANDAME_PAGINA);
 }
 
 

@@ -52,10 +52,21 @@ typedef enum{
     DI
 }t_estrucutra_cpu;
 
+typedef struct{
+	int marco;
+	int desplazamiento;
+	int nro_pagina;
+}t_traduccion;
+
+
+
 //semaforos
 sem_t contador_instruccion;
+pthread_mutex_t contador_marco_obtenido;
 
 
+int marco_obtenido;
+int tamanio_pagina;
 
 void obtener_configuracion();
 void procesar_conexion(void *conexion1);
@@ -73,5 +84,7 @@ void enviar_recurso_a_kernel(char* recurso, op_code operacion, int cliente_fd);
 t_estrucutra_cpu devolver_registro(char* registro);
 void setear(t_estrucutra_cpu pos, uint32_t valor) ;
 uint32_t obtener_valor(t_estrucutra_cpu pos);
+
+
 
 #endif /* SRC_CPU_H_ */

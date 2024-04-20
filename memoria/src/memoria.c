@@ -63,7 +63,8 @@ void procesar_conexion(void* socket){
 					finalizar_proceso(pcb->pid);
 					break;
 				case MANDAME_PAGINA:
-	            	mandar_pagina(cliente_fd);
+	            	recibir_mensaje(cliente_fd);
+	            	enviar_tam_pagina(tam_pagina, cliente_fd);
 	            	break;
 	    		case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");
@@ -75,6 +76,14 @@ void procesar_conexion(void* socket){
 	            }
 	        }
 }
+
+void enviar_tam_pagina(int tam , int cliente_fd){
+	t_paquete* paquete = crear_paquete(MANDAME_PAGINA);
+	agregar_a_paquete(paquete, &tam, sizeof(int));
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}
+
 
 void iterator(char* value) {
     log_info(logger_memoria, "%s", value);
