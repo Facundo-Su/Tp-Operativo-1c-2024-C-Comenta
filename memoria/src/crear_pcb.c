@@ -105,4 +105,33 @@ void enviar_instrucciones(int cliente_fd){
     }
 }
 
-void guardar_proceso_en_memoria(int pid) {}
+void guardar_proceso_en_memoria(int pid) {
+    int size; //TODO Aca el tamanio se lo tendria que pasar kernel creo
+    t_tabla_paginas * tabla_paginas = crear_tabla_pagina(pid, size);
+	list_add(memoria->lista_tabla_paginas,tabla_paginas);
+}
+
+t_tabla_paginas *crear_tabla_pagina(int pid, int size){
+	t_tabla_paginas* tabla_paginas = malloc(sizeof(t_tabla_paginas));
+	int cant_paginas = (size + tam_pagina -1)/tam_pagina; //Aca no sé bien como es que se determina el tamanio de pagina
+	log_info(logger,"PID: %i- Tamaño: %i",pid, cant_paginas);
+	tabla_paginas->pid = pid;
+	tabla_paginas->tamanio_proceso = size;
+	tabla_paginas->paginas_necesarias = cant_paginas;
+	tabla_paginas->paginas = crear_pagina(cant_paginas);
+	return tabla_paginas;
+}
+
+t_list * crear_pagina(int paginas_necesarias){
+	t_list * paginas = list_create();
+	for(int c =0; c<paginas_necesarias;c++){
+		t_pagina * pagina = malloc(sizeof(t_pagina)); 
+		pagina->num_marco =-1; //No entiendo por qué el -1
+		pagina->m =0;
+		pagina->p =0;
+		pagina->num_pagina = c;
+        pagina->ocupada = 1;
+		list_add(paginas,pagina);
+	}
+	return paginas;
+}
