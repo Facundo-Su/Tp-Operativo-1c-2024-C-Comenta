@@ -1,12 +1,11 @@
 #include "manda_marco.h"
 
-void mandar_pagina(int cliente) {
+void mandar_marco(int cliente) {
     t_list* lista = recibir_paquete(cliente);
 	int* num_pag = list_get(lista,0);
     t_pagina* pagina_proceso = pagina_segun_numero(*num_pag);
     enviar_marco(pagina_proceso->num_marco, MANDAME_PAGINA, cliente); //No estoy seguro aca del segundo parametro
 }
-
 
 t_pagina* pagina_segun_numero(int num) {
 

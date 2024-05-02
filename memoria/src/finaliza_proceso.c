@@ -7,14 +7,11 @@ void finalizar_proceso(int pid) {
     for (int j = 0; j <= tabla_de_paginas->paginas_necesarias; j++)
     {
         t_pagina* pagina = list_get(tabla_de_paginas->paginas, j);
-
-        if (pagina->ocupada)
-        {
-            pagina->ocupada = false;
-			t_marco* marco = marco_segun_pagina(pagina);
-			//TODO: Aca hay que liberar liberar el espacio de memoria del proceso (marcando los frames como libres pero sin sobreescribir su contenido)
-
-        }
+		t_marco* marco = marco_segun_pagina(pagina);
+        marco->is_free = true;
+		marco->pid =-1;
+		marco->llegada_fifo =0;
+		marco->last_time_lru =0;
     }
 }
 

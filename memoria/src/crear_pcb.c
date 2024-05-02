@@ -130,7 +130,6 @@ t_list * crear_pagina(int paginas_necesarias){
 		pagina->m =0;
 		pagina->p =0;
 		pagina->num_pagina = c;
-        pagina->ocupada = 1;
 		list_add(paginas,pagina);
 	}
 	return paginas;
