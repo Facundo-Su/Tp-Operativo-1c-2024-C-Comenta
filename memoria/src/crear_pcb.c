@@ -4,8 +4,8 @@ void crear_pcb (int cliente_fd){
     t_list* lista = recibir_paquete(cliente_fd);
 	char* aux =list_get(lista,0);
 	int* pid = list_get(lista,1);
+    int *tamaño = list_get(lista,2); // aca te dejo el tamaño del procesp
 	char*ruta = obtener_ruta(aux);
-
 	cargar_lista_instruccion(*pid, ruta);
     //guardar_proceso_en_memoria(pid);
 }
