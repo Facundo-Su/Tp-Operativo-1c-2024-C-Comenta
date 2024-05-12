@@ -50,8 +50,8 @@ void procesar_conexion(void* socket){
 	                log_info(logger_memoria, "Me llegaron los siguientes valores:\n");
 	                list_iterate(lista, (void*) iterator);
 	                break;
-				case CREAR_PCB:
-					crear_pcb(cliente_fd);
+				case CREAR_PROCESO:
+					crear_proceso(cliente_fd);
 					break;
 	    		case INSTRUCCIONES_A_MEMORIA:
 	    			usleep(retardo_respuesta);
@@ -62,9 +62,15 @@ void procesar_conexion(void* socket){
 					t_contexto_ejecucion* pcb = desempaquetar_pcb(paquete);
 					finalizar_proceso(pcb->pid);
 					break;
-				case OBTENER_MARCO: //Deberia ser OBTENER_PAGINA?
+				case OBTENER_MARCO:
 	    			mandar_marco(cliente_fd);
 	            	break;
+				case ENVIO_RESIZE:
+					break;
+				case ENVIO_MOV_IN:
+					break;
+				case ENVIO_MOV_OUT:
+					break;
 	    		case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");
 	                close(cliente_fd);

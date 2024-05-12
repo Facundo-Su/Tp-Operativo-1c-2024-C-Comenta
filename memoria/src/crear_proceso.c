@@ -1,13 +1,13 @@
-#include "crear_pcb.h"
+#include "crear_proceso.h"
 
-void crear_pcb (int cliente_fd){
+void crear_proceso (int cliente_fd){
     t_list* lista = recibir_paquete(cliente_fd);
 	char* aux =list_get(lista,0);
 	int* pid = list_get(lista,1);
-    int *tamaño = list_get(lista,2); // aca te dejo el tamaño del procesp
+    int *tamanio = list_get(lista,2); //tamaño del proceso
 	char*ruta = obtener_ruta(aux);
 	cargar_lista_instruccion(*pid, ruta);
-    //guardar_proceso_en_memoria(pid);
+    guardar_proceso_en_memoria(*pid, *tamanio);
 }
 
 void cargar_lista_instruccion(int pid, char* ruta) {
@@ -62,7 +62,6 @@ t_list* leer_pseudocodigo(FILE* pseudocodigo){
     // Creo las variables para parsear el archivo
     char* instruccion = NULL;
     size_t len = 0;
-    int cantidad_parametros;
 	t_list * instrucciones_del_pcb = list_create();
 	int j=0;
     // Recorro el archivo de pseudocodigo y parseo las instrucciones
@@ -105,22 +104,22 @@ void enviar_instrucciones(int cliente_fd){
     }
 }
 
-void guardar_proceso_en_memoria(int pid) {
-    int size; //TODO Aca el tamanio se lo tendria que pasar kernel creo
-    t_tabla_paginas * tabla_paginas = crear_tabla_pagina(pid, size);
+void guardar_proceso_en_memoria(int pid, int tamanio) {
+    t_tabla_paginas * tabla_paginas = crear_tabla_pagina(pid, tamanio);
 	list_add(memoria->lista_tabla_paginas,tabla_paginas);
 }
 
 t_tabla_paginas *crear_tabla_pagina(int pid, int size){
 	t_tabla_paginas* tabla_paginas = malloc(sizeof(t_tabla_paginas));
-	int cant_paginas = (size + tam_pagina -1)/tam_pagina; //Aca no sé bien como es que se determina el tamanio de pagina
+	int cant_paginas = (size + tam_pagina -1)/tam_pagina;
 	log_info(logger,"PID: %i- Tamaño: %i",pid, cant_paginas);
 	tabla_paginas->pid = pid;
 	tabla_paginas->tamanio_proceso = size;
 	tabla_paginas->paginas_necesarias = cant_paginas;
-	tabla_paginas->paginas = crear_pagina(cant_paginas);
+	//tabla_paginas->paginas = crear_pagina(cant_paginas);
 	return tabla_paginas;
 }
+/*
 
 t_list * crear_pagina(int paginas_necesarias){
 	t_list * paginas = list_create();
@@ -134,3 +133,4 @@ t_list * crear_pagina(int paginas_necesarias){
 	}
 	return paginas;
 }
+*/

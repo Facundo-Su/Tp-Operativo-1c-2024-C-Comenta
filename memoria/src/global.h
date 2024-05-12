@@ -14,8 +14,6 @@ typedef struct{
 
 typedef struct {
 	int num_marco;
-    int p; //Proceso?
-    int m; //Contenido?
     int num_pagina;
 } t_pagina;
 
@@ -23,8 +21,6 @@ typedef struct {
 	int num_marco;
     int base; //Contenido?
     bool is_free;
-    int llegada_fifo; //?
-    int last_time_lru; //?
     int pid;
 } t_marco;
 

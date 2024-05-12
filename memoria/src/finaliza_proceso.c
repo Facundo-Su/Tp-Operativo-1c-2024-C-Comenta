@@ -10,8 +10,6 @@ void finalizar_proceso(int pid) {
 		t_marco* marco = marco_segun_pagina(pagina);
         marco->is_free = true;
 		marco->pid =-1;
-		marco->llegada_fifo =0;
-		marco->last_time_lru =0;
     }
 }
 

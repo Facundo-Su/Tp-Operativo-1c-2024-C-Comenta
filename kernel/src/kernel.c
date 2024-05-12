@@ -59,7 +59,7 @@ void iniciar_consola(){
 				char * tamaño_string = readline(">");
 				int tamaño = atoi(tamaño_string);
 				t_pcb* pcb = retorno_pcb();
-				t_paquete* paquete =crear_paquete(CREAR_PCB);
+				t_paquete* paquete =crear_paquete(CREAR_PROCESO);
 				int pid = pcb->contexto->pid;
 				agregar_a_paquete(paquete, ruta, strlen(ruta) + 1);
 				agregar_a_paquete(paquete, &(pid), sizeof(int));
@@ -71,7 +71,7 @@ void iniciar_consola(){
 					pthread_mutex_unlock(&sem_exec);
 				}
 				primero = false;
-				//enviar_pcb(pcb_aux,conexion_memoria,CREAR_PCB);
+				//enviar_pcb(pcb_aux,conexion_memoria,CREAR_PROCESO);
 				break;
 			case '3':
 				log_info(logger_consola, "Ingrese el pid de proceso a finalizar");
