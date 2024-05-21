@@ -51,7 +51,8 @@ typedef enum
 	OBTENER_MARCO,
 	ENVIO_RESIZE,
 	ENVIO_MOV_IN,
-	ENVIO_MOV_OUT
+	ENVIO_MOV_OUT,
+	EJECUTAR_IO_SLEEP
 }op_code;
 
 typedef struct
