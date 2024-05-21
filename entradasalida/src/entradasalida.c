@@ -38,7 +38,6 @@ void iniciar_consola(){
 void iniciar_interfaz_generica() {
     log_info(logger, "Ingreso a la interfaz GENERICA");
 	generar_conexion_con_kernel();
-	// TODO: usar un semaforo en lugar de un while falopa
 
 	pthread_mutex_t mutex;
 	sem_init(&mutex,0,0);
