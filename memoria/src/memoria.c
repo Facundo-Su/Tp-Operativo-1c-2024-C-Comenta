@@ -50,22 +50,27 @@ void procesar_conexion(void* socket){
 	                log_info(logger_memoria, "Me llegaron los siguientes valores:\n");
 	                list_iterate(lista, (void*) iterator);
 	                break;
-				case CREAR_PCB:
-					crear_pcb(cliente_fd);
+				case CREAR_PROCESO:
+					crear_proceso(cliente_fd);
 					break;
 	    		case INSTRUCCIONES_A_MEMORIA:
 	    			usleep(retardo_respuesta);
 					enviar_instrucciones(cliente_fd);
 					break;
-				case FINALIZAR: //TODO Todavia no esta terminado ni testeado
+				case FINALIZAR:
 					t_list* paquete = recibir_paquete(cliente_fd);
 					t_contexto_ejecucion* pcb = desempaquetar_pcb(paquete);
 					finalizar_proceso(pcb->pid);
 					break;
-				case MANDAME_PAGINA:
-	            	recibir_mensaje(cliente_fd);
-	            	enviar_tam_pagina(tam_pagina, cliente_fd);
+				case OBTENER_MARCO:
+	    			mandar_marco(cliente_fd);
 	            	break;
+				case ENVIO_RESIZE:
+					break;
+				case ENVIO_MOV_IN:
+					break;
+				case ENVIO_MOV_OUT:
+					break;
 	    		case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");
 	                close(cliente_fd);

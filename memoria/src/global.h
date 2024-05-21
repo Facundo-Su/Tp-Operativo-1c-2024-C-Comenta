@@ -14,18 +14,13 @@ typedef struct{
 
 typedef struct {
 	int num_marco;
-    int p;
-    int m;
     int num_pagina;
-	bool ocupada;
 } t_pagina;
 
 typedef struct {
 	int num_marco;
-    int base;
+    int base; //Contenido?
     bool is_free;
-    int llegada_fifo;
-    int last_time_lru;
     int pid;
 } t_marco;
 
