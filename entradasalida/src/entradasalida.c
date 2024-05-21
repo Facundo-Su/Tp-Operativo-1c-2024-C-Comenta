@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     logger = log_create("./entradasalida.log", "I/O", true, LOG_LEVEL_INFO);
     log_info(logger, "Soy el I/O!");
     obtener_configuracion();
-	iniciar_consola();
+	iniciar_consola();	
 
     return EXIT_SUCCESS;
 }
@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
 void iniciar_consola(){ 
 	t_log * logger_consola = log_create("./entradaSalidaConsole.log", "consola", 1, LOG_LEVEL_INFO);
 	char* interfaz;
+	char* interfaz_name;
 	char* path_configuracion;
 
 	log_info(
@@ -27,9 +28,12 @@ void iniciar_consola(){
 		"\n 2. STDIN"
 		"\n 3. STDOUT"
 		"\n 4 DialFS"
-		"\n 5 enviar mensaje a kernel"
 	);
 	interfaz = readline(">");
+	// TODO: actualmente agarra la config por defecto cambiar en un futuro
+	// TODO: ver como manejar las 4 i/o desde una misma consola
+	log_info(logger_consola,"Ingrese el nombre de la interfaz");
+	interfaz_name = readline(">");
 	log_info(logger_consola,"Ingrese la ubicacion del archivo de configuracion");
 	path_configuracion = readline(">");
 
@@ -47,10 +51,6 @@ void iniciar_consola(){
 		case '4':
 			iniciar_interfaz_dialfs();
 			break;
-		case '5':
-			generar_conexion();
-			enviar_mensaje_instrucciones("hola soy entrada salida",conexion_kernel,MENSAJE);
-			break;
 		default:
 			log_error(logger_consola,"Error interfaz: no conocida");
 			break;
@@ -58,16 +58,14 @@ void iniciar_consola(){
 }
 
 void iniciar_interfaz_generica() {
-    log_info(logger, "Ingreso a la interfaz Generica");
-	int interfaz_fd = iniciar_servidor(8005);
-
-	while (1) {
-        int cliente_fd = esperar_cliente(interfaz_fd);
-		pthread_t atendiendo;
-		pthread_create(&atendiendo,NULL,(void*)procesar_conexion,(void *) &cliente_fd);
-		pthread_detach(atendiendo);
-
-    }
+    log_info(logger, "Ingreso a la interfaz GENERICA");
+	generar_conexion_con_kernel();
+	// TODO: usar un semaforo en lugar de un while falopa
+	while (1)
+	{
+		// * Si no hago esto me mata el proceso y le agrego el sleep de un segundo porque si no me consume toda la cpu
+		sleep(1);
+	}	
 }
 
 void iniciar_interfaz_stdin() {
@@ -99,6 +97,23 @@ void obtener_configuracion(){
 	retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
 }
 
+void generar_conexion_con_kernel(){
+    // Creamos un hilo para la conexión con el kernel
+    pthread_t conexion_kernel_hilo;
+	
+    // Creamos la conexión con el kernel
+    conexion_kernel = crear_conexion(ip_kernel, puerto_kernel);
+    if (conexion_kernel == -1) {
+        log_error(logger, "Error al crear la conexión con el kernel.");
+        return; // Salimos de la función si hay un error
+    }
+    log_info(logger, "Conexión con el kernel establecida.");
+
+    // Creamos un hilo para procesar la conexión
+    pthread_create(&conexion_kernel_hilo, NULL, (void*) procesar_conexion, (void *)&conexion_kernel);
+    pthread_detach(conexion_kernel_hilo);
+}
+
 void generar_conexion(){
 	pthread_t conexion_memoria_hilo;
     pthread_t conexion_kernel_hilo;
@@ -113,26 +128,26 @@ void generar_conexion(){
 }
 
 
-void procesar_conexion(void *conexion1){
-	int *conexion = (int*)conexion1;
-	int cliente_fd = *conexion;
-	while (1) {
-		int cod_op = recibir_operacion(cliente_fd);
-		switch (cod_op) {
-		case MENSAJE:
-			recibir_mensaje(cliente_fd);
-			break;
-		case FINALIZAR:
+void procesar_conexion(void *conexion_ptr){
+    int conexion = *(int *)conexion_ptr;
+    log_info(logger, "Procesando conexión con el kernel.");
 
-			break;
-
-		case -1:
-			log_error(logger, "el cliente se desconecto. Terminando servidor");
-			return;
-		default:
-			log_warning(logger,"Operacion desconocida. No quieras meter la pata");
-			break;
-		}
-	}
-	return;
+    while (1) {
+        int cod_op = recibir_operacion(conexion);
+        switch (cod_op) {
+        case MENSAJE:
+            recibir_mensaje(conexion);
+            break;
+        case FINALIZAR:
+            // Aquí puedes agregar la lógica para finalizar la conexión si es necesario
+            break;
+        case -1:
+            log_error(logger, "El cliente se desconectó. Terminando procesamiento de conexión.");
+            return NULL;
+        default:
+            log_warning(logger, "Operación desconocida. Revisar el protocolo de comunicación.");
+            break;
+        }
+    }
+    return NULL;
 }
