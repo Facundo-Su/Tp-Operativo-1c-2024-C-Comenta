@@ -39,11 +39,12 @@ void iniciar_interfaz_generica() {
     log_info(logger, "Ingreso a la interfaz GENERICA");
 	generar_conexion_con_kernel();
 	// TODO: usar un semaforo en lugar de un while falopa
-	while (1)
-	{
-		// * Si no hago esto me mata el proceso y le agrego el sleep de un segundo porque si no me consume toda la cpu
-		sleep(1);
-	}
+
+	pthread_mutex_t mutex;
+	sem_init(&mutex,0,0);
+	pthread_mutex_init(&mutex,NULL);
+	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&mutex);
 }
 
 void obtener_configuracion(char *path_configuration){
@@ -91,7 +92,7 @@ void procesar_conexion(void *conexion_ptr){
 			int amount = list_get(paquete, 0);
 			sleep(amount * tiempo_unidad_trabajo);
         case -1:
-            log_error(logger, "El cliente se desconectó. Terminando procesamiento de conexión.");
+            log_error(logger, "Ocurrio un error al conectarse al servidor.");
             return NULL;
         default:
             log_warning(logger, "Operación desconocida. Revisar el protocolo de comunicación.");
