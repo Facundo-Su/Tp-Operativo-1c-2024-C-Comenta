@@ -59,7 +59,6 @@ void obtener_configuracion(char *path_configuration){
 void generar_conexion_con_kernel(){
     pthread_t conexion_kernel_hilo;
 	
-    // * info: este seria mi socket_cliente. seria el cliente_fd
     conexion_kernel = crear_conexion(ip_kernel, puerto_kernel);
 
 
