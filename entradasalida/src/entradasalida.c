@@ -11,39 +11,35 @@ int main(int argc, char* argv[]) {
 
 void iniciar_consola(){ 
 	t_log * logger_consola = log_create("./entradaSalidaConsole.log", "consola", 1, LOG_LEVEL_INFO);
-	char* interfaz_name;
 	char* path_configuracion;
 
-	// TODO: ver como manejar las 4 i/o desde una misma consola
-	log_info(logger_consola,"Ingrese el nombre de la interfaz");
-	interfaz_name = readline(">");
-	log_info(logger_consola,"Ingrese la ubicacion del archivo de configuracion");
-	path_configuracion = readline(">");
-	obtener_configuracion(path_configuracion);
+    while (1)
+    {
+        log_info(logger_consola,"Ingrese el nombre de la interfaz");
+        interfaz_name = readline(">");
+        log_info(logger_consola,"Ingrese la ubicacion del archivo de configuracion");
+        path_configuracion = readline(">");
+        obtener_configuracion(path_configuracion);
 
-	if (strcmp(tipo_interfaz, "GENERICA") == 0) 
-	{
-		iniciar_interfaz_generica();
-	}
-	else if (strcmp(tipo_interfaz, "STDIN") == 0)
-	{
-		log_error(logger_consola, "no tan rapido vaquero, eso es para la entrega 3");
-	}
-	else /* default: */
-	{
-		log_error(logger_consola,"Error interfaz: no conocida");
-	}
+        if (strcmp(tipo_interfaz, "GENERICA") == 0) 
+        {
+            iniciar_interfaz_generica();
+        }
+        else if (strcmp(tipo_interfaz, "STDIN") == 0)
+        {
+            log_error(logger_consola, "no tan rapido vaquero, eso es para la entrega 3");
+        }
+        else
+        {
+            log_error(logger_consola,"Error interfaz: no conocida");
+        }
+    }
+    
 }
 
 void iniciar_interfaz_generica() {
     log_info(logger, "Ingreso a la interfaz GENERICA");
 	generar_conexion_con_kernel();
-
-	pthread_mutex_t mutex;
-	sem_init(&mutex,0,0);
-	pthread_mutex_init(&mutex,NULL);
-	pthread_mutex_lock(&mutex);
-	pthread_mutex_lock(&mutex);
 }
 
 void obtener_configuracion(char *path_configuration){
@@ -61,13 +57,12 @@ void obtener_configuracion(char *path_configuration){
 }
 
 void generar_conexion_con_kernel(){
-    // Creamos un hilo para la conexión con el kernel
     pthread_t conexion_kernel_hilo;
 	
-    // Creamos la conexión con el kernel
+    // * info: este seria mi socket_cliente. seria el cliente_fd
     conexion_kernel = crear_conexion(ip_kernel, puerto_kernel);
 
-    // Creamos un hilo para procesar la conexión
+
     pthread_create(&conexion_kernel_hilo, NULL, (void*) procesar_conexion, (void *)&conexion_kernel);
     pthread_detach(conexion_kernel_hilo);
 }
@@ -78,7 +73,11 @@ void procesar_conexion(void *conexion_ptr){
 	int cliente_fd = conexion;
 	t_contexto_ejecucion * contexto;
 	t_paquete * paquete;
-    log_info(logger, "Procesando conexión con el kernel.");
+
+    t_paquete* paquete2 = crear_paquete(CONEXION_INTERFAZ);
+    agregar_a_paquete(paquete2, interfaz_name, sizeof(char*));
+	agregar_a_paquete(paquete2, tipo_interfaz, sizeof(char*));
+	enviar_paquete(paquete2, cliente_fd);
 
     while (1) {
         int cod_op = recibir_operacion(conexion);
@@ -88,8 +87,13 @@ void procesar_conexion(void *conexion_ptr){
             break;
         case EJECUTAR_IO_SLEEP:
 			paquete = recibir_paquete(cliente_fd);
-			int amount = list_get(paquete, 0);
-			sleep(amount * tiempo_unidad_trabajo);
+            int *pid = list_get(paquete, 0);
+			int *amount = list_get(paquete, 1);
+			sleep(*amount * tiempo_unidad_trabajo);
+
+            t_paquete* paquete_finalizar_sleep = crear_paquete(EJECUTAR_IO_SLEEP);
+            agregar_a_paquete(paquete_finalizar_sleep, &pid, sizeof(int));
+            enviar_paquete(paquete_finalizar_sleep, cliente_fd);
         case -1:
             log_error(logger, "Ocurrio un error al conectarse al servidor.");
             return NULL;

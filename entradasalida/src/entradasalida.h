@@ -14,6 +14,8 @@ int block_size;
 int block_count;
 int retraso_compactacion;
 
+char* interfaz_name;
+
 
 t_log* logger;
 t_config* config;

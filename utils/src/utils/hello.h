@@ -52,7 +52,8 @@ typedef enum
 	ENVIO_RESIZE,
 	ENVIO_MOV_IN,
 	ENVIO_MOV_OUT,
-	EJECUTAR_IO_SLEEP
+	EJECUTAR_IO_SLEEP,
+	CONEXION_INTERFAZ
 }op_code;
 
 typedef struct
