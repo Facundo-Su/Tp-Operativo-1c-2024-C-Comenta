@@ -22,6 +22,7 @@ typedef struct{
 typedef struct{
     int codigo_cliente;
     char* nombre_interface;
+    bool en_uso;
     int pid;
     t_cola* cola_espera;
 }t_interfaz;
@@ -37,6 +38,12 @@ typedef enum{
 	RR,
 	VRR
 }t_planificador;
+typedef struct 
+{
+    int posicion;
+    t_interfaz* interfaz;
+}t_interfaz_encontrada;
+
 
 extern sem_t sem_new;
 extern sem_t sem_ready;

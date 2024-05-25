@@ -60,3 +60,15 @@ t_pcb * encontrar_pcb(int pid){
 	}
 	return NULL;
 }
+t_pcb * buscar_pcb_listas(int pid, t_list * lista){
+	int d = list_size(lista);
+	if(d>0){
+		for(int c = 0; c<d;c++){
+			t_pcb * pcb = list_get(lista,c);
+			if(pid == pcb->contexto->pid){
+				return list_remove(lista,c);;
+			}
+		}
+	}
+	return NULL;
+}
