@@ -31,6 +31,7 @@ int main(int argc, char* argv[]) {
 
 void iniciar_recurso(){
 	sem_init(&contador_marco_obtenido,0,0);
+	sem_init(&resize_llegado,0,0);
 	pthread_mutex_init(&contador_marco_obtenido,NULL);
 	pthread_mutex_lock(&contador_marco_obtenido);
 }
@@ -134,7 +135,7 @@ void procesar_conexion(void *conexion1){
 		case RECIBIR_PCB:
 			log_info(logger, "Estoy por recibir un PCB");
 			lista = recibir_paquete(cliente_fd);
-			pcb = desempaquetar_pcb(paquete);
+			pcb = desempaquetar_pcb(lista);
 			//recibir_pcb(cliente_fd);
 			hayInterrupcion = false;
 			hay_finalizar = false;
@@ -155,6 +156,12 @@ void procesar_conexion(void *conexion1){
 			enteros= list_get(lista,0);
 			tamanio_pagina= *enteros;
 			log_warning(logger, "El tamanio de la pagina es %i",tamanio_pagina);
+			break;
+		case RESIZE_TAM:
+			lista= recibir_paquete(cliente_fd);
+			enteros = list_get(lista,0);
+			valor_retorno_resize = *enteros;
+			sem_post(&resize_llegado);
 			break;
 		case -1:
 			log_error(logger, "el cliente se desconecto. Terminando servidor");
@@ -421,6 +428,32 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_recurso_a_kernel(recurso,EJECUTAR_SIGNAL,cliente_fd);
 		break;
+	case RESIZE:
+	//TODO hacer en la parte de memoria
+		parametro = list_get(instrucciones->parametros,0);
+		int tamanio_modificar = atoi(parametro);
+		enviar_memoria_ajustar_tam(tamanio_modificar);
+		sem_wait(&resize_llegado);
+		hayInterrupcion=true;
+		if(valor_retorno_resize == -1){
+			enviar_pcb(pcb,cliente_fd,OUT_OF_MEMORY);
+		}
+		break;
+	case COPY_STRING:
+	// MMU
+		parametro = list_get(instrucciones->parametros,0);
+		int tamanio_copy_string = atoi(parametro);
+		enviar_a_memoria_copy_string(tamanio_copy_string);
+		break;
+	
+	case IO_GEN_SLEEP:
+		hayInterrupcion = true;
+		parametro = list_get(instrucciones->parametros,0);
+		parametro2 = list_get(instrucciones->parametros,1);
+		int entero_sleep = atoi(parametro2);
+		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
+		enviar_IO_SLEEP(parametro,entero_sleep,cliente_fd);
+		break;
 	case EXIT:
 		hayInterrupcion = true;
 		log_info(logger,"PID: %i - Ejecutando EXIT:",pcb->pid);
@@ -431,6 +464,32 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	}
 	recibi_archivo = false;
 	instruccion_ejecutando= false;
+}
+
+void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd){
+	t_paquete* paquete = crear_paquete(IO_SLEEP);
+	agregar_a_paquete(paquete, parametro, sizeof(int));
+	agregar_a_paquete(paquete, &parametro2, sizeof(int));
+	log_warning(logger,"PID: %i - Ejecutando IO_SLEEP: %s - %i",pcb->pid,parametro,parametro2);
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}
+
+void enviar_a_memoria_copy_string(int parametro){
+	//TODO hacer en la parte de memoria
+	t_paquete* paquete = crear_paquete(COPY_STRING_MEMORIA);
+	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
+	agregar_a_paquete(paquete, &parametro, sizeof(int));
+	enviar_paquete(paquete, conexion_memoria);
+	eliminar_paquete(paquete);
+}
+
+void enviar_memoria_ajustar_tam(int tamanio_modificar){
+	t_paquete* paquete = crear_paquete(RESIZE_TAM);
+	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
+	agregar_a_paquete(paquete, &tamanio_modificar, sizeof(int));
+	enviar_paquete(paquete, conexion_memoria);
+	eliminar_paquete(paquete);
 }
 
 t_traduccion* mmu_traducir(int dir_logica){
@@ -473,7 +532,7 @@ void generar_conexion_memoria(){
 	pthread_t conexion_memoria_hilo_cpu;
 	conexion_memoria = crear_conexion(ip_memoria, puerto_memoria);
 	pthread_create(&conexion_memoria_hilo_cpu,NULL,(void*) procesar_conexion,(void *)&conexion_memoria);
-    pthread_detach(conexion_memoria_hilo_cpu);
+	log_info(logger, "mandame intrucciones\n");
 	enviar_mensaje_instrucciones("mandame las instrucciones plz ",conexion_memoria,MANDAME_PAGINA);
 }
 
@@ -509,10 +568,14 @@ void transformar_en_instrucciones(char* auxiliar){
 	        	instruccion_a_realizar->nombre = JNZ;
 	            cantidad_parametros = 2;
 	        }
-	        // if (strcmp(instruccion_parseada[0], "SLEEP") == 0) {
-	        // 	instruccion_a_realizar->nombre = SLEEP;
-	        //     cantidad_parametros = 1;
-	        // }
+			if(strcmp(instruccion_parseada[0], "RESIZE") == 0){
+				instruccion_a_realizar->nombre = RESIZE;
+				cantidad_parametros = 1;
+			}
+			if(strcmp(instruccion_parseada[0], "COPY_STRING") == 0){
+				instruccion_a_realizar->nombre = COPY_STRING;
+				cantidad_parametros = 1;
+			}
 	        if (strcmp(instruccion_parseada[0], "WAIT") == 0) {
 	        	instruccion_a_realizar->nombre = WAIT;
 	            cantidad_parametros = 1;
@@ -521,6 +584,38 @@ void transformar_en_instrucciones(char* auxiliar){
 	        	instruccion_a_realizar->nombre = SIGNAL;
 	            cantidad_parametros = 1;
 	        }
+			if(strcmp(instruccion_parseada[0], "IO_GEN_SLEEP") == 0){
+				instruccion_a_realizar->nombre = IO_GEN_SLEEP;
+				cantidad_parametros = 2;
+			}
+			if(strcmp(instruccion_parseada[0], "IO_STDIN_READ") == 0){
+				instruccion_a_realizar->nombre = IO_STDIN_READ;
+				cantidad_parametros = 3;
+			}
+			if(strcmp(instruccion_parseada[0], "IO_STDOUT_WRITE") == 0){
+				instruccion_a_realizar->nombre = IO_STDOUT_WRITE;
+				cantidad_parametros = 3;
+			}
+			if(strcmp(instruccion_parseada[0], "IO_FS_CREATE") == 0){
+				instruccion_a_realizar->nombre = IO_FS_CREATE;
+				cantidad_parametros = 2;
+			}
+			if(strcmp(instruccion_parseada[0], "IO_FS_DELETE") == 0){
+				instruccion_a_realizar->nombre = IO_FS_DELETE;
+				cantidad_parametros = 2;
+			}
+			if(strcmp(instruccion_parseada[0], "IO_FS_TRUNCATE") == 0){
+				instruccion_a_realizar->nombre = IO_FS_TRUNCATE;
+				cantidad_parametros = 3;
+			}
+			if(strcmp(instruccion_parseada[0], "IO_FS_WRITE") == 0){
+				instruccion_a_realizar->nombre = IO_FS_WRITE;
+				cantidad_parametros = 5;
+			}
+			if(strcmp(instruccion_parseada[0], "IO_FS_READ") == 0){
+				instruccion_a_realizar->nombre = IO_FS_READ;
+				cantidad_parametros = 5;
+			}
 	        // if (strcmp(instruccion_parseada[0], "MOV_IN") == 0) {
 	        // 	instruccion_a_realizar->nombre = MOV_IN;
 	        //     cantidad_parametros = 2;
@@ -529,40 +624,10 @@ void transformar_en_instrucciones(char* auxiliar){
 	        // 	instruccion_a_realizar->nombre = MOV_OUT;
 	        //     cantidad_parametros = 2;
 	        // }
-	        // if (strcmp(instruccion_parseada[0], "F_OPEN") == 0) {
-	        // 	instruccion_a_realizar->nombre = F_OPEN;
-	        //     cantidad_parametros = 2;
-	        // }
-	        // if (strcmp(instruccion_parseada[0], "F_CLOSE") == 0) {
-	        // 	instruccion_a_realizar->nombre = F_CLOSE;
-	        //     cantidad_parametros = 1;
-	        // }
-	        // if (strcmp(instruccion_parseada[0], "F_SEEK") == 0) {
-	        // 	instruccion_a_realizar->nombre = F_SEEK;
-	        //     cantidad_parametros = 2;
-	        // }
-	        // if (strcmp(instruccion_parseada[0], "F_READ") == 0) {
-	        // 	instruccion_a_realizar->nombre = F_READ;
-	        //     cantidad_parametros = 2;
-	        // }
-	        // if (strcmp(instruccion_parseada[0], "F_WRITE") == 0) {
-	        // 	instruccion_a_realizar->nombre = F_WRITE;
-	        //     cantidad_parametros = 2;
-	        // }
-	        // if (strcmp(instruccion_parseada[0], "F_TRUNCATE") == 0) {
-	        // 	instruccion_a_realizar->nombre = F_TRUNCATE;
-	        //     cantidad_parametros = 2;
-	        // }
 	        if (strcmp(instruccion_parseada[0], "EXIT") == 0) {
 	        	instruccion_a_realizar->nombre = EXIT;
 	            cantidad_parametros = 0;
 	        }
-	        // if (strcmp(instruccion_parseada[0], "F_TRUNCATE") == 0) {
-	        // 	instruccion_a_realizar->nombre = F_TRUNCATE;
-	        //     cantidad_parametros = 2;
-	        // }
-						
-
 	    	t_list* parametros = list_create();
 
 	        for(int i=1;i<cantidad_parametros+1;i++){

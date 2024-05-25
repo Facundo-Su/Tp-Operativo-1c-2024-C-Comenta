@@ -18,6 +18,13 @@ typedef struct{
     t_cola* cola_bloqueados;
 }t_recurso;
 
+
+typedef struct{
+    int codigo_cliente;
+    char* nombre_interface;
+    int pid_en_uso;
+}t_interfaz;
+
 typedef struct{
     char* nombre;
     int instancias;
@@ -65,6 +72,8 @@ extern pthread_t hilo_conexion_memoria;
 extern pthread_t hilo_conexion_cpu;
 extern pthread_t hilo_conexion_cpu_interrupt;
 extern t_pcb * running;
+extern t_list* lista_interfaces;
+
 
 //
 

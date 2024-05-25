@@ -17,7 +17,6 @@ int main(int argc, char* argv[]) {
 
 
 void iniciar_servidor_kernel(){
-
 	int kernel_fd = iniciar_servidor(puerto_escucha);
 	log_info(logger, "Servidor listo para recibir al cliente");
 	//generar_conexion_memoria();
@@ -136,10 +135,21 @@ void procesar_conexion(void *conexion1){
 		case MENSAJE:
 			recibir_mensaje(cliente_fd);
 			break;
+		
+		case CONEXION_INTERFAZ:
+			paquete = recibir_paquete(cliente_fd);
+			char* nombre_interfaz = list_get(paquete,0);
+			int conexion_obtenido = cliente_fd;
+			t_interfaz* interfaz = malloc(sizeof(t_interfaz));
+			interfaz->nombre = malloc(strlen(nombre_interfaz) + 1);
+			interfaz.codigo_cliente = cliente_fd;
+			break;	
+
 		case RECIBIR_PCB:
 			paquete = recibir_paquete(cliente_fd);
 			contexto= desempaquetar_pcb(paquete);
 			running->contexto = contexto;
+			
 			recv(cliente_fd,&cod_op,sizeof(op_code),0);
 			if (detener == true)
 			{
@@ -152,12 +162,21 @@ void procesar_conexion(void *conexion1){
 					log_error(logger,"%s", nombre_recurso_wait);
 					
 					ejecutar_wait(nombre_recurso_wait,running);
-				break;
+					break;
 				case EJECUTAR_SIGNAL:
 					paquete = recibir_paquete(cliente_fd);
 					char * nombre_recurso_signal =list_get(paquete,0);
 					log_error(logger,"%s", nombre_recurso_signal);
 					ejecutar_signal(nombre_recurso_signal,running);
+					break;
+				case IO_SLEEP:
+					paquete = recibir_paquete(cliente_fd);
+					char * nombre_de_interfaz_sleep =list_get(paquete,0);
+					int *unidad_trabajo_sleep = list_get(paquete,1);
+					log_error(logger,"el valor de pcb %s", nombre_de_interfaz_sleep);
+					log_error(logger,"el valor de unidad es %i", *unidad_trabajo_sleep);
+					//ejecutar_io_sleep(nombre_de_interfaz_sleep,unidad_trabajo_sleep,running);
+					break;
 				break;
 			default:
 				//log_error(logger, "che no se que me mandaste");
@@ -201,14 +220,22 @@ void procesar_conexion(void *conexion1){
 //			sem_post(&sem_ok_archivo_creado);
 		//			break;
 		case ENVIAR_DESALOJAR:
-		paquete = recibir_paquete(cliente_fd);
-		contexto= desempaquetar_pcb(paquete);
-		running->contexto = contexto;
-		//log_pcb_info(pcb_aux);
-		agregar_cola_ready(running);
-		pthread_mutex_unlock(&sem_exec);
+			paquete = recibir_paquete(cliente_fd);
+			contexto= desempaquetar_pcb(paquete);
+			running->contexto = contexto;
+			//log_pcb_info(pcb_aux);
+			agregar_cola_ready(running);
+			pthread_mutex_unlock(&sem_exec);
+			break;
 
-		break;
+		case OUT_OF_MEMORY:
+			paquete = recibir_paquete(cliente_fd);
+			contexto = desempaquetar_pcb(paquete);
+			running->contexto = contexto;
+			finalizar_pcb(running);
+			log_warning(logger, "Finaliza el proceso %i - Motivo: OUT OF MEMORY",running->contexto->pid);
+			break;
+
 		case FINALIZAR:
 			paquete = recibir_paquete(cliente_fd);
 			contexto = desempaquetar_pcb(paquete);

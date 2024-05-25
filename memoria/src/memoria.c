@@ -65,6 +65,10 @@ void procesar_conexion(void* socket){
 				case OBTENER_MARCO:
 	    			mandar_marco(cliente_fd);
 	            	break;
+				case MANDAME_PAGINA:
+					recibir_mensaje(cliente_fd);
+					enviar_tam_pagina(tam_pagina, cliente_fd);
+					break;
 				case ENVIO_RESIZE:
 					break;
 				case ENVIO_MOV_IN:

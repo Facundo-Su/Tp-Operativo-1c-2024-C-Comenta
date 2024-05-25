@@ -62,11 +62,13 @@ typedef struct{
 
 //semaforos
 sem_t contador_instruccion;
+sem_t resize_llegado;
 pthread_mutex_t contador_marco_obtenido;
 
 
 int marco_obtenido;
 int tamanio_pagina;
+int valor_retorno_resize;
 
 void obtener_configuracion();
 void procesar_conexion(void *conexion1);
@@ -80,6 +82,9 @@ void fetch(int cliente_fd);
 void decode(t_instruccion* instrucciones,int cliente_fd);
 void solicitar_instruccion_ejecutar_segun_pc(int pc,int pid);
 void enviar_recurso_a_kernel(char* recurso, op_code operacion, int cliente_fd);
+void enviar_a_memoria_copy_string(int parametro);
+void enviar_memoria_ajustar_tam(int tamanio_modificar);
+void obtener_el_marco(int nro_pagina,op_code operacion);
 
 t_estrucutra_cpu devolver_registro(char* registro);
 void setear(t_estrucutra_cpu pos, uint32_t valor) ;

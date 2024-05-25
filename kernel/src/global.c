@@ -13,6 +13,9 @@ pthread_mutex_t sem_detener_conexion;
 t_cola * cola_new;
 t_cola * cola_ready;
 t_cola * cola_blocked;
+
+t_list* lista_interfaces;
+
 int quantum;
 int grado_multiprogramacion_ini;
 int contador_pcb;
@@ -88,7 +91,7 @@ void inicializar_estructuras(){
     pthread_mutex_lock(&sem_detener);
     pthread_mutex_lock(&sem_detener_largo);
     pthread_mutex_lock(&sem_detener_conexion);
-
+    lista_interfaces = list_create();
     lista_recursos = list_create();
     lista_recursos_pcb = list_create();
     

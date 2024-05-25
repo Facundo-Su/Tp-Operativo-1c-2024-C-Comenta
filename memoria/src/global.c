@@ -28,5 +28,9 @@ void obtener_configuraciones() {
 void inicializar_estructuras(){
     logger_memoria = log_create("memoria.log", "Memoria", 1, LOG_LEVEL_DEBUG);
     logger = log_create("./memoria_principal.log", "CPU", true, LOG_LEVEL_INFO);
+    memoria = malloc(sizeof(t_memoria));
     lista_instrucciones = list_create();
+    memoria->lista_tabla_paginas = list_create();
+    memoria->marcos = list_create();
+
 }

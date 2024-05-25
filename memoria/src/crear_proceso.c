@@ -14,6 +14,8 @@ void cargar_lista_instruccion(int pid, char* ruta) {
     t_instrucciones* instruccion = malloc(sizeof(t_instrucciones));
     instruccion->pid = pid;
     instruccion->instrucciones = list_create();
+
+    ruta = "./prueba.txt";
     FILE* archivo = fopen(ruta, "r");
 
     if (archivo == NULL) {
