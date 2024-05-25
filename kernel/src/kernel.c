@@ -264,7 +264,9 @@ void procesar_conexion(void *conexion1){
 }
 
 void sacar_meter_en_ready(int pid){
-	//TODO
+	t_pcb* pcb_aux= buscar_pcb_listas(pid,lista_bloqueado_io);
+	agregar_cola_ready(pcb_aux);
+	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb_aux->contexto->pid);
 }
 
 void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,t_pcb * pcb){
@@ -297,6 +299,19 @@ t_interfaz * buscar_interfaces_listas(char* interfaz, t_list * lista){
 			t_interfaz * valor = list_get(lista,c);
 			if(interfaz == valor->nombre_interface){
 				return list_remove(lista,c);
+			}
+		}
+	}
+	return NULL;
+}
+
+t_pcb * buscar_pcb_listas(int pid, t_list * lista){
+	int d = list_size(lista);
+	if(d>0){
+		for(int c = 0; c<d;c++){
+			t_pcb * pcb = list_get(lista,c);
+			if(pid == pcb->pid){
+				return list_remove(lista,c);;
 			}
 		}
 	}
