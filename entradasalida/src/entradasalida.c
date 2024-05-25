@@ -19,7 +19,10 @@ void iniciar_consola(){
         interfaz_name = readline(">");
         log_info(logger_consola,"Ingrese la ubicacion del archivo de configuracion");
         path_configuracion = readline(">");
+        path_configuracion = "entradasalida.config";
         obtener_configuracion(path_configuracion);
+
+
 
         if (strcmp(tipo_interfaz, "GENERICA") == 0) 
         {
@@ -49,6 +52,7 @@ void obtener_configuracion(char *path_configuration){
     ip_kernel = config_get_string_value(config, "IP_KERNEL");
     puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
     ip_memoria = config_get_string_value(config, "IP_MEMORIA");
+    
     puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
     path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
     block_size = config_get_int_value(config, "BLOCK_SIZE");

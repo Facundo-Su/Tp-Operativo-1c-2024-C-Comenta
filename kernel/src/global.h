@@ -22,7 +22,8 @@ typedef struct{
 typedef struct{
     int codigo_cliente;
     char* nombre_interface;
-    int pid_en_uso;
+    int pid;
+    t_cola* cola_espera;
 }t_interfaz;
 
 typedef struct{

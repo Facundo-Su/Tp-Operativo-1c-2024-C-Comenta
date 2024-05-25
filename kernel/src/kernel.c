@@ -226,7 +226,7 @@ void procesar_conexion(void *conexion1){
 //			tam_archivo = *tam_archivo_recibido_creado;
 //			log_error(logger,"llegue a respuesta crear archivo");
 //			sem_post(&sem_ok_archivo_creado);
-		//			break;
+//		break;
 		case ENVIAR_DESALOJAR:
 			paquete = recibir_paquete(cliente_fd);
 			contexto= desempaquetar_pcb(paquete);
@@ -310,7 +310,7 @@ t_pcb * buscar_pcb_listas(int pid, t_list * lista){
 	if(d>0){
 		for(int c = 0; c<d;c++){
 			t_pcb * pcb = list_get(lista,c);
-			if(pid == pcb->pid){
+			if(pid == pcb->contexto->pid){
 				return list_remove(lista,c);;
 			}
 		}
