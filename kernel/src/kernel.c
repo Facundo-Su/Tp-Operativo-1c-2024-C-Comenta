@@ -141,8 +141,12 @@ void procesar_conexion(void *conexion1){
 			char* nombre_interfaz = list_get(paquete,0);
 			int conexion_obtenido = cliente_fd;
 			t_interfaz* interfaz = malloc(sizeof(t_interfaz));
-			interfaz->nombre = malloc(strlen(nombre_interfaz) + 1);
-			interfaz.codigo_cliente = cliente_fd;
+			interfaz->nombre_interface = nombre_interfaz;
+			interfaz->codigo_cliente = conexion_obtenido;
+			interfaz->pid_en_uso =false;
+			list_add(lista_interfaces,interfaz);
+			interfaz =list_get(lista_interfaces,0);
+			log_info(logger, "Se agrego la interfaz %s", interfaz->nombre_interface);
 			break;	
 
 		case RECIBIR_PCB:
@@ -175,8 +179,12 @@ void procesar_conexion(void *conexion1){
 					int *unidad_trabajo_sleep = list_get(paquete,1);
 					log_error(logger,"el valor de pcb %s", nombre_de_interfaz_sleep);
 					log_error(logger,"el valor de unidad es %i", *unidad_trabajo_sleep);
-					//ejecutar_io_sleep(nombre_de_interfaz_sleep,unidad_trabajo_sleep,running);
+					ejecutar_io_sleep(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,running);
 					break;
+				case EJECUTAR_IO_SLEEP:
+					paquete = recibir_paquete(cliente_fd);
+					int *pid_a_sacar_sleep = list_get(paquete,0);
+					sacar_meter_en_ready(*pid_a_sacar_sleep);
 				break;
 			default:
 				//log_error(logger, "che no se que me mandaste");
@@ -253,4 +261,44 @@ void procesar_conexion(void *conexion1){
 		}
 	}
 	return;
+}
+
+void sacar_meter_en_ready(int pid){
+	//TODO
+}
+
+void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,t_pcb * pcb){
+
+	t_interfaz * interfaz = buscar_interfaces_listas(nombre_de_interfaz_sleep,lista_interfaces);
+	if(interfaz == NULL){
+		log_error(logger,"No se encontro la interfaz %s", nombre_de_interfaz_sleep);
+		finalizar_pcb(pcb);
+
+	}else{
+		enviar_dormir(pcb->contexto->pid,unidad_trabajo_sleep,interfaz->codigo_cliente);
+		list_add(lista_bloqueado_io,pcb);
+	}
+}
+
+void enviar_dormir(int pid,int tiempo,int codigo_cliente){
+	t_paquete * paquete = crear_paquete(EJECUTAR_IO_SLEEP);
+	agregar_a_paquete(paquete, &pid, sizeof(int));
+	agregar_a_paquete(paquete, &tiempo, sizeof(int));
+	enviar_paquete(paquete,codigo_cliente);
+	free(paquete);
+}
+
+t_interfaz * buscar_interfaces_listas(char* interfaz, t_list * lista){
+	int d = list_size(lista);
+	t_interfaz * valor = malloc(sizeof(t_interfaz));
+	if(d>0){
+		for(int c = 0; c<d;c++){
+
+			t_interfaz * valor = list_get(lista,c);
+			if(interfaz == valor->nombre_interface){
+				return list_remove(lista,c);
+			}
+		}
+	}
+	return NULL;
 }

@@ -74,8 +74,8 @@ void procesar_conexion(void *conexion_ptr){
 	t_paquete * paquete;
 
     t_paquete* paquete2 = crear_paquete(CONEXION_INTERFAZ);
-    agregar_a_paquete(paquete2, interfaz_name, sizeof(char*));
-	agregar_a_paquete(paquete2, tipo_interfaz, sizeof(char*));
+    agregar_a_paquete(paquete2, interfaz_name, strlen(interfaz_name)+1);
+	agregar_a_paquete(paquete2, tipo_interfaz, strlen(interfaz_name)+1);
 	enviar_paquete(paquete2, cliente_fd);
 
     while (1) {

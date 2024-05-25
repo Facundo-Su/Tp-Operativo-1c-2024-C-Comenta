@@ -50,6 +50,8 @@ extern t_cola * cola_new;
 extern t_cola * cola_ready;
 extern t_cola * cola_blocked;
 
+extern t_list * lista_bloqueado_io;
+
 extern int grado_multiprogramacion_ini;
 extern int contador_pcb;
 extern bool detener;

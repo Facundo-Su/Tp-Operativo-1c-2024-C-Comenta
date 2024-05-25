@@ -15,6 +15,7 @@ t_cola * cola_ready;
 t_cola * cola_blocked;
 
 t_list* lista_interfaces;
+t_list* lista_bloqueado_io;
 
 int quantum;
 int grado_multiprogramacion_ini;
@@ -94,6 +95,7 @@ void inicializar_estructuras(){
     lista_interfaces = list_create();
     lista_recursos = list_create();
     lista_recursos_pcb = list_create();
+    lista_bloqueado_io = list_create();
     
 }
 void inicializar_recursos(){
