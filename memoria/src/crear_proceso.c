@@ -3,11 +3,10 @@
 void crear_proceso (int cliente_fd){
     t_list* lista = recibir_paquete(cliente_fd);
 	char* aux =list_get(lista,0);
-	int* pid = list_get(lista,1);
-    int *tamanio = list_get(lista,2); //tamaño del proceso
+	int* pid = list_get(lista,1);//tamaño del proceso
 	char*ruta = obtener_ruta(aux);
 	cargar_lista_instruccion(*pid, ruta);
-    guardar_proceso_en_memoria(*pid, *tamanio);
+   // guardar_proceso_en_memoria(*pid, *tamanio);
 }
 
 void cargar_lista_instruccion(int pid, char* ruta) {

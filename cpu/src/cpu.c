@@ -450,9 +450,10 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		hayInterrupcion = true;
 		parametro = list_get(instrucciones->parametros,0);
 		parametro2 = list_get(instrucciones->parametros,1);
+		char * nombre_io_sleep = strtok(parametro, "\n");
 		int entero_sleep = atoi(parametro2);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
-		enviar_IO_SLEEP(parametro,entero_sleep,cliente_fd);
+		enviar_IO_SLEEP(nombre_io_sleep,entero_sleep,cliente_fd);
 		break;
 	case EXIT:
 		hayInterrupcion = true;

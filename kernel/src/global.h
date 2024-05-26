@@ -18,7 +18,6 @@ typedef struct{
     t_cola* cola_bloqueados;
 }t_recurso;
 
-
 typedef struct{
     int codigo_cliente;
     char* nombre_interface;
@@ -44,6 +43,10 @@ typedef struct
     t_interfaz* interfaz;
 }t_interfaz_encontrada;
 
+typedef struct{
+    t_pcb * pcb;
+    int unidad_trabajo;
+}t_blocked_io;
 
 extern sem_t sem_new;
 extern sem_t sem_ready;

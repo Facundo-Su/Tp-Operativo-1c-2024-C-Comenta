@@ -91,19 +91,17 @@ void procesar_conexion(void *conexion_ptr){
         case EJECUTAR_IO_SLEEP:
 			paquete = recibir_paquete(cliente_fd);
             int *pid = list_get(paquete, 0);
+            log_error(logger, "%i",*pid);
 			int *amount = list_get(paquete, 1);
-			sleep(*amount * tiempo_unidad_trabajo);
+			usleep(*amount * tiempo_unidad_trabajo);
 
             t_paquete* paquete_finalizar_sleep = crear_paquete(EJECUTAR_IO_SLEEP);
-            agregar_a_paquete(paquete_finalizar_sleep, &pid, sizeof(int));
-            enviar_paquete(paquete_finalizar_sleep, cliente_fd);
-        case -1:
-            log_error(logger, "Ocurrio un error al conectarse al servidor.");
-            return NULL;
+            agregar_a_paquete(paquete_finalizar_sleep, pid, sizeof(int));
+            enviar_paquete(paquete_finalizar_sleep, conexion_kernel);
+            break;
         default:
-            log_warning(logger, "Operación desconocida. Revisar el protocolo de comunicación.");
+            //(logger, "Operación desconocida. Revisar el protocolo de comunicación.");
             break;
         }
     }
-    return NULL;
 }
