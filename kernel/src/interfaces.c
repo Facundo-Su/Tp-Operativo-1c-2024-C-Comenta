@@ -2,9 +2,10 @@
 
 void sacar_meter_en_ready(int pid){
 	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
-    t_interfaz interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
+	
+    t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
 	agregar_cola_ready(pcb);
-    t_pcb pcb_blocked = quitar_cola_bloqueados_interfaces(interfaz);
+    t_pcb *pcb_blocked = quitar_cola_bloqueados_interfaces(interfaz);
     agregar_cola_ready(pcb_blocked);
 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
 }
@@ -42,10 +43,9 @@ t_interfaz * buscar_interfaz_por_nombre(char* interfaz, t_list * lista){
 	t_interfaz * valor;
 	if(d>0){
 		for(int c = 0; c<d;c++){
-
 			t_interfaz * valor = list_get(lista,c);
 			if(interfaz == valor->nombre_interface){
-				return valor(lista,c);
+				return valor;
 			}
 		}
 	}

@@ -9,4 +9,5 @@ t_interfaz * buscar_interfaz_por_nombre(char* , t_list * );
 void agregar_cola_bloqueados_interfaces(t_interfaz * , t_pcb * );
 t_pcb * quitar_cola_bloqueados_interfaces(t_interfaz * );
 void agregar_interfaces(char * ,int );
+t_interfaz * buscar_interfaz_por_pid(int pid, t_list * lista);
 #endif

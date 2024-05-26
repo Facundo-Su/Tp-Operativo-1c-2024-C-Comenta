@@ -142,7 +142,7 @@ void procesar_conexion(void *conexion1){
 			int conexion_obtenido = cliente_fd;
 			agregar_interfaces(nombre_interfaz, conexion_obtenido);
 			//interfaz =list_get(lista_interfaces,0);
-			log_info(logger, "Se agrego la interfaz %s", interfaz->nombre_interface);
+			//log_info(logger, "Se agrego la interfaz %s", interfaz->nombre_interface);
 			break;	
 		case RECIBIR_PCB:
 			paquete = recibir_paquete(cliente_fd);
@@ -174,7 +174,8 @@ void procesar_conexion(void *conexion1){
 					int *unidad_trabajo_sleep = list_get(paquete,1);
 					log_error(logger,"el valor de pcb %s", nombre_de_interfaz_sleep);
 					log_error(logger,"el valor de unidad es %i", *unidad_trabajo_sleep);
-					ejecutar_io_sleep(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,running);
+					//ejecutar_io_sleep(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,running);
+					agregar_cola_ready(running);
 					break;
 				case EJECUTAR_IO_SLEEP:
 					paquete = recibir_paquete(cliente_fd);
