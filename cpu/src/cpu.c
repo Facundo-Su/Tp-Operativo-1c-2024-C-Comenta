@@ -227,6 +227,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	char * recurso ="";
 	char* parametro="";
 	char* parametro2="";
+	char* parametro3="";
 	uint32_t valor_uint1;
 	//uint32_t valor_uint2;
 	uint32_t valor_destino;
@@ -333,73 +334,76 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 
 		 uint32_t valor_destino;
 		 uint32_t valor_origen;
-		    if (registro_aux == AX) {
-		    	valor_destino = pcb->registros->ax;
-		    } else if (registro_aux == BX) {
-		    	valor_destino = pcb->registros->bx;
-			} else if (registro_aux == CX) {
-				valor_destino = pcb->registros->cx;
-			}else if (registro_aux == DX) {
-				valor_destino = pcb->registros->dx;
-			}else if(registro_aux == EAX) {
-				valor_destino = pcb->registros->eax;
-			}else if(registro_aux == EBX) {
-				valor_destino = pcb->registros->ebx;
-			}else if (registro_aux == ECX){
-				valor_destino = pcb->registros->ecx;
-			}else if (registro_aux == EDX) {
-				valor_destino = pcb->registros->edx;
-			}else if (registro_aux == SI) {
-				valor_destino = pcb->registros->si;
-			}else{
-				valor_destino =pcb->registros->di;
-			}
-			
-		    if (registro_aux2 == AX) {
-		    	valor_origen = pcb->registros->ax;
-		    } else if (registro_aux2 == BX) {
-		    	valor_origen = pcb->registros->bx;
-			} else if (registro_aux2 == CX) {
-				valor_origen = pcb->registros->cx;
-			}else if (registro_aux2 == DX) {
-				valor_origen = pcb->registros->dx;
-			}else if(registro_aux2 == EAX) {
-				valor_origen = pcb->registros->eax;
-			}else if(registro_aux2 == EBX) {
-				valor_origen = pcb->registros->ebx;
-			}else if (registro_aux2 == ECX){
-				valor_origen = pcb->registros->ecx;
-			}else if (registro_aux2 == EDX) {
-				valor_origen = pcb->registros->edx;
-			}else if (registro_aux2 == SI) {
-				valor_origen = pcb->registros->si;
-			}else{
-				valor_origen =pcb->registros->di;
-			}
 
+		 valor_destino = obtener_valor_registro(registro_aux);
+
+		    // if (registro_aux == AX) {
+		    // 	valor_destino = pcb->registros->ax;
+		    // } else if (registro_aux == BX) {
+		    // 	valor_destino = pcb->registros->bx;
+			// } else if (registro_aux == CX) {
+			// 	valor_destino = pcb->registros->cx;
+			// }else if (registro_aux == DX) {
+			// 	valor_destino = pcb->registros->dx;
+			// }else if(registro_aux == EAX) {
+			// 	valor_destino = pcb->registros->eax;
+			// }else if(registro_aux == EBX) {
+			// 	valor_destino = pcb->registros->ebx;
+			// }else if (registro_aux == ECX){
+			// 	valor_destino = pcb->registros->ecx;
+			// }else if (registro_aux == EDX) {
+			// 	valor_destino = pcb->registros->edx;
+			// }else if (registro_aux == SI) {
+			// 	valor_destino = pcb->registros->si;
+			// }else{
+			// 	valor_destino =pcb->registros->di;
+			// }
+		 valor_origen = obtener_valor_registro(registro_aux2);
+		    // if (registro_aux2 == AX) {
+		    // 	valor_origen = pcb->registros->ax;
+		    // } else if (registro_aux2 == BX) {
+		    // 	valor_origen = pcb->registros->bx;
+			// } else if (registro_aux2 == CX) {
+			// 	valor_origen = pcb->registros->cx;
+			// }else if (registro_aux2 == DX) {
+			// 	valor_origen = pcb->registros->dx;
+			// }else if(registro_aux2 == EAX) {
+			// 	valor_origen = pcb->registros->eax;
+			// }else if(registro_aux2 == EBX) {
+			// 	valor_origen = pcb->registros->ebx;
+			// }else if (registro_aux2 == ECX){
+			// 	valor_origen = pcb->registros->ecx;
+			// }else if (registro_aux2 == EDX) {
+			// 	valor_origen = pcb->registros->edx;
+			// }else if (registro_aux2 == SI) {
+			// 	valor_origen = pcb->registros->si;
+			// }else{
+			// 	valor_origen =pcb->registros->di;
+			// }
 
 		    resultado = valor_destino + valor_origen;
-		    if (registro_aux == AX) {
-				pcb->registros->ax = resultado;
-			}else if (registro_aux == BX) {
-				pcb->registros->bx = resultado;
-			}else if (registro_aux == CX) {
-				pcb->registros->cx = resultado;
-			}else if(registro_aux == DX) {
-				pcb->registros->dx = resultado;
-			}else if(registro_aux == EAX) {
-				pcb->registros->eax = resultado;
-			}else if(registro_aux == EBX) {
-				pcb->registros->ebx = resultado;
-			}else if(registro_aux == ECX) {
-				pcb->registros->ecx = resultado;
-			}else if(registro_aux == EDX) {
-				pcb->registros->edx = resultado;
-			}else if (registro_aux == SI) {
-				pcb->registros->si = resultado;
-			}else{
-				pcb->registros->di = resultado;
-			}
+			asignar_valor_registro(resultado,registro_aux);
+		    // if (registro_aux == AX) {
+			// 	pcb->registros->ax = resultado;
+			// }else if (registro_aux == BX) {
+			// 	pcb->registros->bx = resultado;
+			// }else if (registro_aux == CX) {
+			// 	pcb->registros->cx = resultado;
+			// }else if(registro_aux == DX) {
+			// 	pcb->registros->dx = resultado;
+			// }else if(registro_aux == EAX) {
+			// 	pcb->registros->eax = resultado;
+			// }else if(registro_aux == EBX) {
+			// 	pcb->registros->ebx = resultado;
+			// }else if(registro_aux == ECX) {
+			// 	pcb->registros->ecx = resultado;
+			// }else if(registro_aux == EDX) {
+			// 	pcb->registros->edx = resultado;
+			// }else if (registro_aux == SI) {
+			// 	pcb->registros->si = resultado;
+			// }else{
+			// 	pcb->registros->di = resultado;
+			// }
 		break;
 	case JNZ:
 		parametro = list_get(instrucciones->parametros,0);
@@ -455,6 +459,37 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_IO_SLEEP(nombre_io_sleep,entero_sleep,cliente_fd);
 		break;
+	case IO_STDIN_READ:
+		hayInterrupcion = true;
+		parametro = list_get(instrucciones->parametros,0);
+		parametro2 = list_get(instrucciones->parametros,1);
+		parametro3 = list_get(instrucciones->parametros,2);
+
+		break;
+	case IO_STDOUT_WRITE:
+		hayInterrupcion = true;
+		parametro = list_get(instrucciones->parametros,0);
+		parametro2 = list_get(instrucciones->parametros,1);
+		parametro3 = list_get(instrucciones->parametros,2);
+		break;
+	case IO_FS_CREATE:
+		
+		break;
+	
+	case IO_FS_DELETE:
+
+		break;
+	case IO_FS_TRUNCATE:
+
+		break;
+	case IO_FS_WRITE:
+
+		break;
+	
+	case IO_FS_READ:
+
+		break;
+
 	case EXIT:
 		hayInterrupcion = true;
 		log_info(logger,"PID: %i - Ejecutando EXIT:",pcb->pid);
@@ -466,6 +501,67 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	recibi_archivo = false;
 	instruccion_ejecutando= false;
 }
+
+int obtener_valor_registro(t_estrucutra_cpu registros_aux) {
+    switch (registros_aux) {
+        case AX:
+            return pcb->registros->ax;
+        case BX:
+            return pcb->registros->bx;
+        case CX:
+            return pcb->registros->cx;
+        case DX:
+            return pcb->registros->dx;
+        case EAX:
+            return pcb->registros->eax;
+        case EBX:
+            return pcb->registros->ebx;
+        case ECX:
+            return pcb->registros->ecx;
+        case EDX:
+            return pcb->registros->edx;
+        case SI:
+            return pcb->registros->si;
+        default:
+            return pcb->registros->di;
+    }
+}
+
+void asignar_valor_registro(int valor, t_estrucutra_cpu registros_aux) {
+    switch (registros_aux) {
+        case AX:
+            pcb->registros->ax = valor;
+            break;
+        case BX:
+            pcb->registros->bx = valor;
+            break;
+        case CX:
+            pcb->registros->cx = valor;
+            break;
+        case DX:
+            pcb->registros->dx = valor;
+            break;
+        case EAX:
+            pcb->registros->eax = valor;
+            break;
+        case EBX:
+            pcb->registros->ebx = valor;
+            break;
+        case ECX:
+            pcb->registros->ecx = valor;
+            break;
+        case EDX:
+            pcb->registros->edx = valor;
+            break;
+        case SI:
+            pcb->registros->si = valor;
+            break;
+        default:
+            pcb->registros->di = valor;
+            break;
+    }
+}
+
 
 void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd){
 	t_paquete* paquete = crear_paquete(IO_SLEEP);
