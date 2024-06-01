@@ -157,8 +157,6 @@ void procesar_conexion(void *conexion1){
 					paquete = recibir_paquete(cliente_fd);
 					char * nombre_de_interfaz_sleep =list_get(paquete,0);
 					int *unidad_trabajo_sleep = list_get(paquete,1);
-					log_error(logger,"el valor de pcb %s", nombre_de_interfaz_sleep);
-					log_error(logger,"el valor de unidad es %i", *unidad_trabajo_sleep);
 					ejecutar_io_sleep(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,running);
 					//agregar_cola_ready(running);
 					break;
@@ -166,14 +164,11 @@ void procesar_conexion(void *conexion1){
 				case EJECUTAR_WAIT:
 					paquete = recibir_paquete(cliente_fd);
 					char *nombre_recurso_wait =list_get(paquete,0);
-					log_error(logger,"%s", nombre_recurso_wait);
-					
 					ejecutar_wait(nombre_recurso_wait,running);
 					break;
 				case EJECUTAR_SIGNAL:
 					paquete = recibir_paquete(cliente_fd);
 					char * nombre_recurso_signal =list_get(paquete,0);
-					log_error(logger,"%s", nombre_recurso_signal);
 					ejecutar_signal(nombre_recurso_signal,running);
 					break;
 				default:
@@ -182,10 +177,10 @@ void procesar_conexion(void *conexion1){
 			}
 			break;
 			case EJECUTAR_IO_SLEEP:
-				log_error(logger, "AAAAAAAAAAAA");
+				//log_error(logger, "AAAAAAAAAAAA");
 				paquete = recibir_paquete(cliente_fd);
 				int *pid_a_sacar_sleep = list_get(paquete,0);
-				log_error(logger, "%i",*pid_a_sacar_sleep);
+				//log_error(logger, "%i",*pid_a_sacar_sleep);
 				io_sleep_ready(*pid_a_sacar_sleep);
 			break;
 		/*case ENVIAR_DESALOJAR:

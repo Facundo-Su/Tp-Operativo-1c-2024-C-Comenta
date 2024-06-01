@@ -93,7 +93,7 @@ void procesar_conexion(void *conexion_ptr){
             int *pid = list_get(paquete, 0);
             log_error(logger, "%i",*pid);
 			int *amount = list_get(paquete, 1);
-			usleep(*amount * tiempo_unidad_trabajo);
+			usleep(*amount * tiempo_unidad_trabajo*1000);
 
             t_paquete* paquete_finalizar_sleep = crear_paquete(EJECUTAR_IO_SLEEP);
             agregar_a_paquete(paquete_finalizar_sleep, pid, sizeof(int));

@@ -2,6 +2,7 @@
 #define INTERFACES_H_
 #include "global.h"
 #include "utils.h"
+#include "planificadores.h"
 void ejecutar_io_sleep(char * ,int ,t_pcb * );
 void enviar_dormir(int ,int ,int );
 void io_sleep_ready(int );
