@@ -11,11 +11,6 @@ int main(int argc, char* argv[]) {
     return EXIT_SUCCESS;
 }
 
-
-
-
-
-
 void iniciar_servidor_memoria(char *puerto) {
 
     int memoria_fd = iniciar_servidor(puerto);
@@ -70,10 +65,13 @@ void procesar_conexion(void* socket){
 					enviar_tam_pagina(tam_pagina, cliente_fd);
 					break;
 				case ENVIO_RESIZE:
+					envio_resize(cliente_fd);
 					break;
 				case ENVIO_MOV_IN:
+					envio_mov_in(cliente_fd);
 					break;
 				case ENVIO_MOV_OUT:
+					envio_mov_out(cliente_fd);
 					break;
 	    		case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");

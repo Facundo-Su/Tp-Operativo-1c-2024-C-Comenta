@@ -5,6 +5,10 @@
 #include "global.h"
 #include "crear_proceso.h"
 #include "finaliza_proceso.h"
+#include "manda_marco.h"
+#include "envio_resize.h"
+#include "envio_mov_in.h"
+#include "envio_mov_out.h"
 
 
 

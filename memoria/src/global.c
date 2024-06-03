@@ -12,6 +12,7 @@ int auxiliar;
 t_log* logger;
 t_log* logger_memoria;
 t_config* config;
+
 void obtener_configuraciones() {
     config = cargar_config("./memoria.config");
     puerto_escucha = config_get_string_value(config,"PUERTO_ESCUCHA");
@@ -23,6 +24,9 @@ void obtener_configuraciones() {
 	auxiliar = config_get_int_value(config,"RETARDO_RESPUESTA");
     auxiliar = auxiliar* 1000;
     retardo_respuesta = (useconds_t) auxiliar;
+    memoria->espacio_usuario= malloc(tam_memoria);
+	memoria->tamanio_marcos = tam_pagina;
+	memoria->cantidad_marcos = tam_memoria/tam_pagina;
 }
 
 void inicializar_estructuras(){
