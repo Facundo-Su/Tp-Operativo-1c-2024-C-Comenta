@@ -5,4 +5,5 @@
 
 void envio_mov_in(int);
 void enviar_registro_leido(int, op_code, int);
+void asignar_marco(int, int);
 #endif 
