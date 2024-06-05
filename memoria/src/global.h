@@ -15,6 +15,7 @@ typedef struct{
 typedef struct {
 	int num_marco;
     int num_pagina;
+	int p; //Vale 1 si la pagina tiene un marco asignado
 } t_pagina;
 
 typedef struct {

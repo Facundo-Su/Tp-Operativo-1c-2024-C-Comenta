@@ -117,21 +117,18 @@ t_tabla_paginas *crear_tabla_pagina(int pid, int size){
 	tabla_paginas->pid = pid;
 	tabla_paginas->tamanio_proceso = size;
 	tabla_paginas->paginas_necesarias = cant_paginas;
-	//tabla_paginas->paginas = crear_pagina(cant_paginas);
+	tabla_paginas->paginas = crear_pagina(cant_paginas);
 	return tabla_paginas;
 }
-/*
 
 t_list * crear_pagina(int paginas_necesarias){
 	t_list * paginas = list_create();
 	for(int c =0; c<paginas_necesarias;c++){
 		t_pagina * pagina = malloc(sizeof(t_pagina)); 
-		pagina->num_marco =-1; //No entiendo por qué el -1
-		pagina->m =0;
+		pagina->num_marco =-1;
 		pagina->p =0;
 		pagina->num_pagina = c;
 		list_add(paginas,pagina);
 	}
 	return paginas;
 }
-*/
