@@ -36,5 +36,18 @@ void inicializar_estructuras(){
     lista_instrucciones = list_create();
     memoria->lista_tabla_paginas = list_create();
     memoria->marcos = list_create();
+    inicializar_marcos();
+}
 
+void inicializar_marcos() {
+    int i, desplazamiento = 0;
+    for(i=0; i<memoria->cantidad_marcos; i++) {
+        t_marco *marco = malloc(sizeof(t_marco));
+        marco->base = desplazamiento;
+        marco->is_free = true;
+        marco->num_marco = i;
+        marco->pid = -1;
+        list_add(memoria->marcos, marco);
+        desplazamiento+= memoria->tamanio_marcos;
+    }
 }

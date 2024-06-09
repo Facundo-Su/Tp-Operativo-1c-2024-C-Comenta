@@ -20,7 +20,7 @@ typedef struct {
 
 typedef struct {
 	int num_marco;
-    int base; //Contenido?
+    int base;
     bool is_free;
     int pid;
 } t_marco;
@@ -58,4 +58,5 @@ extern t_config* config;
 
 void obtener_configuraciones();
 void inicializar_estructuras();
+void inicializar_marcos();
 #endif

@@ -4,5 +4,6 @@
 #include "global.h"
 
 void envio_mov_out(int);
+void enviar_respuesta(int,op_code);
 
 #endif 
