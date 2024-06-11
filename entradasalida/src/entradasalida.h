@@ -2,6 +2,7 @@
 #define KERNEL_H_
 
 #include <utils/hello.h>
+#include <funcionesfs.h>
 
 char* tipo_interfaz;
 int tiempo_unidad_trabajo;

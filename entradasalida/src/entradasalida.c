@@ -201,9 +201,22 @@ void procesar_conexion(void *conexion_ptr){
 
         	enviar_kernel_ok_stdout(cliente_fd);
         	break;
-        case EJECUTAR_DIALFS:
-        	//(logger, "Mas adelante.");
+        case EJECUTAR_IO_FS_CREATE:
+        	//TO-DO
         	break;
+        case EJECUTAR_IO_FS_DELETE:
+        	//TO-DO
+        	break;
+        case EJECUTAR_IO_FS_TRUNCATE:
+        	//TO-DO
+        	break;
+        case EJECUTAR_IO_FS_WRITE:
+        	//TO-DO
+        	break;
+        case EJECUTAR_IO_FS_READ:
+        	//TO-DO
+        	break;
+            
         default:
             //(logger, "Operación desconocida. Revisar el protocolo de comunicación.");
             break;
