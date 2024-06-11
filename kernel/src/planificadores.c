@@ -20,6 +20,20 @@ t_pcb * quitar_cola_ready(){
     pthread_mutex_unlock(&(cola_ready->sem_mutex));
     return pcb;
 }
+
+void agregar_cola_vrr(t_pcb * pcb){
+    pcb->estado = READY;
+    pthread_mutex_lock(&(cola_vrr->sem_mutex));
+    queue_push(cola_vrr->cola, pcb);
+    pthread_mutex_unlock(&(cola_vrr->sem_mutex));
+    sem_post(&sem_ready);
+}
+t_pcb * quitar_cola_vrr(){
+    pthread_mutex_lock(&(cola_vrr->sem_mutex));
+    t_pcb* pcb = queue_pop(cola_vrr->cola);
+    pthread_mutex_unlock(&(cola_vrr->sem_mutex));
+    return pcb;
+}
 t_pcb * quitar_cola_new(){
     pthread_mutex_lock(&(cola_new->sem_mutex));
     t_pcb* pcb = queue_pop(cola_new->cola);
@@ -66,7 +80,7 @@ void planificador_corto_plazo(){
             de_ready_a_round_robin();
             break;
         case VRR:
-        
+            de_ready_a_vrr();
             break;
         
         default:
@@ -82,14 +96,41 @@ void de_ready_a_round_robin(){
     pthread_mutex_unlock(&sem_interrupcion);
     de_ready_a_fifo();
 }
+void de_ready_a_vrr(){
+    pthread_mutex_unlock(&sem_interrupcion);
+    pthread_mutex_lock(&sem_vrr);
+    if(!queue_is_empty(cola_vrr->cola)){
+        t_pcb* pcb =quitar_cola_vrr();
+        enviar_por_dispatch(pcb);   
+    }else{
+        de_ready_a_fifo();
+    }
+}
 void *interrupcion_quantum(){
     while(1){
         //if(!queue_is_empty(cola_ready->cola)){
                 pthread_mutex_lock(&sem_interrupcion);
-                usleep(quantum * 1000);
-                log_error(logger,"INTERRUPCION POR QUANTUM");
-                enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
-                
+                if(planificador == VRR){
+                    inicio_vrr = temporal_create();
+                }
+                log_error(logger,"%i", queue_size(cola_vrr->cola));
+                if(!queue_is_empty(cola_vrr->cola)){
+                    pthread_mutex_lock(&(cola_vrr->sem_mutex));
+                    t_pcb* pcb = queue_peek(cola_vrr->cola);
+                    pthread_mutex_unlock(&(cola_vrr->sem_mutex));
+                    log_error(logger,"EJECUTA QUANTUM DE %i",pcb->contexto->quantum);
+                    pthread_mutex_unlock(&sem_vrr);
+                    pthread_mutex_lock(&sem_quantum);
+                    usleep(pcb->contexto->quantum * 1000);
+                    log_error(logger,"INTERRUPCION POR QUANTUM RESTANTE");
+                    enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
+                }else{
+                    pthread_mutex_unlock(&sem_vrr);
+                    pthread_mutex_lock(&sem_quantum);
+                    usleep(quantum * 1000);
+                    log_error(logger,"INTERRUPCION POR QUANTUM");
+                    enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
+                }
             }
         //}
 }
@@ -99,6 +140,7 @@ void enviar_por_dispatch(t_pcb* pcb) {
     pcb->estado=RUNNING;
     running= pcb;
     enviar_pcb(pcb->contexto,conexion_cpu,RECIBIR_PCB);
+    pthread_mutex_unlock(&sem_quantum);
 }
 
 void inciar_planificadores(){

@@ -183,14 +183,14 @@ void procesar_conexion(void *conexion1){
 				//log_error(logger, "%i",*pid_a_sacar_sleep);
 				io_sleep_ready(*pid_a_sacar_sleep);
 			break;
-		/*case ENVIAR_DESALOJAR:
+		case ENVIAR_DESALOJAR:
 			paquete = recibir_paquete(cliente_fd);
 			contexto= desempaquetar_pcb(paquete);
 			running->contexto = contexto;
 			//log_pcb_info(pcb_aux);
 			agregar_cola_ready(running);
 			pthread_mutex_unlock(&sem_exec);
-			break;*/
+			break;
 
 		case OUT_OF_MEMORY:
 			paquete = recibir_paquete(cliente_fd);

@@ -144,7 +144,7 @@ void procesar_conexion(void *conexion_ptr){
             int *pid = list_get(paquete, 0);
             log_error(logger, "%i",*pid);
 			int *amount = list_get(paquete, 1);
-			usleep(*amount * tiempo_unidad_trabajo);
+			usleep(*amount * tiempo_unidad_trabajo*1000);
 
             t_paquete* paquete_finalizar_sleep = crear_paquete(EJECUTAR_IO_SLEEP);
             agregar_a_paquete(paquete_finalizar_sleep, pid, sizeof(int));
@@ -160,7 +160,7 @@ void procesar_conexion(void *conexion_ptr){
 
         	int *R_tamanio = list_get(paquete, 2);
 
-        	log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDIN_READ >",*pid_stdin);//esta bien que la operacion sea asi?
+        	//log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDIN_READ >",*pid_stdin);//esta bien que la operacion sea asi?
 
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
         	char* palabra_A_enviar = string_substring_from(palabra_usuario,*R_tamanio);// de las commons,ajusto la palabra 
@@ -169,7 +169,7 @@ void procesar_conexion(void *conexion_ptr){
         	enviar_stdin_memoria(*R_direccion,palabra_A_enviar,conexion_memoria,*pid_stdin);
         	int cop;
 			recv(conexion_memoria, &cop, sizeof(cop), 0);//tendria que recibir un ok de memoria?
-            log_info(logger_consola,"me llego confirmacion de Memoria, llego un %i",cop);//1=OK
+            //log_info(logger_consola,"me llego confirmacion de Memoria, llego un %i",cop);//1=OK
 
 			close(conexion_memoria);
         	//sem_wait(&sem_cont_lectura);
@@ -177,11 +177,11 @@ void procesar_conexion(void *conexion_ptr){
 
         	break;
         case EJECUTAR_STDOUT_WRITE:
-        	paquete = recibir_paquete(cliente_fd);
-        	int *pid = list_get(paquete, 0);//el PID para el log sera
-        	int *R_direccion = list_get(paquete, 1);
+        	//paquete = recibir_paquete(cliente_fd);
+        	//int *pid = list_get(paquete, 0);//el PID para el log sera
+        	//int *R_direccion = list_get(paquete, 1);
 
-        	int *R_tamanio = list_get(paquete, 2);
+        	//int *R_tamanio = list_get(paquete, 2);
         	
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
         	enviar_direccion_memoria(*R_direccion,*R_tamanio,conexion_memoria,*pid);//agrego pid por si memoria lo necesita para sus logs en acceso de lectura.
@@ -194,10 +194,10 @@ void procesar_conexion(void *conexion_ptr){
 			//recv(conexion_memoria,informacion,R_tamanio,0);      //recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
 
 			usleep(tiempo_unidad_trabajo*1000);
-			log_info(logger_consola	, "El resultado de lo buscado en memoria es: < %s >",informacion);
+			//log_info(logger_consola	, "El resultado de lo buscado en memoria es: < %s >",informacion);
 			close(conexion_memoria);
 
-			log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDOUT_WRITE >",*pid);
+			//log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDOUT_WRITE >",*pid);
 
         	enviar_kernel_ok_stdout(cliente_fd);
         	break;

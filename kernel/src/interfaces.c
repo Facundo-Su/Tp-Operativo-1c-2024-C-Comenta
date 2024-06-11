@@ -5,8 +5,13 @@ void io_sleep_ready(int pid){
     t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
 	interfaz->en_uso = false;
 	interfaz->pid = -1;
-	agregar_cola_ready(pcb);
 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
+	if(planificador== VRR){
+		log_info(logger,"PID: %i - Agregado cola de prioridades vrr",pcb->contexto->pid);
+		agregar_cola_vrr(pcb);
+	}else{
+		agregar_cola_ready(pcb);
+	}
 	//pthread_mutex_unlock(&sem_exec);
 	if(!queue_is_empty(interfaz->cola_espera->cola)){
 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
@@ -28,6 +33,14 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 			interfaz->en_uso = true;
 			interfaz->pid = pcb->contexto->pid;
             pcb->estado = WAITING;
+			if(planificador == VRR){
+				int tiempo = temporal_gettime(inicio_vrr);
+				temporal_destroy(inicio_vrr);
+				int restante = quantum-tiempo;
+				pcb->contexto->quantum= restante;
+				log_info(logger, "%i",tiempo);
+				log_info(logger, "%i",restante);
+			}
             list_add(lista_bloqueado_io,pcb);
 			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 			enviar_dormir(pcb->contexto->pid,unidad_trabajo_sleep,interfaz->codigo_cliente);

@@ -8,11 +8,14 @@ pthread_mutex_t sem_exec;
 pthread_mutex_t sem_detener_largo;
 pthread_mutex_t sem_interrupcion;
 pthread_mutex_t sem_detener_conexion;
+pthread_mutex_t sem_vrr;
+pthread_mutex_t sem_quantum;
 
 
 t_cola * cola_new;
 t_cola * cola_ready;
 t_cola * cola_blocked;
+t_cola * cola_vrr;
 
 t_list* lista_interfaces;
 t_list* lista_bloqueado_io;
@@ -36,6 +39,7 @@ pthread_t hilo_planificador_corto_plazo;
 pthread_t hilo_conexion_memoria;
 pthread_t hilo_conexion_cpu;
 pthread_t hilo_conexion_cpu_interrupt;
+t_temporal* inicio_vrr;
 
 t_config* config;
 t_log* logger;
@@ -80,6 +84,7 @@ void inicializar_estructuras(){
     cola_new = inicializar_cola();
     cola_ready = inicializar_cola();
     cola_blocked = inicializar_cola();
+    cola_vrr = inicializar_cola();
     sem_init(&sem_new, 0, 0);
     sem_init(&sem_ready, 0, 0);
     sem_init(&sem_grado_multiprogramacion, 0, grado_multiprogramacion_ini);
@@ -87,11 +92,15 @@ void inicializar_estructuras(){
     pthread_mutex_init(&sem_detener_largo, NULL);
     pthread_mutex_init(&sem_exec, NULL);
     pthread_mutex_init(&sem_interrupcion, NULL);
+    pthread_mutex_init(&sem_vrr, NULL);
+    pthread_mutex_init(&sem_quantum, NULL);
     pthread_mutex_init(&sem_detener_conexion, NULL);
     pthread_mutex_lock(&sem_interrupcion);
     pthread_mutex_lock(&sem_detener);
     pthread_mutex_lock(&sem_detener_largo);
     pthread_mutex_lock(&sem_detener_conexion);
+    pthread_mutex_lock(&sem_vrr);
+    pthread_mutex_lock(&sem_quantum);
     lista_interfaces = list_create();
     lista_recursos = list_create();
     lista_recursos_pcb = list_create();

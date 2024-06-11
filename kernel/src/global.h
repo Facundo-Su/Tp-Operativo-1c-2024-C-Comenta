@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include "utils/hello.h"
 #include <commons/collections/list.h> 
+#include <commons/temporal.h>
 
 
 typedef struct
@@ -56,10 +57,12 @@ extern pthread_mutex_t sem_detener;
 extern pthread_mutex_t sem_detener_largo;
 extern pthread_mutex_t sem_interrupcion;
 extern pthread_mutex_t sem_detener_conexion;
-
+extern pthread_mutex_t sem_vrr;
+extern pthread_mutex_t sem_quantum;
 extern t_cola * cola_new;
 extern t_cola * cola_ready;
 extern t_cola * cola_blocked;
+extern t_cola * cola_vrr;
 
 extern t_list * lista_bloqueado_io;
 
@@ -86,6 +89,8 @@ extern pthread_t hilo_conexion_cpu;
 extern pthread_t hilo_conexion_cpu_interrupt;
 extern t_pcb * running;
 extern t_list* lista_interfaces;
+extern t_temporal* inicio_vrr;
+
 
 
 //
