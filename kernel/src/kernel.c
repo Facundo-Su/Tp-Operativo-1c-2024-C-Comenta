@@ -48,25 +48,15 @@ void iniciar_consola(){
 
 		switch (*variable) {
 			case '1':
-			
+				char* ruta_script = readline(">");
+				ejecutar_script(ruta_script);
 				//enviar_mensaje_instrucciones("hola",conexion_memoria,MENSAJE);
 				
 				break;
 			case '2':
-				log_info(logger_consola, "Ingrese la ruta");
+				log_info(logger, "Ingrese la ruta");
 				char* ruta = readline(">");
-				t_pcb* pcb = retorno_pcb();
-				t_paquete* paquete =crear_paquete(CREAR_PROCESO);
-				int pid = pcb->contexto->pid;
-				agregar_a_paquete(paquete, ruta, strlen(ruta) + 1);
-				agregar_a_paquete(paquete, &(pid), sizeof(int));
-				enviar_paquete(paquete, conexion_memoria);
-				eliminar_paquete(paquete);
-				agregar_cola_new(pcb);
-				if(primero == true){
-					pthread_mutex_unlock(&sem_exec);
-				}
-				primero = false;
+				iniciar_proceso(ruta);
 				//enviar_pcb(pcb_aux,conexion_memoria,CREAR_PROCESO);
 				break;
 			case '3':
@@ -126,6 +116,7 @@ void procesar_conexion(void *conexion1){
 	int cliente_fd = *conexion;
 	t_contexto_ejecucion * contexto;
 	t_paquete * paquete;
+	t_pcb * exit;
 	while (1) {
 		int cod_op = recibir_operacion(cliente_fd);
 		switch (cod_op) {
@@ -156,6 +147,7 @@ void procesar_conexion(void *conexion1){
 				case IO_SLEEP:
 					paquete = recibir_paquete(cliente_fd);
 					char * nombre_de_interfaz_sleep =list_get(paquete,0);
+					log_info(logger,"%s", nombre_de_interfaz_sleep);
 					int *unidad_trabajo_sleep = list_get(paquete,1);
 					ejecutar_io_sleep(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,running);
 					//agregar_cola_ready(running);
@@ -196,16 +188,18 @@ void procesar_conexion(void *conexion1){
 			paquete = recibir_paquete(cliente_fd);
 			contexto = desempaquetar_pcb(paquete);
 			running->contexto = contexto;
-			finalizar_pcb(running);
-			log_warning(logger, "Finaliza el proceso %i - Motivo: OUT OF MEMORY",running->contexto->pid);
+			exit = running;
+			finalizar_pcb(exit);
+			log_warning(logger, "Finaliza el proceso %i - Motivo: OUT OF MEMORY",exit->contexto->pid);
 			break;
 
 		case FINALIZAR:
 			paquete = recibir_paquete(cliente_fd);
 			contexto = desempaquetar_pcb(paquete);
 			running->contexto = contexto;
-			finalizar_pcb(running);
-			log_warning(logger, "Finaliza el proceso %i - Motivo: SUCCES",running->contexto->pid);
+			exit= running;
+			finalizar_pcb(exit);
+			log_warning(logger, "Finaliza el proceso %i - Motivo: SUCCES",exit->contexto->pid);
 			break;
 
 		case -1:

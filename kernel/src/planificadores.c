@@ -57,7 +57,6 @@ void planificador_largo_plazo(){
 }
 void planificador_corto_plazo(){
     if(planificador == RR || planificador == VRR){
-        log_info(logger,"ASDASDASASASASAS");
 		 pthread_t hilo_quantum;
 		 pthread_create(&hilo_quantum, NULL, interrupcion_quantum, NULL);
 		 pthread_detach(hilo_quantum);

@@ -19,7 +19,7 @@ void obtener_configuraciones() {
 	tam_memoria = config_get_int_value(config,"TAM_MEMORIA");
     tam_pagina = config_get_int_value(config,"TAM_PAGINA");
     path_instrucciones = config_get_string_value(config,"PATH_INSTRUCCIONES");
-    strcat(path_instrucciones,"/");
+    //strcat(path_instrucciones,"/");
     log_info(logger_memoria, "%s",path_instrucciones);
 	auxiliar = config_get_int_value(config,"RETARDO_RESPUESTA");
     auxiliar = auxiliar* 1000;

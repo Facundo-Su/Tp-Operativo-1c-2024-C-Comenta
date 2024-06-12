@@ -565,7 +565,7 @@ void asignar_valor_registro(int valor, t_estrucutra_cpu registros_aux) {
 
 void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd){
 	t_paquete* paquete = crear_paquete(IO_SLEEP);
-	agregar_a_paquete(paquete, parametro, sizeof(int));
+	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &parametro2, sizeof(int));
 	log_warning(logger,"PID: %i - Ejecutando IO_SLEEP: %s - %i",pcb->pid,parametro,parametro2);
 	enviar_paquete(paquete, cliente_fd);

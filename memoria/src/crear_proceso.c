@@ -76,13 +76,6 @@ t_list* leer_pseudocodigo(FILE* pseudocodigo){
         j++;
        log_info(logger_memoria,"la instruccion es  %s",instruc_aux_nose23);
     }
-
-    //char *instruc_aux_nose = list_get(instrucciones_del_pcb,0);
-   //log_info(logger_memoria,"el instruccion es  %s",instruc_aux_nose);
-   // char *instruc_aux_nose2 = list_get(instrucciones_del_pcb,1);
-    //log_info(logger_memoria,"el instruccion es  %s",instruc_aux_nose2);
-    //char *instruc_aux_nose3 = list_get(instrucciones_del_pcb,2);
-    //log_info(logger_consola_memoria,"el instruccion es  %s",instruc_aux_nose3);
     return instrucciones_del_pcb;
 
 }
