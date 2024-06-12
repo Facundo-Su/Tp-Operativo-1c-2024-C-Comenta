@@ -31,6 +31,7 @@ int conexion_cpu_interrupt;
 char *puerto_escucha;
 bool detener;
 bool primero;
+bool sigue;
 t_list * lista_recursos;
 t_list * lista_recursos_pcb;
 t_planificador planificador;
@@ -80,6 +81,7 @@ void inicializar_estructuras(){
     logger = log_create("./kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
     detener = false;
     primero = true;
+    sigue = true;
     contador_pcb = 0;
     cola_new = inicializar_cola();
     cola_ready = inicializar_cola();

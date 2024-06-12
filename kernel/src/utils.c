@@ -1,5 +1,6 @@
 #include "utils.h"
 void finalizar_pcb(t_pcb * pcb){
+	sigue = false;
     liberar_recursos(pcb->contexto->pid);
     liberar_proceso(pcb);
 }

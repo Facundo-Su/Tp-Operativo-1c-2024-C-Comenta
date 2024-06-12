@@ -244,7 +244,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		valor_uint1 = strtoul(parametro2, NULL, 10);
 		registro_aux = devolver_registro(parametro);
 		setear(registro_aux,valor_uint1);
-		//ADormir(x segundo);
+		usleep(1000*1000);
 		break;
 	case SUB:
 

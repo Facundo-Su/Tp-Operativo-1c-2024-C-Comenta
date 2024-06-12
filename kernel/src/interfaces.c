@@ -41,6 +41,7 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 				log_info(logger, "%i",tiempo);
 				log_info(logger, "%i",restante);
 			}
+			sigue = false;
             list_add(lista_bloqueado_io,pcb);
 			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 			enviar_dormir(pcb->contexto->pid,unidad_trabajo_sleep,interfaz->codigo_cliente);
@@ -52,6 +53,7 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 			blocked->pcb = pcb;
 			blocked->unidad_trabajo = unidad_trabajo_sleep;
 			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+			sigue = false;
             agregar_cola_bloqueados_interfaces(interfaz,blocked);
 			pthread_mutex_unlock(&sem_exec);
         }

@@ -14,11 +14,12 @@ void cargar_lista_instruccion(int pid, char* ruta) {
     instruccion->pid = pid;
     instruccion->instrucciones = list_create();
 
-    ruta = "./prueba.txt";
+    //ruta = "./prueba.txt";
+    log_info(logger, "%s",ruta);
     FILE* archivo = fopen(ruta, "r");
 
     if (archivo == NULL) {
-        //log_error(logger_consola_memoria, "El archivo %s no pudo ser abierto.", ruta);
+        log_error(logger, "El archivo %s no pudo ser abierto.", ruta);
         free(instruccion);  // Liberar la memoria asignada a instruccion
     } else {
         t_list* auxiliar = leer_pseudocodigo(archivo);

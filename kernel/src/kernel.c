@@ -176,13 +176,13 @@ void procesar_conexion(void *conexion1){
 				break;
 			}
 			break;
-			case EJECUTAR_IO_SLEEP:
-				//log_error(logger, "AAAAAAAAAAAA");
-				paquete = recibir_paquete(cliente_fd);
-				int *pid_a_sacar_sleep = list_get(paquete,0);
-				//log_error(logger, "%i",*pid_a_sacar_sleep);
-				io_sleep_ready(*pid_a_sacar_sleep);
-			break;
+		case EJECUTAR_IO_SLEEP:
+			//log_error(logger, "AAAAAAAAAAAA");
+			paquete = recibir_paquete(cliente_fd);
+			int *pid_a_sacar_sleep = list_get(paquete,0);
+			//log_error(logger, "%i",*pid_a_sacar_sleep);
+			io_sleep_ready(*pid_a_sacar_sleep);
+		break;
 		case ENVIAR_DESALOJAR:
 			paquete = recibir_paquete(cliente_fd);
 			contexto= desempaquetar_pcb(paquete);

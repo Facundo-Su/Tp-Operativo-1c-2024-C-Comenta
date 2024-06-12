@@ -71,6 +71,7 @@ void planificador_corto_plazo(){
             pthread_mutex_lock(&sem_detener);
         }
         log_info(logger,"hasta aca llegue 4");
+        sigue = true;
         switch (planificador)
         {
         case FIFO:
@@ -119,17 +120,26 @@ void *interrupcion_quantum(){
                     t_pcb* pcb = queue_peek(cola_vrr->cola);
                     pthread_mutex_unlock(&(cola_vrr->sem_mutex));
                     log_error(logger,"EJECUTA QUANTUM DE %i",pcb->contexto->quantum);
-                    pthread_mutex_unlock(&sem_vrr);
+                    if(planificador == VRR){
+                        pthread_mutex_unlock(&sem_vrr);
+                    }
                     pthread_mutex_lock(&sem_quantum);
                     usleep(pcb->contexto->quantum * 1000);
-                    log_error(logger,"INTERRUPCION POR QUANTUM RESTANTE");
-                    enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
+                    if(sigue){
+                        log_error(logger,"INTERRUPCION POR QUANTUM RESTANTE");
+                        enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
+                    }
                 }else{
-                    pthread_mutex_unlock(&sem_vrr);
+                    
+                   if(planificador == VRR){
+                        pthread_mutex_unlock(&sem_vrr);
+                    }
                     pthread_mutex_lock(&sem_quantum);
                     usleep(quantum * 1000);
-                    log_error(logger,"INTERRUPCION POR QUANTUM");
-                    enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
+                    if(sigue){
+                        log_error(logger,"INTERRUPCION POR QUANTUM");
+                        enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
+                    }
                 }
             }
         //}
