@@ -117,6 +117,15 @@ void procesar_conexion(void *conexion1){
 	t_contexto_ejecucion * contexto;
 	t_paquete * paquete;
 	t_pcb * exit;
+
+	uint32_t *valor_uin32t;
+	uint32_t *valor_uin32t2;
+	uint32_t *valor_uin32t3;
+	int* valor_entero;
+	int* valor_entero2;
+	char* valor_char;
+	char* valor_char2;
+
 	while (1) {
 		int cod_op = recibir_operacion(cliente_fd);
 		switch (cod_op) {
@@ -162,6 +171,37 @@ void procesar_conexion(void *conexion1){
 					paquete = recibir_paquete(cliente_fd);
 					char * nombre_recurso_signal =list_get(paquete,0);
 					ejecutar_signal(nombre_recurso_signal,running);
+					break;
+				case EJECUTAR_IO_STDIN_READ:
+					paquete = recibir_paquete(cliente_fd);
+					valor_char =list_get(paquete,0);// nombre
+					valor_entero =list_get(paquete,1); // nro marco
+					valor_uin32t2 =list_get(paquete,2); //tamanio
+
+					valor_entero2 = (int) valor_uin32t2;
+					log_info(logger,"el nombre de interfaz es %s",valor_char);
+					ejecutar_io_stdin_read(valor_char,*valor_entero,*valor_entero2,running);
+					break;
+				case IO_STDOUT_WRITE:
+					paquete = recibir_paquete(cliente_fd);
+					break;
+
+				case IO_FS_CREATE:
+					paquete = recibir_paquete(cliente_fd);
+
+					break;
+				case IO_FS_DELETE:
+					paquete = recibir_paquete(cliente_fd);
+					break;
+
+				case IO_FS_TRUNCATE:
+					paquete = recibir_paquete(cliente_fd);
+					break;
+				case IO_FS_WRITE:
+					paquete = recibir_paquete(cliente_fd);
+					break;
+				case IO_FS_READ:
+					paquete = recibir_paquete(cliente_fd);		
 					break;
 				default:
 					//log_error(logger, "che no se que me mandaste");

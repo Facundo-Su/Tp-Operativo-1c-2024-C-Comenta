@@ -34,6 +34,21 @@ void iniciar_recurso(){
 	sem_init(&resize_llegado,0,0);
 	pthread_mutex_init(&contador_marco_obtenido,NULL);
 	pthread_mutex_lock(&contador_marco_obtenido);
+	tlb = list_create();
+	contador_fifo =0;
+	iniciar_entrada_tlb();
+}
+
+void iniciar_entrada_tlb(){
+	for(int i = 0; i < cantidad_entrada_tlb; i++){
+		t_estructura_tlb* entrada = malloc(sizeof(t_estructura_tlb));
+		entrada->pid = -1;
+		entrada->marco = -1;
+		entrada->is_free = true;
+		entrada->llegada_fifo = -1;
+		entrada->last_time_lru = -1;
+		list_add(tlb, entrada);
+	}
 }
 
 void iniciar_servidor_cpu(){
@@ -224,16 +239,20 @@ void solicitar_instruccion_ejecutar_segun_pc(int pc,int pid){
 void decode(t_instruccion* instrucciones,int cliente_fd){
 	t_estrucutra_cpu registro_aux;
 	t_estrucutra_cpu registro_aux2;
+	t_estrucutra_cpu registro_aux3;
 	char * recurso ="";
 	char* parametro="";
 	char* parametro2="";
 	char* parametro3="";
+	char* parametro4="";
+	char* parametro5="";
 	uint32_t valor_uint1;
-	//uint32_t valor_uint2;
+	uint32_t valor_uint2;
+	uint32_t valor_uint3;
 	uint32_t valor_destino;
 	uint32_t valor_origen;
 	uint32_t resultado;
-	//int valor_int;
+	int valor_int;
 	//log_warning(logger,"%i",instrucciones->nombre);
 	switch(instrucciones->nombre){
 	case SET:
@@ -332,78 +351,14 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		registro_aux = devolver_registro(parametro);
 		registro_aux2 = devolver_registro(parametro2);
 
-		 uint32_t valor_destino;
-		 uint32_t valor_origen;
+		uint32_t valor_destino;
+		uint32_t valor_origen;
 
-		 valor_destino = obtener_valor_registro(registro_aux);
+		valor_destino = obtener_valor_registro(registro_aux);
+		valor_origen = obtener_valor_registro(registro_aux2);
 
-		    // if (registro_aux == AX) {
-		    // 	valor_destino = pcb->registros->ax;
-		    // } else if (registro_aux == BX) {
-		    // 	valor_destino = pcb->registros->bx;
-			// } else if (registro_aux == CX) {
-			// 	valor_destino = pcb->registros->cx;
-			// }else if (registro_aux == DX) {
-			// 	valor_destino = pcb->registros->dx;
-			// }else if(registro_aux == EAX) {
-			// 	valor_destino = pcb->registros->eax;
-			// }else if(registro_aux == EBX) {
-			// 	valor_destino = pcb->registros->ebx;
-			// }else if (registro_aux == ECX){
-			// 	valor_destino = pcb->registros->ecx;
-			// }else if (registro_aux == EDX) {
-			// 	valor_destino = pcb->registros->edx;
-			// }else if (registro_aux == SI) {
-			// 	valor_destino = pcb->registros->si;
-			// }else{
-			// 	valor_destino =pcb->registros->di;
-			// }
-		 valor_origen = obtener_valor_registro(registro_aux2);
-		    // if (registro_aux2 == AX) {
-		    // 	valor_origen = pcb->registros->ax;
-		    // } else if (registro_aux2 == BX) {
-		    // 	valor_origen = pcb->registros->bx;
-			// } else if (registro_aux2 == CX) {
-			// 	valor_origen = pcb->registros->cx;
-			// }else if (registro_aux2 == DX) {
-			// 	valor_origen = pcb->registros->dx;
-			// }else if(registro_aux2 == EAX) {
-			// 	valor_origen = pcb->registros->eax;
-			// }else if(registro_aux2 == EBX) {
-			// 	valor_origen = pcb->registros->ebx;
-			// }else if (registro_aux2 == ECX){
-			// 	valor_origen = pcb->registros->ecx;
-			// }else if (registro_aux2 == EDX) {
-			// 	valor_origen = pcb->registros->edx;
-			// }else if (registro_aux2 == SI) {
-			// 	valor_origen = pcb->registros->si;
-			// }else{
-			// 	valor_origen =pcb->registros->di;
-			// }
-
-		    resultado = valor_destino + valor_origen;
-			asignar_valor_registro(resultado,registro_aux);
-		    // if (registro_aux == AX) {
-			// 	pcb->registros->ax = resultado;
-			// }else if (registro_aux == BX) {
-			// 	pcb->registros->bx = resultado;
-			// }else if (registro_aux == CX) {
-			// 	pcb->registros->cx = resultado;
-			// }else if(registro_aux == DX) {
-			// 	pcb->registros->dx = resultado;
-			// }else if(registro_aux == EAX) {
-			// 	pcb->registros->eax = resultado;
-			// }else if(registro_aux == EBX) {
-			// 	pcb->registros->ebx = resultado;
-			// }else if(registro_aux == ECX) {
-			// 	pcb->registros->ecx = resultado;
-			// }else if(registro_aux == EDX) {
-			// 	pcb->registros->edx = resultado;
-			// }else if (registro_aux == SI) {
-			// 	pcb->registros->si = resultado;
-			// }else{
-			// 	pcb->registros->di = resultado;
-			// }
+		resultado = valor_destino + valor_origen;
+		asignar_valor_registro(resultado,registro_aux);
 		break;
 	case JNZ:
 		parametro = list_get(instrucciones->parametros,0);
@@ -447,6 +402,8 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	// MMU
 		parametro = list_get(instrucciones->parametros,0);
 		int tamanio_copy_string = atoi(parametro);
+		t_traduccion * traducido = mmu_traducir(pcb->registros->si);
+		valor_uint1 = obtener_valor(pcb->registros->si);
 		enviar_a_memoria_copy_string(tamanio_copy_string);
 		break;
 	
@@ -460,10 +417,23 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		enviar_IO_SLEEP(nombre_io_sleep,entero_sleep,cliente_fd);
 		break;
 	case IO_STDIN_READ:
+		//TODO
 		hayInterrupcion = true;
-		parametro = list_get(instrucciones->parametros,0);
-		parametro2 = list_get(instrucciones->parametros,1);
-		parametro3 = list_get(instrucciones->parametros,2);
+		parametro = list_get(instrucciones->parametros,0);//nombre interfaz
+		parametro2 = list_get(instrucciones->parametros,1);// valor de registro direccion
+		parametro3 = list_get(instrucciones->parametros,2); //registro tamanio
+
+		registro_aux = devolver_registro(parametro2);
+		valor_uint1 = obtener_valor(registro_aux);
+
+		int valor_transofmado=atoi(parametro3);
+
+		t_traduccion* aux = mmu_traducir(valor_uint1);
+
+		registro_aux2 = devolver_registro(parametro3);
+		valor_uint2 = obtener_valor(registro_aux2);
+		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
+		enviar_io_stdin_read(parametro,aux,valor_uint2,cliente_fd);
 
 		break;
 	case IO_STDOUT_WRITE:
@@ -471,23 +441,78 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		parametro = list_get(instrucciones->parametros,0);
 		parametro2 = list_get(instrucciones->parametros,1);
 		parametro3 = list_get(instrucciones->parametros,2);
+
+		registro_aux = devolver_registro(parametro2);
+		valor_uint1 = obtener_valor(registro_aux);
+
+		registro_aux2 = devolver_registro(parametro3);
+		valor_uint2 = obtener_valor(registro_aux2);
+
+		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
+		enviar_io_stdout_write(parametro,valor_uint1,valor_uint2,cliente_fd);
 		break;
 	case IO_FS_CREATE:
-		
-		break;
-	
-	case IO_FS_DELETE:
+		hayInterrupcion = true;
+		parametro = list_get(instrucciones->parametros,0);
+		parametro2 = list_get(instrucciones->parametros,1);
+		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
+		enviar_io_fs_create(parametro,parametro2,parametro3,cliente_fd);
 
+		break;
+	case IO_FS_DELETE:
+		hayInterrupcion = true;
+		parametro = list_get(instrucciones->parametros,0);
+		parametro2 = list_get(instrucciones->parametros,1);
+		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
+		enviar_io_fs_delete(parametro,parametro2,cliente_fd);
 		break;
 	case IO_FS_TRUNCATE:
-
+		hayInterrupcion = true;
+		parametro = list_get(instrucciones->parametros,0);
+		parametro2 = list_get(instrucciones->parametros,1);
+		parametro3 = list_get(instrucciones->parametros,2);
+		registro_aux = devolver_registro(parametro3);
+		valor_uint1 = obtener_valor(registro_aux);
+		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
+		enviar_io_fs_truncate(parametro,parametro2,valor_uint1,cliente_fd);
 		break;
 	case IO_FS_WRITE:
+		hayInterrupcion = true;
+		parametro = list_get(instrucciones->parametros,0); //nombre interfaz
+		parametro2 = list_get(instrucciones->parametros,1);//nombre archivo
+		parametro3 = list_get(instrucciones->parametros,2);//valor de registro direccion
+		parametro4 = list_get(instrucciones->parametros,3);//valor de registro tamanio
+		parametro5 = list_get(instrucciones->parametros,4);//valor de puntero archivo
+		
+		registro_aux= devolver_registro(parametro3);
+		registro_aux2= devolver_registro(parametro4);
+		registro_aux3= devolver_registro(parametro5);
+		valor_uint1 = obtener_valor(registro_aux);
+		valor_uint2 = obtener_valor(registro_aux2);
+		valor_uint3 = obtener_valor(registro_aux3);
+
+		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
+		enviar_io_fs_write(parametro,parametro2,parametro3,parametro4,parametro5,cliente_fd);
 
 		break;
 	
 	case IO_FS_READ:
+		hayInterrupcion = true;
+		parametro = list_get(instrucciones->parametros,0); //nombre interfaz
+		parametro2 = list_get(instrucciones->parametros,1);//nombre archivo
+		parametro3 = list_get(instrucciones->parametros,2);//valor de registro direccion
+		parametro4 = list_get(instrucciones->parametros,3);//valor de registro tamanio
+		parametro5 = list_get(instrucciones->parametros,4);//valor de puntero archivo
+		
+		registro_aux= devolver_registro(parametro3);
+		registro_aux2= devolver_registro(parametro4);
+		registro_aux3= devolver_registro(parametro5);
+		valor_uint1 = obtener_valor(registro_aux);
+		valor_uint2 = obtener_valor(registro_aux2);
+		valor_uint3 = obtener_valor(registro_aux3);
 
+		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
+		enviar_io_fs_read(parametro,parametro2,parametro3,parametro4,parametro5,cliente_fd);
 		break;
 
 	case EXIT:
@@ -500,6 +525,71 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	}
 	recibi_archivo = false;
 	instruccion_ejecutando= false;
+}
+
+void enviar_io_fs_read(char* parametro,char* parametro2,uint32_t parametro3,uint32_t parametro4,uint32_t parametro5,int cliente_fd){
+	t_paquete* paquete = crear_paquete(IO_FS_READ);
+	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
+	agregar_a_paquete(paquete, parametro2, strlen(parametro2)+1);
+	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
+	agregar_a_paquete(paquete, &parametro4, sizeof(uint32_t));
+	agregar_a_paquete(paquete, &parametro5, sizeof(uint32_t));
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}
+
+void enviar_io_fs_write(char* parametro,char* parametro2,uint32_t parametro3,uint32_t parametro4,uint32_t parametro5,int cliente_fd){
+	t_paquete* paquete = crear_paquete(IO_FS_WRITE);
+	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
+	agregar_a_paquete(paquete, parametro2, strlen(parametro2)+1);
+	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
+	agregar_a_paquete(paquete, &parametro4, sizeof(uint32_t));
+	agregar_a_paquete(paquete, &parametro5, sizeof(uint32_t));
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}
+
+void enviar_io_fs_truncate(char* parametro,char* parametro2,uint32_t parametro3,int cliente_fd){
+	t_paquete* paquete = crear_paquete(IO_FS_TRUNCATE);
+	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
+	agregar_a_paquete(paquete, parametro2, strlen(parametro2)+1);
+	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}
+
+void enviar_io_fs_delete(char* parametro,char* parametro2,int cliente_fd){
+	t_paquete* paquete = crear_paquete(IO_FS_DELETE);
+	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
+	agregar_a_paquete(paquete, parametro2, strlen(parametro2)+1);
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}
+
+void enviar_io_fs_create(char* parametro,char* parametro2,int cliente_fd){
+	t_paquete* paquete = crear_paquete(IO_FS_CREATE);
+	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
+	agregar_a_paquete(paquete, parametro2, strlen(parametro2)+1);
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}
+
+void enviar_io_stdout_write(char* parametro,t_traduccion* traducido,uint32_t parametro3,int cliente_fd){
+
+	t_paquete* paquete = crear_paquete(IO_STDOUT_WRITE);
+	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
+	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
+	enviar_paquete(paquete, cliente_fd);
+}
+
+void enviar_io_stdin_read(char* parametro,t_traduccion* traducido,uint32_t parametro3,int cliente_fd){
+
+	t_paquete* paquete = crear_paquete(EJECUTAR_IO_STDIN_READ);
+	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
+	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete, &parametro3, sizeof(int));
+	enviar_paquete(paquete, cliente_fd);
 }
 
 int obtener_valor_registro(t_estrucutra_cpu registros_aux) {
@@ -593,14 +683,21 @@ t_traduccion* mmu_traducir(int dir_logica){
 
 	t_traduccion* traducido= malloc(sizeof(t_traduccion));
 	int nro_pagina =  floor(dir_logica / tamanio_pagina);
+	
 	obtener_el_marco(nro_pagina,OBTENER_MARCO);
-	pthread_mutex_lock(&contador_marco_obtenido);
-	int desplazamiento = dir_logica - nro_pagina * tamanio_pagina;
+	int marco_encontrado = consultar_tlb(nro_pagina, pcb->pid);
 
-	traducido->marco= marco_obtenido;
+	if(marco_encontrado == -1){
+		obtener_el_marco(nro_pagina,OBTENER_MARCO);
+		pthread_mutex_lock(&contador_marco_obtenido);
+		insertar_tlb(pcb->pid,nro_pagina);
+		marco_encontrado = marco_obtenido;
+	}
+
+	int desplazamiento = dir_logica - nro_pagina * tamanio_pagina;
+	traducido->marco= marco_encontrado;
 	traducido->desplazamiento= desplazamiento;
 	traducido->nro_pagina = nro_pagina;
-
 
 	return traducido;
 }
@@ -639,6 +736,14 @@ void obtener_configuracion(){
 	puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
 	puerto_escucha_dispatch = config_get_string_value(config,"PUERTO_ESCUCHA_DISPATCH");
 	puerto_escucha_interrupt = config_get_string_value(config,"PUERTO_ESCUCHA_INTERRUPT");
+	cantidad_entrada_tlb = config_get_int_value(config,"CANTIDAD_ENTRADAS_TLB");
+	char * alg_tlb = config_get_string_value(config,"ALGORITMO_TLB");
+
+	if(strcmp(alg_tlb,"FIFO")==0){
+		algoritmo= FIFO;
+	}else if(strcmp(alg_tlb,"LRU")==0){
+		algoritmo= LRU;
+	}
 }
 
 
@@ -827,3 +932,95 @@ uint32_t obtener_valor(t_estrucutra_cpu pos) {
     }
 	return valor_retorno;
 }
+
+
+int consultar_tlb(int nro_pagina,int pid) {
+
+	for (int i = 0; i < cantidad_entrada_tlb; i++) {
+		t_estructura_tlb *tlb_aux = list_get(tlb, i);
+		if (tlb_aux->pid == pid && tlb_aux->pagina == nro_pagina) {
+			return tlb_aux->marco;
+		}
+	}
+
+	log_info(logger, "Pagina no encontrada en TLB");
+	return -1;
+}
+
+int encontrar_tlb_libre() {
+    int i;
+	for(i=0;i<cantidad_entrada_tlb;i++) {
+    	t_estructura_tlb *tlb_aux = list_get(tlb, i);
+		if(tlb_aux->is_free) {
+            return i;
+		}
+	}
+    return -1;
+}
+
+void insertar_tlb(int pid, int nro_pagina) {
+	int i = encontrar_tlb_libre();
+
+	if(i!=-1) {
+		t_estructura_tlb *tlb_aux = list_get(tlb, i);
+		tlb_aux->pid = pid;
+		tlb_aux->pagina = nro_pagina;
+		tlb_aux->is_free = false;
+		tlb_aux->marco = marco_obtenido;
+	}else{
+		log_info(logger, "TLB llena");
+		int aux = ejecutar_algoritmo();
+		t_estructura_tlb *tlb_aux = list_get(tlb, aux);
+		tlb_aux->pid = pid;
+		tlb_aux->pagina = nro_pagina;
+		tlb_aux->is_free = false;
+		tlb_aux->marco = marco_obtenido;
+	}
+}
+
+
+int ejecutar_algoritmo(){
+	switch(algoritmo){
+	case FIFO:
+		//return ejecutar_fifo();
+		break;
+	case LRU:
+		//return ejecutar_lru();
+		break;
+	default:
+		//log_info(logger,"ERROR Planificador");
+		return -1;
+	break;
+	}
+}
+
+// int ejecutar_fifo(){
+// 	t_list_iterator* iterador = list_iterator_create(memoria->marcos);
+// 	int llegada = INT_MAX;
+// 	int nro_marco;
+// 	while(list_iterator_has_next(iterador)){
+// 		t_marco * marco = (t_marco*)list_iterator_next(iterador);
+// 		if(!marco->is_free && (marco->llegada_fifo < llegada)){
+// 			llegada = marco->llegada_fifo;
+// 			nro_marco = marco->num_marco;
+// 		}
+// 	}
+// 	list_iterator_destroy(iterador);
+// 	return nro_marco;
+// }
+// int ejecutar_lru(){
+// 	t_list_iterator* iterador = list_iterator_create(memoria->marcos);
+// 	int tiempo = 0;
+// 	int nro_marco =-1;
+// 	while(list_iterator_has_next(iterador)){
+// 		t_marco * marco = (t_marco*)list_iterator_next(iterador);
+// 		log_error(logger, "a comparar marco %i tiempo lru : %i ",marco->num_marco,marco->last_time_lru);
+// 		if(!marco->is_free && (marco->last_time_lru > tiempo)){
+// 			log_error(logger, "marco %i tiempo lru : %i ",marco->num_marco,marco->last_time_lru);
+// 			tiempo = marco->last_time_lru;
+// 			nro_marco = marco->num_marco;
+// 		}
+// 	}
+// 	list_iterator_destroy(iterador);
+// 	return nro_marco;
+// }

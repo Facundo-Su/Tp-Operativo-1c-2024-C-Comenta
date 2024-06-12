@@ -47,6 +47,8 @@ typedef struct
 typedef struct{
     t_pcb * pcb;
     int unidad_trabajo;
+    int nro_marco;
+    int tamanio;
 }t_blocked_io;
 
 extern sem_t sem_new;

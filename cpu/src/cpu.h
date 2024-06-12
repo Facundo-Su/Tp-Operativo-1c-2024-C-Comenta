@@ -24,10 +24,20 @@ char *ip_memoria;
 char *puerto_memoria;
 char *puerto_escucha_dispatch;
 char *puerto_escucha_interrupt;
+int cantidad_entrada_tlb;
+
 int conexion_memoria;
 
 t_contexto_ejecucion* pcb;
 
+
+
+typedef enum{
+	FIFO,
+	LRU,
+}algoritmo_tlb;
+
+algoritmo_tlb algoritmo;
 
 //variable que uso en global
 bool recibi_archivo;
@@ -58,7 +68,17 @@ typedef struct{
 	int nro_pagina;
 }t_traduccion;
 
+typedef struct{
+	int pid;
+	int pagina;
+	int marco;
+    bool is_free;
+    int llegada_fifo;
+    int last_time_lru;
+}t_estructura_tlb;
 
+t_list* tlb;
+int contador_fifo;
 
 //semaforos
 sem_t contador_instruccion;
@@ -85,6 +105,12 @@ void enviar_recurso_a_kernel(char* recurso, op_code operacion, int cliente_fd);
 void enviar_a_memoria_copy_string(int parametro);
 void enviar_memoria_ajustar_tam(int tamanio_modificar);
 void obtener_el_marco(int nro_pagina,op_code operacion);
+void asignar_valor_registro(int valor, t_estrucutra_cpu registros_aux);
+void enviar_io_stdin_read(char* ,t_traduccion* ,uint32_t ,int );
+void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd);
+void enviar_io_stdout_write(char* ,t_traduccion* ,uint32_t ,int );
+int consultar_tlb(int nro_pagina, int pid);
+
 
 t_estrucutra_cpu devolver_registro(char* registro);
 void setear(t_estrucutra_cpu pos, uint32_t valor) ;
