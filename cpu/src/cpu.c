@@ -34,6 +34,8 @@ void iniciar_recurso(){
 	sem_init(&resize_llegado,0,0);
 	pthread_mutex_init(&contador_marco_obtenido,NULL);
 	pthread_mutex_lock(&contador_marco_obtenido);
+	pthread_mutex_init(&respuesta_ok,NULL);
+	pthread_mutex_lock(&respuesta_ok);
 	tlb = list_create();
 	contador_fifo =0;
 	iniciar_entrada_tlb();
@@ -177,6 +179,9 @@ void procesar_conexion(void *conexion1){
 			enteros = list_get(lista,0);
 			valor_retorno_resize = *enteros;
 			sem_post(&resize_llegado);
+			break;
+		case RESPUESTA_OK_CPU_MEMORIA:
+			pthread_mutex_unlock(&respuesta_ok);
 			break;
 		case -1:
 			log_error(logger, "el cliente se desconecto. Terminando servidor");
@@ -402,9 +407,11 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	// MMU
 		parametro = list_get(instrucciones->parametros,0);
 		int tamanio_copy_string = atoi(parametro);
-		t_traduccion * traducido = mmu_traducir(pcb->registros->si);
-		valor_uint1 = obtener_valor(pcb->registros->si);
-		enviar_a_memoria_copy_string(tamanio_copy_string);
+		t_traduccion * copy_si = mmu_traducir(pcb->registros->si);
+		t_traduccion* copy_di = mmu_traducir(pcb->registros->di);
+
+		enviar_a_memoria_copy_string(tamanio_copy_string,copy_si,copy_di);
+		pthread_mutex_lock(&respuesta_ok);
 		break;
 	
 	case IO_GEN_SLEEP:
@@ -662,11 +669,13 @@ void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd){
 	eliminar_paquete(paquete);
 }
 
-void enviar_a_memoria_copy_string(int parametro){
+void enviar_a_memoria_copy_string(int parametro,t_traduccion* traducido,t_traduccion* traducido2){
 	//TODO hacer en la parte de memoria
 	t_paquete* paquete = crear_paquete(COPY_STRING_MEMORIA);
 	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
 	agregar_a_paquete(paquete, &parametro, sizeof(int));
+	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete, &(traducido2->marco), sizeof(int));
 	enviar_paquete(paquete, conexion_memoria);
 	eliminar_paquete(paquete);
 }
@@ -818,18 +827,19 @@ void transformar_en_instrucciones(char* auxiliar){
 				instruccion_a_realizar->nombre = IO_FS_READ;
 				cantidad_parametros = 5;
 			}
-	        // if (strcmp(instruccion_parseada[0], "MOV_IN") == 0) {
-	        // 	instruccion_a_realizar->nombre = MOV_IN;
-	        //     cantidad_parametros = 2;
-	        // }
-	        // if (strcmp(instruccion_parseada[0], "MOV_OUT") == 0) {
-	        // 	instruccion_a_realizar->nombre = MOV_OUT;
-	        //     cantidad_parametros = 2;
-	        // }
+	        if (strcmp(instruccion_parseada[0], "MOV_IN") == 0) {
+	        	instruccion_a_realizar->nombre = MOV_IN;
+	            cantidad_parametros = 2;
+	        }
+	        if (strcmp(instruccion_parseada[0], "MOV_OUT") == 0) {
+	        	instruccion_a_realizar->nombre = MOV_OUT;
+	            cantidad_parametros = 2;
+	        }
 	        if (strcmp(instruccion_parseada[0], "EXIT") == 0) {
 	        	instruccion_a_realizar->nombre = EXIT;
 	            cantidad_parametros = 0;
 	        }
+			
 	    	t_list* parametros = list_create();
 
 	        for(int i=1;i<cantidad_parametros+1;i++){
