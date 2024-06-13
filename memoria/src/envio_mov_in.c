@@ -8,15 +8,12 @@ void envio_mov_in (int cliente_fd){
     t_list* lista = recibir_paquete(cliente_fd);
 	int *marco = list_get(lista,0);
 	int *desplazamiento = list_get(lista,1);
-	int *tamanio_a_leer = list_get(lista, 2); //Valor nuevo para la lista!! Seria la cantidad de paginas/marcos
 	t_marco *marco_obtenido = list_get(memoria->marcos, *marco);
 	uint32_t *valor_leido = malloc(sizeof(uint32_t));
-	for (int i = 0; i < *tamanio_a_leer; i++) {
-	memcpy(valor_leido + i, memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, sizeof(uint32_t));
+	memcpy(valor_leido, memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, sizeof(uint32_t));
 	enviar_registro_leido(*valor_leido,ENVIO_MOV_IN,cliente_fd); //Aca no estoy seguro si es el codigo de operacion correcto
-	}
 	int dir = (*marco * tam_pagina) + *desplazamiento;
-	log_info(logger,"PID: %i- Accion: LEER - Direccion fisica: %i- Tamaño:  %i",marco_obtenido->pid, dir, *tamanio_a_leer); //Aca se podria preguntar que direccion fisica me pide realmente el logger
+	log_info(logger,"PID: %i- Accion: LEER - Direccion fisica: %i- Tamaño:  %i",marco_obtenido->pid, dir, tam_pagina); //Aca se podria preguntar que direccion fisica me pide realmente el logger
 	free(valor_leido);
 }
 
