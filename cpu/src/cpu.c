@@ -967,6 +967,8 @@ void insertar_tlb(int pid, int nro_pagina) {
 		tlb_aux->pagina = nro_pagina;
 		tlb_aux->is_free = false;
 		tlb_aux->marco = marco_obtenido;
+		tlb_aux->llegada_fifo = contador_fifo;
+		tlb_aux->last_time_lru =0;
 	}else{
 		log_info(logger, "TLB llena");
 		int aux = ejecutar_algoritmo();
@@ -975,17 +977,20 @@ void insertar_tlb(int pid, int nro_pagina) {
 		tlb_aux->pagina = nro_pagina;
 		tlb_aux->is_free = false;
 		tlb_aux->marco = marco_obtenido;
+		tlb_aux->llegada_fifo = contador_fifo;
+		tlb_aux->last_time_lru =0;
 	}
+	actualizar_algortimos();
 }
 
 
 int ejecutar_algoritmo(){
 	switch(algoritmo){
 	case FIFO:
-		//return ejecutar_fifo();
+		return ejecutar_fifo();
 		break;
 	case LRU:
-		//return ejecutar_lru();
+		return ejecutar_lru();
 		break;
 	default:
 		//log_info(logger,"ERROR Planificador");
@@ -994,33 +999,62 @@ int ejecutar_algoritmo(){
 	}
 }
 
-// int ejecutar_fifo(){
-// 	t_list_iterator* iterador = list_iterator_create(memoria->marcos);
-// 	int llegada = INT_MAX;
-// 	int nro_marco;
-// 	while(list_iterator_has_next(iterador)){
-// 		t_marco * marco = (t_marco*)list_iterator_next(iterador);
-// 		if(!marco->is_free && (marco->llegada_fifo < llegada)){
-// 			llegada = marco->llegada_fifo;
-// 			nro_marco = marco->num_marco;
-// 		}
-// 	}
-// 	list_iterator_destroy(iterador);
-// 	return nro_marco;
-// }
-// int ejecutar_lru(){
-// 	t_list_iterator* iterador = list_iterator_create(memoria->marcos);
-// 	int tiempo = 0;
-// 	int nro_marco =-1;
-// 	while(list_iterator_has_next(iterador)){
-// 		t_marco * marco = (t_marco*)list_iterator_next(iterador);
-// 		log_error(logger, "a comparar marco %i tiempo lru : %i ",marco->num_marco,marco->last_time_lru);
-// 		if(!marco->is_free && (marco->last_time_lru > tiempo)){
-// 			log_error(logger, "marco %i tiempo lru : %i ",marco->num_marco,marco->last_time_lru);
-// 			tiempo = marco->last_time_lru;
-// 			nro_marco = marco->num_marco;
-// 		}
-// 	}
-// 	list_iterator_destroy(iterador);
-// 	return nro_marco;
-// }
+int ejecutar_fifo(){
+	t_list_iterator* iterador = list_iterator_create(tlb);
+	int llegada = INT_MAX;
+	int numero;
+	int i=0;
+	while(list_iterator_has_next(iterador)){
+		t_estructura_tlb *aux= (t_estructura_tlb*)list_iterator_next(iterador);
+		if(!aux->is_free && (aux->llegada_fifo < llegada)){
+			llegada = aux->llegada_fifo;
+			numero = i;
+		}
+		i++;
+	}
+	list_iterator_destroy(iterador);
+	return numero;
+}
+int ejecutar_lru(){
+	t_list_iterator* iterador = list_iterator_create(tlb);
+	int tiempo = 0;
+	int numero;
+	int i=0;
+	while(list_iterator_has_next(iterador)){
+		t_estructura_tlb *aux= (t_estructura_tlb*)list_iterator_next(iterador);
+		//log_error(logger, "a comparar marco %i tiempo lru : %i ",marco->num_marco,marco->last_time_lru);
+		if(!aux->is_free && (aux->last_time_lru > tiempo)){
+			//log_error(logger, "marco %i tiempo lru : %i ",marco->num_marco,marco->last_time_lru);
+			tiempo = aux->last_time_lru;
+			numero = i;
+		}
+		i++;
+	}
+	list_iterator_destroy(iterador);
+	return numero;
+}
+
+void actualizar_algortimos(){
+	switch(algoritmo){
+	case FIFO:
+		contador_fifo++;
+		break;
+	case LRU:
+		 actualizar_lru();
+		break;
+	default:
+		//log_info(logger,"ERROR Planificador")
+	break;
+	}
+}
+
+void actualizar_lru(){
+	t_list_iterator* iterador = list_iterator_create(tlb);
+	while(list_iterator_has_next(iterador)){
+		t_estructura_tlb *aux= (t_estructura_tlb*)list_iterator_next(iterador);
+		if(!aux->is_free && !aux->last_time_lru ==0){
+			aux->last_time_lru ++;
+		}
+	}
+	list_iterator_destroy(iterador);
+}

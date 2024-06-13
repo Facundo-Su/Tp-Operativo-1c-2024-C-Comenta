@@ -6,12 +6,7 @@ void io_sleep_ready(int pid){
 	interfaz->en_uso = false;
 	interfaz->pid = -1;
 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
-	if(planificador== VRR){
-		log_info(logger,"PID: %i - Agregado cola de prioridades vrr",pcb->contexto->pid);
-		agregar_cola_vrr(pcb);
-	}else{
-		agregar_cola_ready(pcb);
-	}
+	vuelta_io_vrr(pcb);
 	//pthread_mutex_unlock(&sem_exec);
 	if(!queue_is_empty(interfaz->cola_espera->cola)){
 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
@@ -32,24 +27,16 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int tamanio,t_pcb* 
 				interfaz->en_uso = true;
 				interfaz->pid = pcb->contexto->pid;
 				pcb->estado = WAITING;
-				if(planificador == VRR){
-					int tiempo = temporal_gettime(inicio_vrr);
-					temporal_destroy(inicio_vrr);
-					int restante = quantum-tiempo;
-					pcb->contexto->quantum= restante;
-					log_info(logger, "%i",tiempo);
-					log_info(logger, "%i",restante);
-				}
+				pcb->contexto->quantum= obtener_tiempo_vrr();
 				sigue = false;
 				list_add(lista_bloqueado_io,pcb);
-				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
-				//enviar_dormir(pcb->contexto->pid,unidad_trabajo_sleep,interfaz->codigo_cliente);
 				enviar_a_io_stdin_read(nombre_interfaz,marco,tamanio,pcb);
 				pthread_mutex_unlock(&sem_exec);
 
 			}else{
 				pcb->estado = WAITING;
 				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+				pcb->contexto->quantum= obtener_tiempo_vrr();
 				blocked->pcb = pcb;
 				blocked->unidad_trabajo = 0;
 				blocked->marco = marco;
@@ -68,43 +55,29 @@ void io_stdin_read_ready(int pid){
 	interfaz->en_uso = false;
 	interfaz->pid = -1;
 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
-	if(planificador== VRR){
-		log_info(logger,"PID: %i - Agregado cola de prioridades vrr",pcb->contexto->pid);
-		agregar_cola_vrr(pcb);
-	}else{
-		agregar_cola_ready(pcb);
-	}
+	vuelta_io_vrr(pcb);
 	//pthread_mutex_unlock(&sem_exec);
 	if(!queue_is_empty(interfaz->cola_espera->cola)){
 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
 		//agregar_cola_ready(pcb_blocked);
+		ejecutar_io_stdin_read(interfaz->nombre_interface, blocked->nro_marco, blocked->tamanio,blocked->pcb);
 	}
 }
 
 
 
-
 void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,t_pcb * pcb){
-	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_de_interfaz_sleep,lista_interfaces);
+	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
-		log_error(logger,"No se encontro la interfaz %s", nombre_de_interfaz_sleep);
+		log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 		finalizar_pcb(pcb);
-
 	}else{
 		log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
         if(!interfaz->en_uso){
 			interfaz->en_uso = true;
 			interfaz->pid = pcb->contexto->pid;
             pcb->estado = WAITING;
-			if(planificador == VRR){
-				int tiempo = temporal_gettime(inicio_vrr);
-				temporal_destroy(inicio_vrr);
-				int restante = quantum-tiempo;
-				pcb->contexto->quantum= restante;
-				log_info(logger, "%i",tiempo);
-				log_info(logger, "%i",restante);
-			}
 			sigue = false;
             list_add(lista_bloqueado_io,pcb);
 			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
@@ -112,6 +85,7 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 			pthread_mutex_unlock(&sem_exec);
 
         }else{
+			pcb->contexto->quantum= obtener_tiempo_vrr();
 			pcb->estado = WAITING;
 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
 			blocked->pcb = pcb;
@@ -122,7 +96,7 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 			pthread_mutex_unlock(&sem_exec);
         }
 	}
-}
+}	
 
 void enviar_dormir(int pid,int tiempo,int codigo_cliente){
 	t_paquete * paquete = crear_paquete(EJECUTAR_IO_SLEEP);
@@ -189,4 +163,29 @@ void agregar_interfaces(char * nombre_interfaz, int conexion_obtenido){
     interfaz->en_uso = false;
     interfaz->cola_espera = inicializar_cola();
     list_add(lista_interfaces, interfaz);
+}
+int obtener_tiempo_vrr(){
+	int restante =0;
+	if(planificador == VRR){
+		int tiempo = temporal_gettime(inicio_vrr);
+		temporal_destroy(inicio_vrr);
+		if(tiempo < quantum){
+			restante = quantum-tiempo;
+			log_info(logger, "%i",tiempo);
+			log_info(logger, "%i",restante);
+		}
+	}
+	return restante;
+}
+void vuelta_io_vrr(t_pcb * pcb){
+	if(planificador== VRR){
+		log_info(logger,"PID: %i - Agregado cola de prioridades vrr",pcb->contexto->pid);
+		if(pcb->quantum ==0){
+			agregar_cola_ready(pcb);
+		}else{
+			agregar_cola_vrr(pcb);
+		}
+	}else{
+		agregar_cola_ready(pcb);
+	}
 }

@@ -15,6 +15,7 @@
 #include<commons/config.h>
 #include<readline/readline.h>
 #include <utils/hello.h>
+#include <limits.h>
 
 t_log* logger;
 t_config* config;
@@ -110,6 +111,7 @@ void enviar_io_stdin_read(char* ,t_traduccion* ,uint32_t ,int );
 void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd);
 void enviar_io_stdout_write(char* ,t_traduccion* ,uint32_t ,int );
 int consultar_tlb(int nro_pagina, int pid);
+t_traduccion* mmu_traducir(int );
 
 
 t_estrucutra_cpu devolver_registro(char* registro);
