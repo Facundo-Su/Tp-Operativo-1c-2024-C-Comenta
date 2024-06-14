@@ -31,11 +31,10 @@ int main(int argc, char* argv[]) {
 
 void iniciar_recurso(){
 	sem_init(&contador_marco_obtenido,0,0);
-	sem_init(&resize_llegado,0,0);
 	pthread_mutex_init(&contador_marco_obtenido,NULL);
+	pthread_mutex_init(&sem_resize,NULL);
 	pthread_mutex_lock(&contador_marco_obtenido);
-	pthread_mutex_init(&respuesta_ok,NULL);
-	pthread_mutex_lock(&respuesta_ok);
+	pthread_mutex_lock(&sem_resize);
 	tlb = list_create();
 	contador_fifo =0;
 	iniciar_entrada_tlb();
@@ -168,13 +167,6 @@ void procesar_conexion(void *conexion1){
 			//log_info(logger, "el valor del marco es %i",marco_obtenido);
 			pthread_mutex_unlock(&contador_marco_obtenido);
 			break;
-		case OUT_OF_MEMORY:
-			lista = recibir_paquete(cliente_fd);
-			int *auxiliar3 = list_get(lista,0);
-			out_of_memory_valor = *auxiliar3;
-			pthread_mutex_unlock(&respuesta_ok);
-			break;
-
 		case MANDAME_PAGINA:
 			lista= recibir_paquete(cliente_fd);
 			enteros= list_get(lista,0);
@@ -185,12 +177,7 @@ void procesar_conexion(void *conexion1){
 			lista= recibir_paquete(cliente_fd);
 			enteros = list_get(lista,0);
 			valor_retorno_resize = *enteros;
-			sem_post(&resize_llegado);
-			break;
-		case RESPUESTA_OK_CPU_MEMORIA:
-			lista =recibir_paquete(cliente_fd);
-			log_error(logger, "Recibi la respuesta ok");
-			pthread_mutex_unlock(&respuesta_ok);
+			pthread_mutex_unlock(&sem_resize);
 			break;
 		case -1:
 			log_error(logger, "el cliente se desconecto. Terminando servidor");
@@ -402,25 +389,25 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		enviar_recurso_a_kernel(recurso,EJECUTAR_SIGNAL,cliente_fd);
 		break;
 	case RESIZE:
+	//TODO hacer en la parte de memoria
 		parametro = list_get(instrucciones->parametros,0);
 		int tamanio_modificar = atoi(parametro);
 		enviar_memoria_ajustar_tam(tamanio_modificar);
-		pthread_mutex_lock(&respuesta_ok);
-		log_error(logger,"PID: %i - Ejecutando RESIZE pase por aca: %s",pcb->pid,parametro);
+		pthread_mutex_lock(&sem_resize);
+		//log_info(logger,"PID: %i - Ejecutando SIGNAL: %s",pcb->pid,recurso);
 		if(valor_retorno_resize == -1){
+			hayInterrupcion=true;
 			enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
-			enviar_out_of_memory_cpu(cliente_fd);
-			valor_retorno_resize =0;
+			enviar_pcb(pcb,cliente_fd,OUT_OF_MEMORY);
 		}
 		break;
 	case COPY_STRING:
+	// MMU
 		parametro = list_get(instrucciones->parametros,0);
 		int tamanio_copy_string = atoi(parametro);
-		t_traduccion * copy_si = mmu_traducir(pcb->registros->si);
-		t_traduccion* copy_di = mmu_traducir(pcb->registros->di);
-
-		enviar_a_memoria_copy_string(tamanio_copy_string,copy_si,copy_di);
-		pthread_mutex_lock(&respuesta_ok);
+		t_traduccion * traducido = mmu_traducir(pcb->registros->si);
+		valor_uint1 = obtener_valor(pcb->registros->si);
+		//enviar_a_memoria_copy_string(tamanio_copy_string);
 		break;
 	
 	case IO_GEN_SLEEP:
@@ -543,14 +530,6 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	instruccion_ejecutando= false;
 }
 
-void enviar_out_of_memory_cpu(int cliente_fd){
-	t_paquete* paquete = crear_paquete(OUT_OF_MEMORY);
-	int int_auxiliar = 0;
-	agregar_a_paquete(paquete, &int_auxiliar, sizeof(int));
-	enviar_paquete(paquete, cliente_fd);
-	eliminar_paquete(paquete);
-}
-
 void enviar_io_fs_read(char* parametro,char* parametro2,uint32_t parametro3,uint32_t parametro4,uint32_t parametro5,int cliente_fd){
 	t_paquete* paquete = crear_paquete(IO_FS_READ);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
@@ -603,7 +582,6 @@ void enviar_io_stdout_write(char* parametro,t_traduccion* traducido,uint32_t par
 	t_paquete* paquete = crear_paquete(IO_STDOUT_WRITE);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
-	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(int));
 	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
 	enviar_paquete(paquete, cliente_fd);
 }
@@ -613,7 +591,6 @@ void enviar_io_stdin_read(char* parametro,t_traduccion* traducido,uint32_t param
 	t_paquete* paquete = crear_paquete(EJECUTAR_IO_STDIN_READ);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
-	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(int));
 	agregar_a_paquete(paquete, &parametro3, sizeof(int));
 	enviar_paquete(paquete, cliente_fd);
 }
@@ -688,15 +665,11 @@ void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd){
 	eliminar_paquete(paquete);
 }
 
-void enviar_a_memoria_copy_string(int parametro,t_traduccion* traducido,t_traduccion* traducido2){
+void enviar_a_memoria_copy_string(int parametro){
 	//TODO hacer en la parte de memoria
 	t_paquete* paquete = crear_paquete(COPY_STRING_MEMORIA);
 	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
 	agregar_a_paquete(paquete, &parametro, sizeof(int));
-	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
-	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(int));
-	agregar_a_paquete(paquete, &(traducido2->marco), sizeof(int));
-	agregar_a_paquete(paquete, &(traducido2->desplazamiento), sizeof(int));
 	enviar_paquete(paquete, conexion_memoria);
 	eliminar_paquete(paquete);
 }
@@ -710,7 +683,6 @@ void enviar_memoria_ajustar_tam(int tamanio_modificar){
 }
 
 t_traduccion* mmu_traducir(int dir_logica){
-
 	t_traduccion* traducido= malloc(sizeof(t_traduccion));
 	int nro_pagina =  floor(dir_logica / tamanio_pagina);
 	
@@ -848,19 +820,18 @@ void transformar_en_instrucciones(char* auxiliar){
 				instruccion_a_realizar->nombre = IO_FS_READ;
 				cantidad_parametros = 5;
 			}
-	        if (strcmp(instruccion_parseada[0], "MOV_IN") == 0) {
-	        	instruccion_a_realizar->nombre = MOV_IN;
-	            cantidad_parametros = 2;
-	        }
-	        if (strcmp(instruccion_parseada[0], "MOV_OUT") == 0) {
-	        	instruccion_a_realizar->nombre = MOV_OUT;
-	            cantidad_parametros = 2;
-	        }
+	        // if (strcmp(instruccion_parseada[0], "MOV_IN") == 0) {
+	        // 	instruccion_a_realizar->nombre = MOV_IN;
+	        //     cantidad_parametros = 2;
+	        // }
+	        // if (strcmp(instruccion_parseada[0], "MOV_OUT") == 0) {
+	        // 	instruccion_a_realizar->nombre = MOV_OUT;
+	        //     cantidad_parametros = 2;
+	        // }
 	        if (strcmp(instruccion_parseada[0], "EXIT") == 0) {
 	        	instruccion_a_realizar->nombre = EXIT;
 	            cantidad_parametros = 0;
 	        }
-
 	    	t_list* parametros = list_create();
 
 	        for(int i=1;i<cantidad_parametros+1;i++){

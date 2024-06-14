@@ -56,6 +56,7 @@ void iniciar_consola(){
 			case '2':
 				log_info(logger, "Ingrese la ruta");
 				char* ruta = readline(">");
+				
 				iniciar_proceso(ruta);
 				//enviar_pcb(pcb_aux,conexion_memoria,CREAR_PROCESO);
 				break;

@@ -6,7 +6,7 @@ void crear_proceso (int cliente_fd){
 	int* pid = list_get(lista,1);//tamaño del proceso
 	char*ruta = obtener_ruta(aux);
 	cargar_lista_instruccion(*pid, ruta);
-    guardar_proceso_en_memoria(*pid,0);
+    guardar_proceso_en_memoria(*pid);
 }
 
 void cargar_lista_instruccion(int pid, char* ruta) {
@@ -14,7 +14,7 @@ void cargar_lista_instruccion(int pid, char* ruta) {
     instruccion->pid = pid;
     instruccion->instrucciones = list_create();
 
-    ruta = "./prueba.txt";
+    //ruta = "./prueba.txt";
     log_info(logger, "%s",ruta);
     FILE* archivo = fopen(ruta, "r");
 
@@ -99,30 +99,17 @@ void enviar_instrucciones(int cliente_fd){
     }
 }
 
-void guardar_proceso_en_memoria(int pid, int tamanio) {
-    t_tabla_paginas * tabla_paginas = crear_tabla_pagina(pid, tamanio);
+void guardar_proceso_en_memoria(int pid) {
+    t_tabla_paginas * tabla_paginas = crear_tabla_pagina(pid);
 	list_add(memoria->lista_tabla_paginas,tabla_paginas);
 }
 
-t_tabla_paginas *crear_tabla_pagina(int pid, int size){
+t_tabla_paginas *crear_tabla_pagina(int pid){
 	t_tabla_paginas* tabla_paginas = malloc(sizeof(t_tabla_paginas));
-	int cant_paginas = (size + tam_pagina -1)/tam_pagina;
-	log_info(logger,"PID: %i- Tamaño: %i",pid, cant_paginas);
+	//int cant_paginas = (size + tam_pagina -1)/tam_pagina;
 	tabla_paginas->pid = pid;
-	tabla_paginas->tamanio_proceso = size;
-	tabla_paginas->paginas_necesarias = cant_paginas;
-	tabla_paginas->paginas = crear_pagina(cant_paginas);
+	tabla_paginas->tamanio_proceso= 0;
+    tabla_paginas->paginas = list_create();
 	return tabla_paginas;
 }
 
-t_list * crear_pagina(int paginas_necesarias){
-	t_list * paginas = list_create();
-	for(int c =0; c<paginas_necesarias;c++){
-		t_pagina * pagina = malloc(sizeof(t_pagina)); 
-		pagina->num_marco =-1;
-		pagina->p =0;
-		pagina->num_pagina = c;
-		list_add(paginas,pagina);
-	}
-	return paginas;
-}

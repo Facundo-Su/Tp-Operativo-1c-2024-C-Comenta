@@ -83,9 +83,9 @@ int contador_fifo;
 
 //semaforos
 sem_t contador_instruccion;
-sem_t resize_llegado;
 pthread_mutex_t contador_marco_obtenido;
 pthread_mutex_t respuesta_ok;
+pthread_mutex_t sem_resize;
 
 
 
@@ -106,7 +106,7 @@ void fetch(int cliente_fd);
 void decode(t_instruccion* instrucciones,int cliente_fd);
 void solicitar_instruccion_ejecutar_segun_pc(int pc,int pid);
 void enviar_recurso_a_kernel(char* recurso, op_code operacion, int cliente_fd);
-void enviar_a_memoria_copy_string(int parametro,t_traduccion* traducido,t_traduccion* traducido2);
+//void enviar_a_memoria_copy_string(int parametrot_traduccion,* traducido,t_traduccion* traducido2);
 void enviar_memoria_ajustar_tam(int tamanio_modificar);
 void obtener_el_marco(int nro_pagina,op_code operacion);
 void asignar_valor_registro(int valor, t_estrucutra_cpu registros_aux);

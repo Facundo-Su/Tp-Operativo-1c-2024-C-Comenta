@@ -30,6 +30,7 @@ void inicializar_estructuras(){
     memoria->espacio_usuario= malloc(tam_memoria);
 	memoria->tamanio_marcos = tam_pagina;
 	memoria->cantidad_marcos = tam_memoria/tam_pagina;
+    memoria->espacio_disponible = tam_memoria;
     logger_memoria = log_create("memoria.log", "Memoria", 1, LOG_LEVEL_DEBUG);
     logger = log_create("./memoria_principal.log", "CPU", true, LOG_LEVEL_INFO);
     lista_instrucciones = list_create();

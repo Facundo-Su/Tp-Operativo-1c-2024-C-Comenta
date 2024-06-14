@@ -15,7 +15,6 @@ typedef struct{
 typedef struct {
 	int num_marco;
     int num_pagina;
-	int p; //Vale 1 si la pagina tiene un marco asignado
 } t_pagina;
 
 typedef struct {
@@ -29,7 +28,6 @@ typedef struct {
 	int pid;
     t_list * paginas;
     int tamanio_proceso;
-    int paginas_necesarias;
 }t_tabla_paginas;
 
 typedef struct{
@@ -38,6 +36,7 @@ typedef struct{
 	t_list  * lista_tabla_paginas;
 	int tamanio_marcos;
 	int cantidad_marcos;
+	int espacio_disponible;
 }t_memoria;
 
 extern t_memoria* memoria;
