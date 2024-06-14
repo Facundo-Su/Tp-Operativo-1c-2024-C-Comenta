@@ -393,7 +393,6 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		enviar_recurso_a_kernel(recurso,EJECUTAR_SIGNAL,cliente_fd);
 		break;
 	case RESIZE:
-	//TODO hacer en la parte de memoria
 		parametro = list_get(instrucciones->parametros,0);
 		int tamanio_modificar = atoi(parametro);
 		enviar_memoria_ajustar_tam(tamanio_modificar);
@@ -404,7 +403,6 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		}
 		break;
 	case COPY_STRING:
-	// MMU
 		parametro = list_get(instrucciones->parametros,0);
 		int tamanio_copy_string = atoi(parametro);
 		t_traduccion * copy_si = mmu_traducir(pcb->registros->si);
@@ -586,6 +584,7 @@ void enviar_io_stdout_write(char* parametro,t_traduccion* traducido,uint32_t par
 	t_paquete* paquete = crear_paquete(IO_STDOUT_WRITE);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(int));
 	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
 	enviar_paquete(paquete, cliente_fd);
 }
@@ -595,6 +594,7 @@ void enviar_io_stdin_read(char* parametro,t_traduccion* traducido,uint32_t param
 	t_paquete* paquete = crear_paquete(EJECUTAR_IO_STDIN_READ);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(int));
 	agregar_a_paquete(paquete, &parametro3, sizeof(int));
 	enviar_paquete(paquete, cliente_fd);
 }
@@ -675,13 +675,15 @@ void enviar_a_memoria_copy_string(int parametro,t_traduccion* traducido,t_traduc
 	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
 	agregar_a_paquete(paquete, &parametro, sizeof(int));
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(int));
 	agregar_a_paquete(paquete, &(traducido2->marco), sizeof(int));
+	agregar_a_paquete(paquete, &(traducido2->desplazamiento), sizeof(int));
 	enviar_paquete(paquete, conexion_memoria);
 	eliminar_paquete(paquete);
 }
 
 void enviar_memoria_ajustar_tam(int tamanio_modificar){
-	t_paquete* paquete = crear_paquete(RESIZE_TAM);
+	t_paquete* paquete = crear_paquete(ENVIO_RESIZE);
 	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
 	agregar_a_paquete(paquete, &tamanio_modificar, sizeof(int));
 	enviar_paquete(paquete, conexion_memoria);
@@ -839,7 +841,7 @@ void transformar_en_instrucciones(char* auxiliar){
 	        	instruccion_a_realizar->nombre = EXIT;
 	            cantidad_parametros = 0;
 	        }
-			
+
 	    	t_list* parametros = list_create();
 
 	        for(int i=1;i<cantidad_parametros+1;i++){

@@ -19,19 +19,21 @@ void envio_resize (int cliente_fd){
 	int* pid = list_get(lista,0);
 	int* tamanio = list_get(lista,1);
 	int cantidad_de_marcos = *tamanio/memoria->tamanio_marcos;
-	t_tabla_paginas* tabla = tabla_paginas_segun_pid(*pid);
+	t_tabla_paginas* tabla = list_create();
+	tabla = tabla_paginas_segun_pid(*pid);
 	int memoria_llena = 0;
-	
+	log_error(logger_memoria, "PID - %d Tamanio - %d Cantidad de marcos - %d", *pid, *tamanio, cantidad_de_marcos);
+	log_warning(logger_memoria,"el tamanio que tiene asigando es - %d", tamanio_asignado(*pid));
 	if(tamanio_asignado(*pid) < *tamanio) { 	//Ampliacion de proceso
-
-	for (int i = 0; i < cantidad_de_marcos; i++){
-		t_pagina* pagina_libre = siguiente_pagina_libre(tabla);
-		asignar_marco(*pid, pagina_libre, &memoria_llena);
-		if(memoria_llena == 1) {
-			enviar_out_of_memory(OUT_OF_MEMORY, cliente_fd);
-			return; //Podria ser un break creo
+		for (int i = 0; i < cantidad_de_marcos; i++){
+			t_pagina* pagina_libre = siguiente_pagina_libre(tabla);
+			log_error(logger_memoria, "PID - %d Pagina libre: %d", *pid, pagina_libre->num_pagina);
+			asignar_marco(*pid, pagina_libre, &memoria_llena);
+			if(memoria_llena == 1) {
+				enviar_out_of_memory(OUT_OF_MEMORY, cliente_fd);
+				return; //Podria ser un break creo
+			}
 		}
-	}
 	} else { //Reduccion de proceso
 
 	while (tamanio_asignado(*pid) >= *tamanio){
@@ -55,7 +57,6 @@ int tamanio_asignado(int pid) {
         if (pid == aux->pid) {
 			aux1 += memoria->tamanio_marcos;
 		}
-        aux1 = aux1 + memoria->tamanio_marcos;
     }
 	return aux1;
 }
@@ -63,15 +64,21 @@ int tamanio_asignado(int pid) {
 t_pagina* siguiente_pagina_libre(t_tabla_paginas* tabla) {
 	t_pagina* aux;
 
+	if(list_size(tabla->paginas) == 0) {
+
+		list_add(tabla,)
+		return NULL;
+	}
+
     for (int i = 0; i < list_size(tabla->paginas); i++)
     {
+		log_error(logger_memoria, " PID de tabla paginas segun pid - %d", tabla->pid);
         aux = list_get(tabla->paginas, i);
         if (aux->p == 0) {
 			return aux;	
 		}
             
     }
-
 	log_error(logger_memoria, "PID - %d No hay paginas que no esten asignadas a un marco", tabla->pid);
     return NULL;
 }
@@ -95,8 +102,10 @@ int encontrar_marco_libre() {
     int i;
 	t_marco* marco;
     for(i=0;i<memoria->cantidad_marcos;i++) {
+		log_warning(logger_memoria, "cantidad de marcos es - %d", list_size(memoria->marcos));
     	marco = list_get(memoria->marcos, i);
 		if(marco->is_free) {
+
             return i;
 		}
 	}

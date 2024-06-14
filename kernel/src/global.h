@@ -49,6 +49,7 @@ typedef struct{
     int unidad_trabajo;
     int nro_marco;
     int tamanio;
+    int desplazamiento;
 }t_blocked_io;
 
 extern sem_t sem_new;

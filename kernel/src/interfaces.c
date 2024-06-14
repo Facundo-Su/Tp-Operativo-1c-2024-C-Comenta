@@ -16,7 +16,7 @@ void io_sleep_ready(int pid){
 	}
 }
 
-void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int tamanio,t_pcb* pcb){
+void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
 			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
@@ -30,7 +30,7 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int tamanio,t_pcb* 
 				pcb->contexto->quantum= obtener_tiempo_vrr();
 				sigue = false;
 				list_add(lista_bloqueado_io,pcb);
-				enviar_a_io_stdin_read(nombre_interfaz,marco,tamanio,pcb);
+				enviar_a_io_stdin_read(nombre_interfaz,marco,desplazamiento,tamanio,pcb);
 				pthread_mutex_unlock(&sem_exec);
 
 			}else{
@@ -39,7 +39,7 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int tamanio,t_pcb* 
 				pcb->contexto->quantum= obtener_tiempo_vrr();
 				blocked->pcb = pcb;
 				blocked->unidad_trabajo = 0;
-				blocked->marco = marco;
+				blocked->nro_marco = marco;
 				blocked->tamanio = tamanio;
 				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
 				sigue = false;
@@ -49,7 +49,7 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int tamanio,t_pcb* 
 		}
 }
 
-void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int tamanio,t_pcb* pcb){
+void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
 			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
@@ -63,7 +63,7 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int tamanio,t_pcb*
 				pcb->contexto->quantum= obtener_tiempo_vrr();
 				sigue = false;
 				list_add(lista_bloqueado_io,pcb);
-				enviar_a_io_stdin_write(nombre_interfaz,marco,tamanio,pcb,interfaz->codigo_cliente);
+				enviar_a_io_stdin_write(nombre_interfaz,marco,desplazamiento,tamanio,pcb,interfaz->codigo_cliente);
 				pthread_mutex_unlock(&sem_exec);
 
 			}else{
@@ -72,8 +72,9 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int tamanio,t_pcb*
 				pcb->contexto->quantum= obtener_tiempo_vrr();
 				blocked->pcb = pcb;
 				blocked->unidad_trabajo = 0;
-				blocked->marco = marco;
+				blocked->nro_marco = marco;
 				blocked->tamanio = tamanio;
+				blocked->desplazamiento=desplazamiento;
 				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
 				sigue = false;
 				agregar_cola_bloqueados_interfaces(interfaz,blocked);
@@ -83,24 +84,43 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int tamanio,t_pcb*
 }
 
 
-void enviar_a_io_stdin_write(char* nombre_interfaz, int marco,int tamanio,t_pcb* pcb,int cdogio_cliente){
-	t_paquete* paquete=crear_paquete(ENVIAR_IO_STDOUT_WRITE);
-	agregar_a_paquete(paquete,nombre_interfaz,strlen(nombre_interfaz));
+void enviar_a_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int cdogio_cliente){
+	t_paquete* paquete=crear_paquete(EJECUTAR_STDOUT_WRITE);
+	agregar_a_paquete(paquete,&(pcb->contexto->pid),sizeof(int));
 	agregar_a_paquete(paquete,&marco,sizeof(int));
+	agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
 	agregar_a_paquete(paquete,&tamanio,sizeof(int));
 	agregar_a_paquete(paquete, &pcb->contexto->pid, sizeof(int));
 	enviar_paquete(paquete, cdogio_cliente);
 	eliminar_paquete(paquete);
 }
 
-void enviar_a_io_stdin_read(char* nombre_interfaz, int marco,int tamanio,t_pcb* pcb,int cdogio_cliente){
-	t_paquete* paquete=crear_paquete(ENVIAR_IO_STDIN_READ);
-	agregar_a_paquete(paquete,nombre_interfaz,strlen(nombre_interfaz));
+void enviar_a_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int cdogio_cliente){
+	t_paquete* paquete=crear_paquete(EJECUTAR_STDIN_READ);
 	agregar_a_paquete(paquete,&marco,sizeof(int));
+	agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
 	agregar_a_paquete(paquete,&tamanio,sizeof(int));
 	agregar_a_paquete(paquete, &pcb->contexto->pid, sizeof(int));
 	enviar_paquete(paquete, cdogio_cliente);
 	eliminar_paquete(paquete);
+}
+
+
+void io_stdout_write_ready(int pid){
+
+	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
+    t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
+	interfaz->en_uso = false;
+	interfaz->pid = -1;
+	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
+	vuelta_io_vrr(pcb);
+	//pthread_mutex_unlock(&sem_exec);
+	if(!queue_is_empty(interfaz->cola_espera->cola)){
+		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
+		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
+		//agregar_cola_ready(pcb_blocked);
+		ejecutar_io_stdin_write(interfaz->nombre_interface, blocked->nro_marco,blocked->desplazamiento, blocked->tamanio,blocked->pcb);
+	}
 }
 
 void io_stdin_read_ready(int pid){
@@ -115,7 +135,7 @@ void io_stdin_read_ready(int pid){
 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
 		//agregar_cola_ready(pcb_blocked);
-		ejecutar_io_stdin_read(interfaz->nombre_interface, blocked->nro_marco, blocked->tamanio,blocked->pcb);
+		ejecutar_io_stdin_read(interfaz->nombre_interface, blocked->nro_marco,blocked->desplazamiento, blocked->tamanio,blocked->pcb);
 	}
 }
 
@@ -132,7 +152,7 @@ void io_stdin_write_ready(int pid){
 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
 		//agregar_cola_ready(pcb_blocked);
-		ejecutar_io_stdin_write(interfaz->nombre_interface, blocked->nro_marco, blocked->tamanio,blocked->pcb);
+		ejecutar_io_stdin_write(interfaz->nombre_interface, blocked->nro_marco,blocked->desplazamiento, blocked->tamanio,blocked->pcb);
 	}
 }
 
@@ -140,9 +160,9 @@ void io_stdin_write_ready(int pid){
 
 
 void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,t_pcb * pcb){
-	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
+	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_de_interfaz_sleep,lista_interfaces);
 	if(interfaz == NULL){
-		log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+		log_error(logger,"No se encontro la interfaz %s", nombre_de_interfaz_sleep);
 		finalizar_pcb(pcb);
 	}else{
 		log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
@@ -252,7 +272,7 @@ int obtener_tiempo_vrr(){
 void vuelta_io_vrr(t_pcb * pcb){
 	if(planificador== VRR){
 		log_info(logger,"PID: %i - Agregado cola de prioridades vrr",pcb->contexto->pid);
-		if(pcb->quantum ==0){
+		if(pcb->contexto->quantum ==0){
 			agregar_cola_ready(pcb);
 		}else{
 			agregar_cola_vrr(pcb);

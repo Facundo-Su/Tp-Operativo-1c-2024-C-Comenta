@@ -176,19 +176,21 @@ void procesar_conexion(void *conexion1){
 					paquete = recibir_paquete(cliente_fd);
 					valor_char =list_get(paquete,0);// nombre
 					valor_entero =list_get(paquete,1); // nro marco
-					valor_uin32t2 =list_get(paquete,2); //tamanio
+					int *desplzazamiento_stdin_read = list_get(paquete,2);
+					valor_uin32t2 =list_get(paquete,3); //tamanio
 					valor_entero2 = (int) valor_uin32t2;
 					log_info(logger,"el nombre de interfaz es %s",valor_char);
-					ejecutar_io_stdin_read(valor_char,*valor_entero,*valor_entero2,running);
+					ejecutar_io_stdin_read(valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2,running);
 					break;
 				case IO_STDOUT_WRITE:
 					paquete = recibir_paquete(cliente_fd);
 					valor_char =list_get(paquete,0);// nombre
 					valor_entero =list_get(paquete,1); // nro marco
+					int *desplzazamiento_stdout_write = list_get(paquete,2);
 					valor_uin32t2 =list_get(paquete,2); //tamanio
 					valor_entero2 = (int) valor_uin32t2;
 					log_info(logger,"el nombre de interfaz es %s",valor_char);
-					ejecutar_io_stdin_write(valor_char,*valor_entero,*valor_entero2,running);
+					ejecutar_io_stdin_write(valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2,running);
 					break;
 
 				case IO_FS_CREATE:
@@ -228,7 +230,7 @@ void procesar_conexion(void *conexion1){
 
 		case EJECUTAR_STDOUT_WRITE:
 			paquete = recibir_paquete(cliente_fd);
-			int *pid_stdin_read = list_get(paquete,0);
+			int *pid_stdin_write = list_get(paquete,0);
 			io_stdout_write_ready(*pid_stdin_read);
 			break;
 		case ENVIAR_DESALOJAR:

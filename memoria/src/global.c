@@ -20,22 +20,25 @@ void obtener_configuraciones() {
     tam_pagina = config_get_int_value(config,"TAM_PAGINA");
     path_instrucciones = config_get_string_value(config,"PATH_INSTRUCCIONES");
     //strcat(path_instrucciones,"/");
-    log_info(logger_memoria, "%s",path_instrucciones);
 	auxiliar = config_get_int_value(config,"RETARDO_RESPUESTA");
     auxiliar = auxiliar* 1000;
     retardo_respuesta = (useconds_t) auxiliar;
-    memoria->espacio_usuario= malloc(tam_memoria);
-	memoria->tamanio_marcos = tam_pagina;
-	memoria->cantidad_marcos = tam_memoria/tam_pagina;
 }
 
 void inicializar_estructuras(){
+    memoria = malloc(sizeof(t_memoria));
+    memoria->espacio_usuario= malloc(tam_memoria);
+	memoria->tamanio_marcos = tam_pagina;
+	memoria->cantidad_marcos = tam_memoria/tam_pagina;
     logger_memoria = log_create("memoria.log", "Memoria", 1, LOG_LEVEL_DEBUG);
     logger = log_create("./memoria_principal.log", "CPU", true, LOG_LEVEL_INFO);
-    memoria = malloc(sizeof(t_memoria));
     lista_instrucciones = list_create();
     memoria->lista_tabla_paginas = list_create();
     memoria->marcos = list_create();
+    log_warning(logger_memoria, "cantidad de marcos es - %d", memoria->cantidad_marcos);
+    log_warning(logger_memoria, "tamanio de marco es - %d", memoria->tamanio_marcos);
+    log_warning(logger_memoria, "tamanio de memoria es - %d", tam_memoria);
+    log_warning(logger_memoria, "tamanio de pagina es - %d", tam_pagina);
     inicializar_marcos();
 }
 
@@ -48,6 +51,7 @@ void inicializar_marcos() {
         marco->num_marco = i;
         marco->pid = -1;
         list_add(memoria->marcos, marco);
+
         desplazamiento+= memoria->tamanio_marcos;
     }
 }

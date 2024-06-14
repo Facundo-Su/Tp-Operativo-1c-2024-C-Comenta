@@ -5,8 +5,8 @@
 #include "memoria.h"
 
 int main(int argc, char* argv[]) {
+	obtener_configuraciones();
 	inicializar_estructuras();
-    obtener_configuraciones();
 	iniciar_servidor_memoria(puerto_escucha);
     return EXIT_SUCCESS;
 }

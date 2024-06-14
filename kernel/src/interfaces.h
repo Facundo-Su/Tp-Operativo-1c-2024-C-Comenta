@@ -11,7 +11,8 @@ void agregar_cola_bloqueados_interfaces(t_interfaz * , void * );
 void * quitar_cola_bloqueados_interfaces(t_interfaz * );
 void agregar_interfaces(char * ,int );
 t_interfaz * buscar_interfaz_por_pid(int pid, t_list * lista);
-void ejecutar_io_stdin_read(char*,uint32_t,uint32_t,t_pcb*);
-void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int tamanio,t_pcb* pcb);
+void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb);
+void enviar_a_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int cdogio_cliente);
+
 
 #endif
