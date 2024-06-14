@@ -21,7 +21,6 @@ void envio_resize (int cliente_fd){
 	int cantidad_de_marcos = *tamanio/memoria->tamanio_marcos;
 	t_tabla_paginas* tabla = tabla_paginas_segun_pid(*pid);
 
-
 	int memoria_llena = 0;
 	log_warning(logger_memoria,"el pid de la tabla es - %d", tabla->pid);
 
@@ -31,6 +30,8 @@ void envio_resize (int cliente_fd){
 	
 	if(tamanio_asignado(*pid) < *tamanio) { 	//Ampliacion de proceso
 
+		int cantidad_de_marcos_agrandar =cantidad_de_marcos - list_size(tabla->paginas);
+		log_error(logger_memoria,"cantidad de marcos a agrandar es - %d", cantidad_de_marcos_agrandar);
 		if(marco_disponible_restante < restante) {
 			enviar_out_of_memory(cliente_fd);
 			return;
@@ -59,8 +60,8 @@ void envio_resize (int cliente_fd){
 			}
 		}
 
-		for (int i = list_size(tabla->paginas); i < cantidad_de_marcos - list_size(tabla->paginas); i++){
-
+		for (int i = list_size(tabla->paginas); i < cantidad_de_marcos; i++){
+			log_warning(logger_memoria,"comienzo a teral - %d me falta - %d veces por asignar", i, cantidad_de_marcos - list_size(tabla->paginas) - i);
 			t_pagina* aux2 = malloc(sizeof(t_pagina));
 			aux2->num_pagina = i;
 			aux2->num_marco = -1;
