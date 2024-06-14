@@ -58,12 +58,69 @@ void levantar_archivo_bloques(){
     // Cerrar el archivo después de asignar el mapeo
     close(file_descrip_bloques);
 }
-int obtenerPrimeraPosicionLibre(){
-    TO-DO
+
+void crear_archivo_metadata(char* nombre_archivo){
+
+    FILE* archivo_MD;
+    char* extension = "txt";
+    char* path_archivo = string_new();
+    t_config* archivo;
+    string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
+        
+    int primerBloqueLibre = proximoBitDisponible();//probar funcion
+    asignarProximoBitDisponible();
+    char* bloqueInicialEnChar = itoa(primerBloqueLibre);
+
+    archivo_MD = fopen(path_archivo, "w");
+
+    
+    archivo = config_create(path_archivo);
+    //aca uso las commons del config?
+    config_set_value(path_archivo, "TAMANIO_ARCHIVO", "0");
+    config_set_value(path_archivo, "BLOQUE_INICIAL", bloqueInicialEnChar);
+    config_save(path_archivo);
+
+    config_destroy(path_archivo);
+
+    fclose(archivo_MD);
 }
 
-void crear_archivos_metadata(){
-    TO-DO
+int proximoBitDisponible(){
+    int fd = open(ruta_bitmap,O_RDONLY);
+    char* bitarray = malloc(block_count / 8);
+    bitarray = mmap(NULL,block_count / 8,PROT_READ ,MAP_SHARED,fd,0);
+    if(bitarray == MAP_FAILED)
+    {
+        log_error(logger,"no se pudo mapear el archivo de bitmap");
+    }
+    t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
+    int i = 0;
+    while(bitarray_test_bit(bitmap,i)==1){
+        i++;
+    }
+    close(fd);
+    bitarray_destroy(bitmap);
+    return i;
 }
+
+void asignarProximoBitDisponible(){ //talvez se pueda achicar aun mas el codigo.
+    int fd = open(ruta_bitmap,O_RDWR);
+    char* bitarray = malloc(block_count / 8);
+    bitarray = mmap(NULL,block_count / 8,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0);
+    if(bitarray == MAP_FAILED)
+    {
+        log_error(logger,"no se pudo mapear el archivo de bitmap");
+    }
+    t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
+    int i=0;
+    while(bitarray_test_bit(bitmap,i)==1){
+        i++;
+    }
+    bitarray_set_bit(bitmap,i);
+    msync(bitarray,block_count / 8,MS_SYNC);//eso o fd? luego ver
+    close(fd);
+    bitarray_destroy(bitmap);
+}
+
 */
 
