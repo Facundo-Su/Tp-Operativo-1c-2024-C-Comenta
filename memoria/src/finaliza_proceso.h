@@ -4,7 +4,6 @@
 
 void finalizar_proceso(int);
 void liberar_marcos(int, t_tabla_paginas*);
-t_tabla_paginas* tabla_paginas_segun_pid(int pid);
 t_marco* marco_segun_pagina(t_pagina* pagina);
 
 

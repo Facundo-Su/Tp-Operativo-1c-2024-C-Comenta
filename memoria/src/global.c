@@ -65,3 +65,18 @@ void enviar_ok(int cliente_fd) {
     enviar_paquete(paquete, cliente_fd);
     eliminar_paquete(paquete);
 }
+
+t_tabla_paginas* tabla_paginas_segun_pid(int pid)
+{
+	t_tabla_paginas* aux = NULL;
+    for (int i = 0; i < list_size(memoria->lista_tabla_paginas); i++)
+    {
+        log_error(logger_memoria, " PID de tabla paginas segun pid - %d", pid);
+        aux = list_get(memoria->lista_tabla_paginas, i);
+        if (pid == aux->pid)
+            return aux;
+    }
+
+	log_error(logger_memoria, "PID - %d No se encontro la Tabla de Paginas", pid);
+    return NULL;
+}

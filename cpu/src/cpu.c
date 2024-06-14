@@ -172,7 +172,9 @@ void procesar_conexion(void *conexion1){
 			marco_obtenido = *auxiliar2;
 			//log_info(logger, "el valor del marco es %i",marco_obtenido);
 			pthread_mutex_unlock(&contador_marco_obtenido);
+
 			break;
+
 		case MANDAME_PAGINA:
 			lista= recibir_paquete(cliente_fd);
 			enteros= list_get(lista,0);
@@ -774,10 +776,16 @@ t_traduccion* mmu_traducir(int dir_logica){
 	int marco_encontrado = consultar_tlb(nro_pagina, pcb->pid);
 
 	if(marco_encontrado == -1){
+		log_error(logger, "TLB MIS");
 		obtener_el_marco(nro_pagina,OBTENER_MARCO);
 		pthread_mutex_lock(&contador_marco_obtenido);
+		//log_error(logger, "LLEGUE HASTA ACA");
+		
 		insertar_tlb(pcb->pid,nro_pagina);
+		//log_error(logger, "LLEGUE HASTA ACA");
 		marco_encontrado = marco_obtenido;
+	}else{
+		log_error(logger, "TLB HIT");
 	}
 
 	int desplazamiento = dir_logica - nro_pagina * tamanio_pagina;
@@ -1028,10 +1036,6 @@ int consultar_tlb(int nro_pagina,int pid) {
 			return tlb_aux->marco;
 		}
 	}
-	
-	obtener_el_marco(nro_pagina,OBTENER_MARCO);
-
-	log_info(logger, "Pagina no encontrada en TLB");
 	return -1;
 }
 

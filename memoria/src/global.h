@@ -59,4 +59,6 @@ void obtener_configuraciones();
 void inicializar_estructuras();
 void inicializar_marcos();
 void enviar_ok(int cliente_fd) ;
+t_tabla_paginas* tabla_paginas_segun_pid(int);
+
 #endif

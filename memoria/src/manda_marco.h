@@ -4,9 +4,9 @@
 
 void mandar_pagina(int);
 void enviar_marco(int,op_code,int);
-t_pagina* pagina_segun_numero(int num);
-int pid_segun_num_de_pagina(int num);
-t_tabla_paginas* tabla_paginas_segun_pid(int pid);
+t_pagina* pagina_segun_numero(int );
+int pid_segun_num_de_pagina(int );
+//t_tabla_paginas* tabla_paginas_segun_pid(int );
 
 
 #endif 

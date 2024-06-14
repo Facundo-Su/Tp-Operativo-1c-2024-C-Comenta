@@ -23,20 +23,6 @@ void liberar_marcos(int pid, t_tabla_paginas* tabla) {
     }
 }
 
-t_tabla_paginas* tabla_paginas_segun_pid(int pid)
-{
-	t_tabla_paginas* aux = NULL;
-    for (int i = 0; i < list_size(memoria->lista_tabla_paginas); i++)
-    {
-        log_error(logger_memoria, " PID de tabla paginas segun pid - %d", pid);
-        aux = list_get(memoria->lista_tabla_paginas, i);
-        if (pid == aux->pid)
-            return aux;
-    }
-
-	log_error(logger_memoria, "PID - %d No se encontro la Tabla de Paginas", pid);
-    return NULL;
-}
 
 t_marco* marco_segun_pagina(t_pagina* pagina) {
 	t_marco* aux = NULL;
