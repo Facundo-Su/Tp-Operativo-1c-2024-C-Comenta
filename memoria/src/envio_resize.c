@@ -31,7 +31,6 @@ void envio_resize (int cliente_fd){
 	if(tamanio_asignado(*pid) < *tamanio) { 	//Ampliacion de proceso
 
 		int cantidad_de_marcos_agrandar =cantidad_de_marcos - list_size(tabla->paginas);
-		log_error(logger_memoria,"cantidad de marcos a agrandar es - %d", cantidad_de_marcos_agrandar);
 		if(marco_disponible_restante < restante) {
 			enviar_out_of_memory(cliente_fd);
 			return;
@@ -54,6 +53,7 @@ void envio_resize (int cliente_fd){
 					marco->pid = pid;
 					pagina->num_marco = i;
 					pagina->p=1;
+					log_warning(logger_memoria,"asigne el marco %d",marco->num_marco);
 					list_add(tabla->paginas,pagina);
 					break;
 				}
@@ -61,7 +61,6 @@ void envio_resize (int cliente_fd){
 		}
 
 		for (int i = list_size(tabla->paginas); i < cantidad_de_marcos; i++){
-			log_warning(logger_memoria,"comienzo a teral - %d me falta - %d veces por asignar", i, cantidad_de_marcos - list_size(tabla->paginas) - i);
 			t_pagina* aux2 = malloc(sizeof(t_pagina));
 			aux2->num_pagina = i;
 			aux2->num_marco = -1;
@@ -71,11 +70,7 @@ void envio_resize (int cliente_fd){
 			t_pagina* pagina_aux_anterior = list_get(tabla->paginas, i-1);
 			int ultimo_marco_usado_por_el_pid = pagina_aux_anterior->num_marco;
 
-			int marco_obtenido =encontrar_marco_libre(ultimo_marco_usado_por_el_pid);
-			log_error(logger_memoria,"cantidad de elemento en la tabla es - %d", list_size(tabla->paginas));
-			log_error(logger_memoria,"el i va a ser - %d", i);
 			t_pagina* aux = list_get(tabla->paginas, i);
-			log_error(logger_memoria, "PID - %d Pagina libre: %d", *pid, aux->num_pagina);
 			asignar_marco(*pid,aux,ultimo_marco_usado_por_el_pid);
 
 		}
@@ -163,12 +158,11 @@ t_pagina* siguiente_pagina_libre(t_tabla_paginas* tabla) {
 void asignar_marco(int pid, t_pagina * pagina, int ultimo_marco){ //TODO 
 
 	int i = encontrar_marco_libre(ultimo_marco);
-	log_error(logger_memoria, "el valor de marco que encontre es - %d", i);
 	t_marco * marco = list_get(memoria->marcos, i);
 	marco = list_get(memoria->marcos,i);
 	marco->is_free = false; 
 	marco->pid = pid;
-
+	log_warning(logger_memoria,"asigne el marco %d",marco->num_marco);
 	pagina->num_marco = i;
 	pagina->p=1;
 }
@@ -186,7 +180,7 @@ int encontrar_marco_libre(int ultimo_marco) {
 
     	marco = list_get(memoria->marcos, ultimo_marco);
 		if(marco->is_free) {
-			log_error(logger_memoria, "el valor de marco que encontre es - %d", i);
+			log_error(logger_memoria, "el valor de marco que encontre libre es - %d", i);
             return ultimo_marco;
 		}
 		ultimo_marco++;
