@@ -29,7 +29,36 @@ void levantarBitMap(){//crea y inicializa en 0 el bitmap
     bitarray_destroy(bitmap);
 }
 
-void levantar_archivos_bloque(){
+void levantar_archivo_bloques(){
+    //ver que ruta le defino
+    int file_descrip_bloques = open(ruta_bloques, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (file_descrip_bloques == -1) {
+        perror("Error al abrir el archivo de bloques");
+        exit(EXIT_FAILURE);
+    }
+    int tamanio = block_count*block_size;
+
+    if (ftruncate(file_descrip_bloques, tamanio) == -1) {
+        perror("Error al establecer el tamaño del archivo de bloques");
+        close(file_descrip_bloques);
+        exit(EXIT_FAILURE);
+    }
+
+    void *bloq = mmap(NULL, tamanio, PROT_READ | PROT_WRITE, MAP_SHARED,file_descrip_bloques, 0);
+
+    if (bloq != MAP_FAILED) {
+        log_info(logger,"El archivo bloques se ha mapeado correctamente en la memoria.");
+
+    } else {
+        perror("Error al mapear el archivo de bloques");
+        close(file_descrip_bloques);
+        exit(EXIT_FAILURE);
+    }
+
+    // Cerrar el archivo después de asignar el mapeo
+    close(file_descrip_bloques);
+}
+int obtenerPrimeraPosicionLibre(){
     TO-DO
 }
 
