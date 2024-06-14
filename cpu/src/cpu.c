@@ -168,6 +168,13 @@ void procesar_conexion(void *conexion1){
 			//log_info(logger, "el valor del marco es %i",marco_obtenido);
 			pthread_mutex_unlock(&contador_marco_obtenido);
 			break;
+		case OUT_OF_MEMORY:
+			lista = recibir_paquete(cliente_fd);
+			int *auxiliar3 = list_get(lista,0);
+			out_of_memory_valor = *auxiliar3;
+			pthread_mutex_unlock(&respuesta_ok);
+			break;
+
 		case MANDAME_PAGINA:
 			lista= recibir_paquete(cliente_fd);
 			enteros= list_get(lista,0);
@@ -181,6 +188,8 @@ void procesar_conexion(void *conexion1){
 			sem_post(&resize_llegado);
 			break;
 		case RESPUESTA_OK_CPU_MEMORIA:
+			lista =recibir_paquete(cliente_fd);
+			log_error(logger, "Recibi la respuesta ok");
 			pthread_mutex_unlock(&respuesta_ok);
 			break;
 		case -1:
@@ -396,10 +405,12 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		parametro = list_get(instrucciones->parametros,0);
 		int tamanio_modificar = atoi(parametro);
 		enviar_memoria_ajustar_tam(tamanio_modificar);
-		sem_wait(&resize_llegado);
-		hayInterrupcion=true;
+		pthread_mutex_lock(&respuesta_ok);
+		log_error(logger,"PID: %i - Ejecutando RESIZE pase por aca: %s",pcb->pid,parametro);
 		if(valor_retorno_resize == -1){
-			enviar_pcb(pcb,cliente_fd,OUT_OF_MEMORY);
+			enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
+			enviar_out_of_memory_cpu(cliente_fd);
+			valor_retorno_resize =0;
 		}
 		break;
 	case COPY_STRING:
@@ -530,6 +541,14 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	}
 	recibi_archivo = false;
 	instruccion_ejecutando= false;
+}
+
+void enviar_out_of_memory_cpu(int cliente_fd){
+	t_paquete* paquete = crear_paquete(OUT_OF_MEMORY);
+	int int_auxiliar = 0;
+	agregar_a_paquete(paquete, &int_auxiliar, sizeof(int));
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
 }
 
 void enviar_io_fs_read(char* parametro,char* parametro2,uint32_t parametro3,uint32_t parametro4,uint32_t parametro5,int cliente_fd){

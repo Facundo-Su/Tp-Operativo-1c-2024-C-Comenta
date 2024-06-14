@@ -88,6 +88,8 @@ pthread_mutex_t contador_marco_obtenido;
 pthread_mutex_t respuesta_ok;
 
 
+
+int out_of_memory_valor;
 int marco_obtenido;
 int tamanio_pagina;
 int valor_retorno_resize;

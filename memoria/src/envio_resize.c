@@ -19,32 +19,114 @@ void envio_resize (int cliente_fd){
 	int* pid = list_get(lista,0);
 	int* tamanio = list_get(lista,1);
 	int cantidad_de_marcos = *tamanio/memoria->tamanio_marcos;
-	t_tabla_paginas* tabla = list_create();
-	tabla = tabla_paginas_segun_pid(*pid);
+	t_tabla_paginas* tabla = tabla_paginas_segun_pid(*pid);
+
+
 	int memoria_llena = 0;
-	log_error(logger_memoria, "PID - %d Tamanio - %d Cantidad de marcos - %d", *pid, *tamanio, cantidad_de_marcos);
-	log_warning(logger_memoria,"el tamanio que tiene asigando es - %d", tamanio_asignado(*pid));
+	log_warning(logger_memoria,"el pid de la tabla es - %d", tabla->pid);
+
+	int restante = cantidad_de_marcos - list_size(tabla->paginas);
+
+	int marco_disponible_restante  = marco_disponible_restante_funcion();
+	
 	if(tamanio_asignado(*pid) < *tamanio) { 	//Ampliacion de proceso
-		for (int i = 0; i < cantidad_de_marcos; i++){
-			t_pagina* pagina_libre = siguiente_pagina_libre(tabla);
-			log_error(logger_memoria, "PID - %d Pagina libre: %d", *pid, pagina_libre->num_pagina);
-			asignar_marco(*pid, pagina_libre, &memoria_llena);
-			if(memoria_llena == 1) {
-				enviar_out_of_memory(OUT_OF_MEMORY, cliente_fd);
-				return; //Podria ser un break creo
+
+		if(marco_disponible_restante < restante) {
+			enviar_out_of_memory(cliente_fd);
+			return;
+		}
+
+		if(list_size(tabla->paginas) == 0) {
+			log_error(logger_memoria,"pase por aca");
+			t_pagina* pagina = malloc(sizeof(t_pagina));
+			pagina->num_pagina = 0;
+			pagina->num_marco = -1;
+			pagina->p = 0;
+
+
+			for(int i=0;i<list_size(memoria->marcos);i++) {
+				t_marco* aux = list_get(memoria->marcos, i);
+				if(aux->is_free) {
+					t_marco * marco = list_get(memoria->marcos, i);
+					marco = list_get(memoria->marcos,i);
+					marco->is_free = false; 
+					marco->pid = pid;
+					pagina->num_marco = i;
+					pagina->p=1;
+					list_add(tabla->paginas,pagina);
+					break;
+				}
 			}
 		}
-	} else { //Reduccion de proceso
 
-	while (tamanio_asignado(*pid) >= *tamanio){
-		t_pagina* pagina_libre = ultima_pagina_asignada(tabla);
-		if (pagina_libre == NULL) {
-                log_error(logger_memoria, "PID - %d No se pudo encontrar una página asignada para liberar", *pid);
-                return;
-            }
-		liberar_pagina_y_marco(pagina_libre);
+		for (int i = list_size(tabla->paginas); i < cantidad_de_marcos - list_size(tabla->paginas); i++){
+
+			t_pagina* aux2 = malloc(sizeof(t_pagina));
+			aux2->num_pagina = i;
+			aux2->num_marco = -1;
+			aux2->p = 0;
+			list_add(tabla->paginas, aux2);
+
+			t_pagina* pagina_aux_anterior = list_get(tabla->paginas, i-1);
+			int ultimo_marco_usado_por_el_pid = pagina_aux_anterior->num_marco;
+
+			int marco_obtenido =encontrar_marco_libre(ultimo_marco_usado_por_el_pid);
+			log_error(logger_memoria,"cantidad de elemento en la tabla es - %d", list_size(tabla->paginas));
+			log_error(logger_memoria,"el i va a ser - %d", i);
+			t_pagina* aux = list_get(tabla->paginas, i);
+			log_error(logger_memoria, "PID - %d Pagina libre: %d", *pid, aux->num_pagina);
+			asignar_marco(*pid,aux,ultimo_marco_usado_por_el_pid);
+
+		}
+	
+			enviar_ok(cliente_fd);
+
+	} else { //Reduccion de proceso
+		int pagina_a_borrar = list_size(tabla->paginas) - cantidad_de_marcos;
+
+		for(int i=0;i<pagina_a_borrar;i++) {
+			int ultimo_elemento = list_size(tabla->paginas);
+			t_pagina* pagina = list_remove(tabla->paginas,ultimo_elemento);
+			eliminar_el_marco(pagina);
+			
+		}
 	}
+}
+
+void eliminar_el_marco(t_pagina* pagina) {
+	t_marco* aux = NULL;   
+
+    int nro_marco = pagina->num_marco;
+    aux=list_get(memoria->marcos, nro_marco);
+    aux->is_free = true;
+    aux->pid = -1;
+}
+
+void enviar_out_of_memory(cliente_fd){
+	t_paquete* paquete = crear_paquete(OUT_OF_MEMORY);
+	int numero =-1;
+	agregar_a_paquete(paquete,&(numero), sizeof(int));
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}
+
+int marco_disponible_restante_funcion(){
+	int contador=0;
+	for(int i=0;i<list_size(memoria->marcos);i++) {
+		t_marco* aux = list_get(memoria->marcos, i);
+		if(aux->is_free) {
+			contador++;
+		}
 	}
+	return contador;
+}
+
+void agregar_pagina_a_tabla(int i) {
+	t_pagina* aux = malloc(sizeof(t_pagina));
+	aux->num_pagina = i;
+	aux->num_marco = -1;
+	aux->p = 0;
+	list_add(memoria->marcos, aux);
 }
 
 int tamanio_asignado(int pid) {
@@ -64,12 +146,6 @@ int tamanio_asignado(int pid) {
 t_pagina* siguiente_pagina_libre(t_tabla_paginas* tabla) {
 	t_pagina* aux;
 
-	if(list_size(tabla->paginas) == 0) {
-
-		list_add(tabla,)
-		return NULL;
-	}
-
     for (int i = 0; i < list_size(tabla->paginas); i++)
     {
 		log_error(logger_memoria, " PID de tabla paginas segun pid - %d", tabla->pid);
@@ -83,33 +159,37 @@ t_pagina* siguiente_pagina_libre(t_tabla_paginas* tabla) {
     return NULL;
 }
 
-void asignar_marco(int pid, t_pagina * pagina, int *memoria_llena){ //Le asigna a una pagina de proceso un marco libre
-	t_marco * marco;
-	int i = encontrar_marco_libre();
-	if(i!=-1){
-		marco = list_get(memoria->marcos,i);
-		marco->is_free = false;
-		marco->pid = pid;
-		pagina->num_marco = i;
-		pagina->p=1;
-	}
-	else {
-		*memoria_llena = 1;
-	} 
+void asignar_marco(int pid, t_pagina * pagina, int ultimo_marco){ //TODO 
+
+	int i = encontrar_marco_libre(ultimo_marco);
+	log_error(logger_memoria, "el valor de marco que encontre es - %d", i);
+	t_marco * marco = list_get(memoria->marcos, i);
+	marco = list_get(memoria->marcos,i);
+	marco->is_free = false; 
+	marco->pid = pid;
+
+	pagina->num_marco = i;
+	pagina->p=1;
 }
 
-int encontrar_marco_libre() {
+int encontrar_marco_libre(int ultimo_marco) {
     int i;
-	t_marco* marco;
-    for(i=0;i<memoria->cantidad_marcos;i++) {
-		log_warning(logger_memoria, "cantidad de marcos es - %d", list_size(memoria->marcos));
-    	marco = list_get(memoria->marcos, i);
-		if(marco->is_free) {
+	int marco_no_tuvido_encuenta= list_size(memoria->marcos) -ultimo_marco;
 
-            return i;
+	t_marco* marco;
+	for(i=0;i<memoria->cantidad_marcos;i++) {
+
+		if(ultimo_marco == list_size(memoria->marcos)) {
+			ultimo_marco=0;
 		}
+
+    	marco = list_get(memoria->marcos, ultimo_marco);
+		if(marco->is_free) {
+			log_error(logger_memoria, "el valor de marco que encontre es - %d", i);
+            return ultimo_marco;
+		}
+		ultimo_marco++;
 	}
-    return -1;
 }
 
 t_pagina* ultima_pagina_asignada(t_tabla_paginas* tabla) {
@@ -139,10 +219,4 @@ void liberar_pagina_y_marco(t_pagina* pagina) {
     }
     pagina->num_marco = -1;
     pagina->p = 0;
-}
-
-void enviar_out_of_memory(op_code operacion, int cliente_fd){
-	t_paquete* paquete = crear_paquete(operacion);
-	enviar_paquete(paquete, cliente_fd);
-	eliminar_paquete(paquete);
 }

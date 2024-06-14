@@ -59,4 +59,5 @@ extern t_config* config;
 void obtener_configuraciones();
 void inicializar_estructuras();
 void inicializar_marcos();
+void enviar_ok(int cliente_fd) ;
 #endif

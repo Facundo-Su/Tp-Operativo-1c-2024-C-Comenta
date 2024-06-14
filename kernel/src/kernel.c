@@ -153,6 +153,12 @@ void procesar_conexion(void *conexion1){
 				pthread_mutex_lock(&sem_detener_conexion);
 			}
 			switch(cod_op){
+				case OUT_OF_MEMORY:
+					paquete = recibir_paquete(cliente_fd);
+					exit = running;
+					log_warning(logger, "Finaliza el proceso %i - Motivo: OUT OF MEMORY",exit->contexto->pid);
+					finalizar_pcb(exit);
+					break;
 				case IO_SLEEP:
 					paquete = recibir_paquete(cliente_fd);
 					char * nombre_de_interfaz_sleep =list_get(paquete,0);
@@ -240,14 +246,6 @@ void procesar_conexion(void *conexion1){
 			//log_pcb_info(pcb_aux);
 			agregar_cola_ready(running);
 			pthread_mutex_unlock(&sem_exec);
-			break;
-		case OUT_OF_MEMORY:
-			paquete = recibir_paquete(cliente_fd);
-			contexto = desempaquetar_pcb(paquete);
-			running->contexto = contexto;
-			exit = running;
-			finalizar_pcb(exit);
-			log_warning(logger, "Finaliza el proceso %i - Motivo: OUT OF MEMORY",exit->contexto->pid);
 			break;
 
 		case FINALIZAR:

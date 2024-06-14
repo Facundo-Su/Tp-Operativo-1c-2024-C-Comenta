@@ -55,3 +55,12 @@ void inicializar_marcos() {
         desplazamiento+= memoria->tamanio_marcos;
     }
 }
+
+void enviar_ok(int cliente_fd) {
+    t_paquete* paquete = crear_paquete(RESPUESTA_OK_CPU_MEMORIA);
+    int auxiliar2 = 0;
+    log_error(logger_memoria, "envie ok a cpu");
+    agregar_a_paquete(paquete, &auxiliar2, sizeof(int));
+    enviar_paquete(paquete, cliente_fd);
+    eliminar_paquete(paquete);
+}
