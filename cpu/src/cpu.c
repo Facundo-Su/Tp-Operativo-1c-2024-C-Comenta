@@ -31,10 +31,16 @@ int main(int argc, char* argv[]) {
 
 void iniciar_recurso(){
 	sem_init(&contador_marco_obtenido,0,0);
+	sem_init(&contador_respuesta,0,0);
 	pthread_mutex_init(&contador_marco_obtenido,NULL);
 	pthread_mutex_init(&sem_resize,NULL);
+	//ptheard_mutex_init(&respuesta_ok,NULL);
+
 	pthread_mutex_lock(&contador_marco_obtenido);
 	pthread_mutex_lock(&sem_resize);
+	//ptheard_mutex_lock(&respuesta_ok);
+
+
 	tlb = list_create();
 	contador_fifo =0;
 	iniciar_entrada_tlb();
@@ -179,6 +185,13 @@ void procesar_conexion(void *conexion1){
 			valor_retorno_resize = *enteros;
 			pthread_mutex_unlock(&sem_resize);
 			break;
+		case ENVIO_MOV_IN:
+			lista = recibir_paquete(cliente_fd);
+			enteros = list_get(lista,0);
+			registro_por_mov = *enteros;
+			sem_post(&contador_respuesta);
+			//pthread_mutex_unlock(&respuesta_ok);
+			break;	
 		case -1:
 			log_error(logger, "el cliente se desconecto. Terminando servidor");
 			close(cliente_fd);
@@ -401,11 +414,54 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 			enviar_pcb(pcb,cliente_fd,OUT_OF_MEMORY);
 		}
 		break;
+	case MOV_IN:
+		parametro= list_get(instrucciones->parametros,0);//REGISTROS  DATOS
+		parametro2= list_get(instrucciones->parametros,1);// REGISTROS DIRECCION
+		
+		registro_aux2 = devolver_registro(parametro2);
+ 		valor_int= obtener_valor(registro_aux2);
+
+		t_traduccion* traducido = mmu_traducir(valor_int);
+
+		log_info(logger,"PID: %i - Ejecutando MOV_IN: %s-%s",pcb->pid,parametro,parametro2);
+
+		log_info(logger,"PID: %i - OBTENER MARCO - Página: %i - Marco: %i.",pcb->pid,traducido->nro_pagina,traducido->marco);
+		valor_uint1 = obtener_el_valor_de_memoria(traducido);
+		registro_aux = devolver_registro(parametro);
+
+		valor_uint1 = (uint32_t) registro_por_mov;
+
+		log_warning(logger,"el valor que lei de memoria es %i",valor_uint1);
+
+		setear(registro_aux, valor_uint1);
+		int dir_fisica = traducido->marco* tamanio_pagina + traducido->desplazamiento;
+		log_info(logger, "PID: %i - Acción: LEER - Dirección Física: %i - Valor: %u",pcb->pid,dir_fisica,valor_uint1);
+		break;
+	case MOV_OUT:
+		log_error(logger,"PID: %i - Ejecutando MOV_OUT",pcb->pid);
+
+		parametro= list_get(instrucciones->parametros,0);//REGISTROS  DATOS
+		parametro2= list_get(instrucciones->parametros,1);// REGISTROS DIRECCION
+
+		registro_aux = devolver_registro(parametro);
+		valor_uint1 = obtener_valor(registro_aux);//valor direccion
+		
+		registro_aux2 = devolver_registro(parametro2);
+ 		valor_int= obtener_valor(registro_aux2);//datos
+
+		t_traduccion* traducido2 = mmu_traducir(valor_uint1);
+		log_info(logger,"PID: %i - Ejecutando MOV_OUT: %s-%s",pcb->pid,parametro,parametro2);
+		log_info(logger,"PID: %i - OBTENER MARCO - Página: %i - Marco: %i.",pcb->pid,traducido2->nro_pagina,traducido2->marco);
+		int dir_fisica2 = traducido2->marco* tamanio_pagina + traducido2->desplazamiento;
+		log_info(logger, "PID: %i - Acción: ESCRIBIR - Dirección Física: %i - Valor: %u",pcb->pid,dir_fisica2,valor_uint1);
+		enviar_traduccion_mov_out(traducido2, ENVIO_MOV_OUT, valor_int);
+		
+		break;
 	case COPY_STRING:
 	// MMU
 		parametro = list_get(instrucciones->parametros,0);
 		int tamanio_copy_string = atoi(parametro);
-		t_traduccion * traducido = mmu_traducir(pcb->registros->si);
+		t_traduccion * traducido3 = mmu_traducir(pcb->registros->si);
 		valor_uint1 = obtener_valor(pcb->registros->si);
 		//enviar_a_memoria_copy_string(tamanio_copy_string);
 		break;
@@ -529,6 +585,34 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	recibi_archivo = false;
 	instruccion_ejecutando= false;
 }
+
+void enviar_traduccion_mov_out(t_traduccion* traducido,op_code operacion,uint32_t valor_int){
+	t_paquete* paquete = crear_paquete(operacion);
+	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(int));
+	agregar_a_paquete(paquete, &(traducido->nro_pagina), sizeof(int));
+	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
+	agregar_a_paquete(paquete, &valor_int, sizeof(uint32_t));
+	enviar_paquete(paquete, conexion_memoria);
+	eliminar_paquete(paquete);
+}
+
+uint32_t obtener_el_valor_de_memoria(t_traduccion* traducido){
+	enviar_traduccion(traducido, ENVIO_MOV_IN);
+	sem_wait(&contador_respuesta);
+	//pthread_mutex_lock(&respuesta_ok);
+	uint32_t valor_obtenido = registro_por_mov;
+	return valor_obtenido;
+}
+
+void enviar_traduccion(t_traduccion* traducido,op_code operacion){
+	t_paquete* paquete = crear_paquete(operacion);
+	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(int));
+	enviar_paquete(paquete, conexion_memoria);
+	eliminar_paquete(paquete);
+}
+
 
 void enviar_io_fs_read(char* parametro,char* parametro2,uint32_t parametro3,uint32_t parametro4,uint32_t parametro5,int cliente_fd){
 	t_paquete* paquete = crear_paquete(IO_FS_READ);
@@ -686,7 +770,7 @@ t_traduccion* mmu_traducir(int dir_logica){
 	t_traduccion* traducido= malloc(sizeof(t_traduccion));
 	int nro_pagina =  floor(dir_logica / tamanio_pagina);
 	
-	obtener_el_marco(nro_pagina,OBTENER_MARCO);
+
 	int marco_encontrado = consultar_tlb(nro_pagina, pcb->pid);
 
 	if(marco_encontrado == -1){
@@ -820,14 +904,14 @@ void transformar_en_instrucciones(char* auxiliar){
 				instruccion_a_realizar->nombre = IO_FS_READ;
 				cantidad_parametros = 5;
 			}
-	        // if (strcmp(instruccion_parseada[0], "MOV_IN") == 0) {
-	        // 	instruccion_a_realizar->nombre = MOV_IN;
-	        //     cantidad_parametros = 2;
-	        // }
-	        // if (strcmp(instruccion_parseada[0], "MOV_OUT") == 0) {
-	        // 	instruccion_a_realizar->nombre = MOV_OUT;
-	        //     cantidad_parametros = 2;
-	        // }
+	        if (strcmp(instruccion_parseada[0], "MOV_IN") == 0) {
+	        	instruccion_a_realizar->nombre = MOV_IN;
+	            cantidad_parametros = 2;
+	        }
+	        if (strcmp(instruccion_parseada[0], "MOV_OUT") == 0) {
+	        	instruccion_a_realizar->nombre = MOV_OUT;
+	            cantidad_parametros = 2;
+	        }
 	        if (strcmp(instruccion_parseada[0], "EXIT") == 0) {
 	        	instruccion_a_realizar->nombre = EXIT;
 	            cantidad_parametros = 0;
@@ -944,6 +1028,8 @@ int consultar_tlb(int nro_pagina,int pid) {
 			return tlb_aux->marco;
 		}
 	}
+	
+	obtener_el_marco(nro_pagina,OBTENER_MARCO);
 
 	log_info(logger, "Pagina no encontrada en TLB");
 	return -1;

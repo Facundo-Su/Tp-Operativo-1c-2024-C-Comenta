@@ -220,13 +220,12 @@ void envio_resize(int cliente_fd){
 	t_list* lista = recibir_paquete(cliente_fd);
 	int* pid = list_get(lista,0);
 	int* tamanio = list_get(lista,1);
-	int cantidad_de_marcos = *tamanio/memoria->tamanio_marcos;
 	t_tabla_paginas *tabla = tabla_paginas_segun_pid(*pid);
 	int tamanio_proceso = tabla->tamanio_proceso;
 	log_error(logger_memoria, "TAMAÑIO proceso %i", tamanio_proceso);
 	log_error(logger_memoria, "TAMAÑIO memoria %i", memoria->espacio_disponible);
 	
-	if(tamanio<tamanio_proceso){
+	if(*tamanio<tamanio_proceso){
 		int tamanio_a_eliminar = tamanio_proceso-*tamanio;
 		ejecutar_reduccion(tamanio_a_eliminar, tabla);
 		enviar_respuesta_resize (cliente_fd,0);
@@ -262,7 +261,7 @@ void crear_paginas(int paginas_necesarias, int contador, t_tabla_paginas * tabla
 		contador++;
 	}
 }
-void asignar_marco(int pid, t_pagina * pagina){ //TODO 
+void asignar_marco(int pid, t_pagina * pagina){ 
 
 	int i = encontrar_marco_libre();
 	if(i ==-1){

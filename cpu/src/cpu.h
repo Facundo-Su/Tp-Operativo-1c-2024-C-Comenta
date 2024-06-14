@@ -16,6 +16,7 @@
 #include<readline/readline.h>
 #include <utils/hello.h>
 #include <limits.h>
+#include <pthread.h>
 
 t_log* logger;
 t_config* config;
@@ -81,10 +82,13 @@ typedef struct{
 t_list* tlb;
 int contador_fifo;
 
+uint32_t registro_por_mov;
+
 //semaforos
 sem_t contador_instruccion;
+sem_t contador_respuesta;
 pthread_mutex_t contador_marco_obtenido;
-pthread_mutex_t respuesta_ok;
+//pthread_mutex_t respuesta_ok;
 pthread_mutex_t sem_resize;
 
 
@@ -114,6 +118,7 @@ void enviar_io_stdin_read(char* ,t_traduccion* ,uint32_t ,int );
 void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd);
 void enviar_io_stdout_write(char* ,t_traduccion* ,uint32_t ,int );
 int consultar_tlb(int nro_pagina, int pid);
+uint32_t obtener_el_valor_de_memoria(t_traduccion* traducido);
 t_traduccion* mmu_traducir(int );
 
 
