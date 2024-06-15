@@ -21,10 +21,15 @@ char* interfaz_name;
 t_log* logger;
 t_config* config;
 
+int conexion_memoria_prueba;
 
 int conexion_kernel;
 int conexion_memoria;
 
+void* info_stdout_write;
+
+pthread_t conexion_kernel_hilo;
+pthread_mutex_t mutex_respuesta_stdout_write;
 
 void asignar_algoritmo(char *algoritmo);
 void obtener_configuracion();
@@ -37,6 +42,7 @@ void iniciar_recurso();
 void generar_conexion();
 void procesar_conexion(void *);
 void recibir_mensaje(int);
+void enviar_stdin_memoria(int pid, int marco, int desplazamiento, int tamanio,char* palabra_A_enviar, int conexion_memoria);
 
 
 #endif

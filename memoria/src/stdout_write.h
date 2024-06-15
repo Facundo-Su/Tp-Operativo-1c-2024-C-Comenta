@@ -3,5 +3,5 @@
 
 #include "global.h"
 void stdout_write(int);
-void enviar_registro_leido_IO(int, op_code, int);
+void enviar_registro_leido_IO(void*, op_code,int,int);
 #endif 

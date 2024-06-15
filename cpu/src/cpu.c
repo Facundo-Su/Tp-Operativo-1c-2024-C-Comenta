@@ -463,9 +463,9 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	// MMU
 		parametro = list_get(instrucciones->parametros,0);
 		int tamanio_copy_string = atoi(parametro);
-		t_traduccion * traducido3 = mmu_traducir(pcb->registros->si);
-		valor_uint1 = obtener_valor(pcb->registros->si);
-		//enviar_a_memoria_copy_string(tamanio_copy_string);
+		t_traduccion * traducido_copy_string_origen = mmu_traducir(pcb->registros->si);
+		t_traduccion * traducido_copy_string_destino = mmu_traducir(pcb->registros->di);
+		enviar_a_memoria_copy_string(tamanio_copy_string,traducido_copy_string_origen,traducido_copy_string_destino);
 		break;
 	
 	case IO_GEN_SLEEP:
@@ -479,6 +479,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		break;
 	case IO_STDIN_READ:
 		//TODO
+		
 		hayInterrupcion = true;
 		parametro = list_get(instrucciones->parametros,0);//nombre interfaz
 		parametro2 = list_get(instrucciones->parametros,1);// valor de registro direccion
@@ -486,8 +487,6 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 
 		registro_aux = devolver_registro(parametro2);
 		valor_uint1 = obtener_valor(registro_aux);
-
-		int valor_transofmado=atoi(parametro3);
 
 		t_traduccion* aux = mmu_traducir(valor_uint1);
 
@@ -498,6 +497,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 
 		break;
 	case IO_STDOUT_WRITE:
+
 		hayInterrupcion = true;
 		parametro = list_get(instrucciones->parametros,0);
 		parametro2 = list_get(instrucciones->parametros,1);
@@ -506,11 +506,13 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		registro_aux = devolver_registro(parametro2);
 		valor_uint1 = obtener_valor(registro_aux);
 
+		t_traduccion* aux2 = mmu_traducir(valor_uint1);
+
 		registro_aux2 = devolver_registro(parametro3);
 		valor_uint2 = obtener_valor(registro_aux2);
 
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
-		enviar_io_stdout_write(parametro,valor_uint1,valor_uint2,cliente_fd);
+		enviar_io_stdout_write(parametro,aux2,valor_uint2,cliente_fd);
 		break;
 	case IO_FS_CREATE:
 		hayInterrupcion = true;
@@ -558,6 +560,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		break;
 	
 	case IO_FS_READ:
+		log_warning(logger, "Estoy por leer un archivo");
 		hayInterrupcion = true;
 		parametro = list_get(instrucciones->parametros,0); //nombre interfaz
 		parametro2 = list_get(instrucciones->parametros,1);//nombre archivo
@@ -668,6 +671,7 @@ void enviar_io_stdout_write(char* parametro,t_traduccion* traducido,uint32_t par
 	t_paquete* paquete = crear_paquete(IO_STDOUT_WRITE);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete,&(traducido->desplazamiento), sizeof(int));
 	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
 	enviar_paquete(paquete, cliente_fd);
 }
@@ -677,6 +681,7 @@ void enviar_io_stdin_read(char* parametro,t_traduccion* traducido,uint32_t param
 	t_paquete* paquete = crear_paquete(EJECUTAR_IO_STDIN_READ);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
+	agregar_a_paquete(paquete,&(traducido->desplazamiento), sizeof(int));
 	agregar_a_paquete(paquete, &parametro3, sizeof(int));
 	enviar_paquete(paquete, cliente_fd);
 }
@@ -751,11 +756,14 @@ void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd){
 	eliminar_paquete(paquete);
 }
 
-void enviar_a_memoria_copy_string(int parametro){
-	//TODO hacer en la parte de memoria
+void enviar_a_memoria_copy_string(int tamanio,t_traduccion* traducido_origen,t_traduccion* traducido_destino){
 	t_paquete* paquete = crear_paquete(COPY_STRING_MEMORIA);
 	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
-	agregar_a_paquete(paquete, &parametro, sizeof(int));
+	agregar_a_paquete(paquete, &tamanio, sizeof(int));
+	agregar_a_paquete(paquete,&(traducido_origen->marco),sizeof(int));
+	agregar_a_paquete(paquete,&(traducido_origen->desplazamiento),sizeof(int));
+	agregar_a_paquete(paquete,&(traducido_destino->marco),sizeof(int));
+	agregar_a_paquete(paquete,&(traducido_destino->desplazamiento),sizeof(int));
 	enviar_paquete(paquete, conexion_memoria);
 	eliminar_paquete(paquete);
 }
@@ -792,6 +800,7 @@ t_traduccion* mmu_traducir(int dir_logica){
 	traducido->marco= marco_encontrado;
 	traducido->desplazamiento= desplazamiento;
 	traducido->nro_pagina = nro_pagina;
+
 
 	return traducido;
 }
@@ -1064,6 +1073,7 @@ void insertar_tlb(int pid, int nro_pagina) {
 	}else{
 		log_info(logger, "TLB llena");
 		int aux = ejecutar_algoritmo();
+		log_warning(logger, "hola como estas");
 		t_estructura_tlb *tlb_aux = list_get(tlb, aux);
 		tlb_aux->pid = pid;
 		tlb_aux->pagina = nro_pagina;

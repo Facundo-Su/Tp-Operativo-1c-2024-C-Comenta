@@ -30,7 +30,7 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,
 				pcb->contexto->quantum= obtener_tiempo_vrr();
 				sigue = false;
 				list_add(lista_bloqueado_io,pcb);
-				enviar_a_io_stdin_read(nombre_interfaz,marco,desplazamiento,tamanio,pcb);
+				enviar_a_io_stdin_read(nombre_interfaz,marco,desplazamiento,tamanio,pcb,interfaz->codigo_cliente);
 				pthread_mutex_unlock(&sem_exec);
 
 			}else{
@@ -86,22 +86,25 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento
 
 void enviar_a_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int cdogio_cliente){
 	t_paquete* paquete=crear_paquete(EJECUTAR_STDOUT_WRITE);
-	agregar_a_paquete(paquete,&(pcb->contexto->pid),sizeof(int));
+	log_warning(logger,"el pid que envie es %i",pcb->contexto->pid);
+	agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
 	agregar_a_paquete(paquete,&marco,sizeof(int));
 	agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
 	agregar_a_paquete(paquete,&tamanio,sizeof(int));
-	agregar_a_paquete(paquete, &pcb->contexto->pid, sizeof(int));
 	enviar_paquete(paquete, cdogio_cliente);
 	eliminar_paquete(paquete);
 }
 
 void enviar_a_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int cdogio_cliente){
 	t_paquete* paquete=crear_paquete(EJECUTAR_STDIN_READ);
+	agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
 	agregar_a_paquete(paquete,&marco,sizeof(int));
 	agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
 	agregar_a_paquete(paquete,&tamanio,sizeof(int));
-	agregar_a_paquete(paquete, &pcb->contexto->pid, sizeof(int));
+
 	enviar_paquete(paquete, cdogio_cliente);
+	log_warning(logger,"mensaje enviado");
+	log_warning(logger,"envie con el codigo de cliente %i",cdogio_cliente);
 	eliminar_paquete(paquete);
 }
 
@@ -254,6 +257,9 @@ void agregar_interfaces(char * nombre_interfaz, int conexion_obtenido){
     interfaz->codigo_cliente = conexion_obtenido;
     interfaz->en_uso = false;
     interfaz->cola_espera = inicializar_cola();
+
+	log_info(logger, "Se agrego la interfaz %s", interfaz->nombre_interface);
+	log_warning(logger, "el codigo de cliente que recibi es : %i ",interfaz->codigo_cliente);
     list_add(lista_interfaces, interfaz);
 }
 int obtener_tiempo_vrr(){

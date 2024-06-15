@@ -75,10 +75,13 @@ void procesar_conexion(void* socket){
 					break;
 				case COPY_STRING_MEMORIA:
 					copy_string(cliente_fd);
+					break;
 				case EJECUTAR_STDIN_READ:
 					stdin_read(cliente_fd);
+					break;
 				case EJECUTAR_STDOUT_WRITE:
 					stdout_write(cliente_fd);
+					break;
 	    		case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");
 	                close(cliente_fd);
