@@ -9,6 +9,8 @@
 #include "envio_resize.h"
 #include "envio_mov_in.h"
 #include "envio_mov_out.h"
+#include "stdin_read.h"
+#include "stdout_write.h"
 
 
 

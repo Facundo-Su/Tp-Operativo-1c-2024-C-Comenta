@@ -84,27 +84,27 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento
 }
 
 
-void enviar_a_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int cdogio_cliente){
+void enviar_a_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int codigo_cliente){
 	t_paquete* paquete=crear_paquete(EJECUTAR_STDOUT_WRITE);
 	log_warning(logger,"el pid que envie es %i",pcb->contexto->pid);
 	agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
 	agregar_a_paquete(paquete,&marco,sizeof(int));
 	agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
 	agregar_a_paquete(paquete,&tamanio,sizeof(int));
-	enviar_paquete(paquete, cdogio_cliente);
+	enviar_paquete(paquete, codigo_cliente);
 	eliminar_paquete(paquete);
 }
 
-void enviar_a_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int cdogio_cliente){
+void enviar_a_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int codigo_cliente){
 	t_paquete* paquete=crear_paquete(EJECUTAR_STDIN_READ);
 	agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
 	agregar_a_paquete(paquete,&marco,sizeof(int));
 	agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
 	agregar_a_paquete(paquete,&tamanio,sizeof(int));
 
-	enviar_paquete(paquete, cdogio_cliente);
+	enviar_paquete(paquete, codigo_cliente);
 	log_warning(logger,"mensaje enviado");
-	log_warning(logger,"envie con el codigo de cliente %i",cdogio_cliente);
+	log_warning(logger,"envie con el codigo de cliente %i",codigo_cliente);
 	eliminar_paquete(paquete);
 }
 

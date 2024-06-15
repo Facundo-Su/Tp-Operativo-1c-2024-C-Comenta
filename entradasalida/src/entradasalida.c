@@ -21,6 +21,26 @@ void iniciar_consola(){
 
         log_info(logger_consola,"Ingrese el nombre de la interfaz");
         interfaz_name = readline(">");
+        interfaz_name = strtok(interfaz_name, "\n");
+        if(strcmp(interfaz_name, "GENERICA")){
+            path_configuracion = "generica.config";
+            obtener_configuracion(path_configuracion);
+            iniciar_interfaz_generica();
+        }else if(strcmp(interfaz_name, "MONITOR")){
+            path_configuracion = "monitor.config";
+            obtener_configuracion(path_configuracion);
+            iniciar_interfaz_stdout();
+        }
+        else if(strcmp(interfaz_name, "TECLADO")){
+            path_configuracion = "teclado.config";
+            obtener_configuracion(path_configuracion);
+            iniciar_interfaz_stdin();
+        }else{
+            log_error(logger_consola,"Interfaz desconocidad");
+        }
+  
+
+        /*
         log_info(logger_consola,"Ingrese la ubicacion del archivo de configuracion");
         path_configuracion = readline(">");
         //path_configuracion = "entradasalida.config";//sacar esto despues
@@ -51,7 +71,7 @@ void iniciar_consola(){
         }else{
 
         	log_error(logger_consola,"Interfaz desconocidad");
-        }
+        }*/
     
 }
 
@@ -173,7 +193,7 @@ void procesar_conexion(void *conexion_ptr){
         	int cop;
 			recv(conexion_memoria, &cop, sizeof(cop), 0);//tendria que recibir un ok de memoria?
             //log_info(logger_consola,"me llego confirmacion de Memoria, llego un %i",cop);//1=OK
-
+            
 			close(conexion_memoria);
         	//sem_wait(&sem_cont_lectura);
         	enviar_kernel_ok_stdin(cliente_fd,*pid_stdin);//aviso q termine accion.
@@ -185,32 +205,33 @@ void procesar_conexion(void *conexion_ptr){
             int *marco_stdout = list_get(paquete, 1);
             int *desplazamiento_stdout = list_get(paquete, 2);
         	int *tamanio_stdout = list_get(paquete, 3);
+            log_warning(logger,"el tamanio es  %i",*tamanio_stdout);
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
-            conexion_memoria_prueba =conexion_memoria;
             enviar_direccion_memoria(*pid_stdout,*marco_stdout,*desplazamiento_stdout,*tamanio_stdout,conexion_memoria);//agrego pid por si memoria lo necesita para sus logs en acceso de lectura.
-
-			t_list* lista_mostrar=list_create();
-            void* informacion = info_stdout_write;
+            void* informacion = malloc(*tamanio_stdout);
 			//paquete2 = recibir_paquete(conexion_memoria);
             //void* informacion = malloc(R_tamanio);
-			//recv(conexion_memoria,informacion,R_tamanio,0);      //recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
-
+            //pthread_mutex_lock(&mutex_respuesta_stdout_write);
+            //log_warning(logger,"PASEEEEEEEE");
+			ssize_t b = recv(conexion_memoria,informacion,*tamanio_stdout,0); 
+            if(b==-1){
+                log_error(logger, "ERRORRRRRRRRR");
+            } //recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
 			//usleep(tiempo_unidad_trabajo*1000);
-            pthread_mutex_lock(&mutex_respuesta_stdout_write);
-
+            close(conexion_memoria);
 			log_info(logger	, "El resultado de lo buscado en memoria es: < %s >",informacion);
-			close(conexion_memoria);
-
 			//log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDOUT_WRITE >",*pid);
             log_warning(logger,"el pid es %i",*pid_stdout);
-            enviar_kernel_ok_stdout(cliente_fd,*pid_stdout);//aviso q termine accion.
+            enviar_kernel_ok_stdout(cliente_fd,*pid_stdout);
+            free(informacion);//aviso q termine accio
         	break;
-        case RESPUESTA_STDOUT_WRITE:
-            paquete = recibir_paquete(conexion_memoria_prueba);
-            info_stdout_write = list_get(paquete, 0);
-            log_warning(logger,"el tamanio de info que recibi es es %s",sizeof(info_stdout_write));
+       /*case RESPUESTA_STDOUT_WRITE:
+            log_warning(logger,"llegueeeeeee");
+            paquete = recibir_paquete(cliente_fd);
+            informacion = list_get(paquete, 0);
+            log_warning(logger,"recibi EL DATO  %s",informacion);
             pthread_mutex_unlock(&mutex_respuesta_stdout_write);
-            break;
+            break;*/
         case EJECUTAR_IO_FS_CREATE:
         	//TO-DO
         	break;
