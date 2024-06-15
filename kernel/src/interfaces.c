@@ -75,6 +75,7 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento
 				blocked->nro_marco = marco;
 				blocked->tamanio = tamanio;
 				blocked->desplazamiento=desplazamiento;
+				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE FWRITE %i, %i, %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
 				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
 				sigue = false;
 				agregar_cola_bloqueados_interfaces(interfaz,blocked);
@@ -86,7 +87,7 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento
 
 void enviar_a_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int codigo_cliente){
 	t_paquete* paquete=crear_paquete(EJECUTAR_STDOUT_WRITE);
-	log_warning(logger,"el pid que envie es %i",pcb->contexto->pid);
+	log_error(logger,"ENVIEE PID %i, MARCO %i, DESPLAZAMIENTO %i, tamanio %i,",pcb->contexto->pid,marco,desplazamiento,tamanio);
 	agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
 	agregar_a_paquete(paquete,&marco,sizeof(int));
 	agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
@@ -122,6 +123,7 @@ void io_stdout_write_ready(int pid){
 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
 		//agregar_cola_ready(pcb_blocked);
+		log_error(logger, "SALI DE BLOQUEADO FWRITE");
 		ejecutar_io_stdin_write(interfaz->nombre_interface, blocked->nro_marco,blocked->desplazamiento, blocked->tamanio,blocked->pcb);
 	}
 }

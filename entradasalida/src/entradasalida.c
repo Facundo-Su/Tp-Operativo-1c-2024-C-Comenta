@@ -157,7 +157,7 @@ void procesar_conexion(void *conexion_ptr){
 
     while (1) {
         int cod_op = recibir_operacion(conexion);
-        log_warning(logger, "recibi una instruccion %i",cod_op);
+        //log_warning(logger, "recibi una instruccion %i",cod_op);
         switch (cod_op) {
         case MENSAJE:
             recibir_mensaje(conexion);
@@ -191,7 +191,7 @@ void procesar_conexion(void *conexion_ptr){
 
             
         	char* palabra_A_enviar = string_substring_until(palabra_usuario,*tamanio_stdin);// de las commons,ajusto la palabra 
-            
+            log_info(logger, "envio la palabra: %s",palabra_A_enviar);
             enviar_stdin_memoria(*pid_stdin,*marco_stdin,*desplazamiento_stdin,*tamanio_stdin,palabra_A_enviar,conexion_memoria);//pid_stdin es el PID para el log de memoria cuando escribe.
         	int cop;
 			recv(conexion_memoria, &cop, sizeof(cop), 0);//tendria que recibir un ok de memoria?
@@ -208,7 +208,7 @@ void procesar_conexion(void *conexion_ptr){
             int *marco_stdout = list_get(paquete, 1);
             int *desplazamiento_stdout = list_get(paquete, 2);
         	int *tamanio_stdout = list_get(paquete, 3);
-            log_warning(logger,"el tamanio es  %i",*tamanio_stdout);
+            log_warning(logger,"RECIBI PID %i, marco %i, desplamiento %i, tamanio %i",*pid_stdout, *marco_stdout ,*desplazamiento_stdout,*tamanio_stdout);
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
             enviar_direccion_memoria(*pid_stdout,*marco_stdout,*desplazamiento_stdout,*tamanio_stdout,conexion_memoria);//agrego pid por si memoria lo necesita para sus logs en acceso de lectura.
             void* informacion = malloc(*tamanio_stdout);
@@ -219,7 +219,6 @@ void procesar_conexion(void *conexion_ptr){
 			log_error(logger,"el codigo socket es %i",cliente_fd);
 			lista2= recibir_paquete(conexion_memoria);
 			void* auxiliar = list_get(lista2,0);
-
 			//paquete2 = recibir_paquete(conexion_memoria);
             //void* informacion = malloc(R_tamanio);
             //pthread_mutex_lock(&mutex_respuesta_stdout_write);
@@ -270,7 +269,7 @@ void enviar_stdin_memoria(int pid, int marco, int desplazamiento, int tamanio,ch
 	agregar_a_paquete(paquete,&marco,sizeof(int));
     agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
     agregar_a_paquete(paquete,&tamanio,sizeof(int));
-	agregar_a_paquete(paquete,palabra_A_enviar,strlen(palabra_A_enviar));//+1 para agregar centinela pero no lo quiero
+	agregar_a_paquete(paquete,palabra_A_enviar,strlen(palabra_A_enviar)+1);//+1 para agregar centinela pero no lo quiero
 	enviar_paquete(paquete, conexion_memoria);
     log_warning(logger,"el palabra que envie es %s",palabra_A_enviar);
 	eliminar_paquete(paquete);

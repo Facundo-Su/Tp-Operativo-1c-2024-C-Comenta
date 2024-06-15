@@ -8,6 +8,7 @@ void stdout_write(int cliente_fd){
 	int *desplazamiento = list_get(lista,2);
     int *tamanio = list_get(lista,3);
 	void *valor_leido = malloc(*tamanio);
+	log_info(logger, "me llego para fwrite pid %i, marco %i, desplazamiento %i, tamanio %i",*pid, *marco,*desplazamiento, *tamanio);
     memcpy(valor_leido, memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, *tamanio);
 	enviar_registro_leido_IO(valor_leido, RESPUESTA_STDOUT_WRITE,*tamanio,cliente_fd);
 	int dir = (*marco * tam_pagina) + *desplazamiento;

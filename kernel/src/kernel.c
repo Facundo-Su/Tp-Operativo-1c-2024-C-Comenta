@@ -185,7 +185,7 @@ void procesar_conexion(void *conexion1){
 					int *desplzazamiento_stdin_read = list_get(paquete,2);
 					valor_uin32t2 =list_get(paquete,3); //tamanio
 					valor_entero2 = (int) valor_uin32t2;
-					log_info(logger,"el nombre de interfaz es %s",valor_char);
+					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2);
 					ejecutar_io_stdin_read(valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2,running);
 					break;
 				case IO_STDOUT_WRITE:
@@ -195,7 +195,7 @@ void procesar_conexion(void *conexion1){
 					int *desplzazamiento_stdout_write = list_get(paquete,2);//desplazamiento
 					valor_uin32t2 =list_get(paquete,2); //tamanio
 					valor_entero2 = (int) valor_uin32t2;
-					log_info(logger,"el nombre de interfaz es %s",valor_char);
+					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2);
 					log_warning(logger,"el pid es %i",running->contexto->pid);
 					ejecutar_io_stdin_write(valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2,running);
 					break;

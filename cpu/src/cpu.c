@@ -492,6 +492,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 
 		registro_aux2 = devolver_registro(parametro3);
 		valor_uint2 = obtener_valor(registro_aux2);
+		log_info(logger,"ENVIO %u %u",valor_uint1, valor_uint2);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_io_stdin_read(parametro,aux,valor_uint2,cliente_fd);
 
@@ -667,7 +668,7 @@ void enviar_io_fs_create(char* parametro,char* parametro2,int cliente_fd){
 }
 
 void enviar_io_stdout_write(char* parametro,t_traduccion* traducido,uint32_t parametro3,int cliente_fd){
-
+	log_error(logger, "ENVIO FWRITE nombre %s,marco %i, despĺazamiento %i, tamanio %i",parametro,traducido->marco,traducido->desplazamiento);
 	t_paquete* paquete = crear_paquete(IO_STDOUT_WRITE);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
@@ -779,21 +780,26 @@ void enviar_memoria_ajustar_tam(int tamanio_modificar){
 t_traduccion* mmu_traducir(int dir_logica){
 	t_traduccion* traducido= malloc(sizeof(t_traduccion));
 	int nro_pagina =  floor(dir_logica / tamanio_pagina);
-	
+	int marco_encontrado;
+	if(cantidad_entrada_tlb>0){
+		marco_encontrado = consultar_tlb(nro_pagina, pcb->pid);
+		if(marco_encontrado == -1){
+			log_error(logger, "TLB MIS");
+			obtener_el_marco(nro_pagina,OBTENER_MARCO);
+			pthread_mutex_lock(&contador_marco_obtenido);
+			//log_error(logger, "LLEGUE HASTA ACA");
+			
+			insertar_tlb(pcb->pid,nro_pagina);
+			//log_error(logger, "LLEGUE HASTA ACA");
+			marco_encontrado = marco_obtenido;
+		}else{
+			log_error(logger, "TLB HIT");
+		}
+	}else{
 
-	int marco_encontrado = consultar_tlb(nro_pagina, pcb->pid);
-
-	if(marco_encontrado == -1){
-		log_error(logger, "TLB MIS");
 		obtener_el_marco(nro_pagina,OBTENER_MARCO);
 		pthread_mutex_lock(&contador_marco_obtenido);
-		//log_error(logger, "LLEGUE HASTA ACA");
-		
-		insertar_tlb(pcb->pid,nro_pagina);
-		//log_error(logger, "LLEGUE HASTA ACA");
 		marco_encontrado = marco_obtenido;
-	}else{
-		log_error(logger, "TLB HIT");
 	}
 
 	int desplazamiento = dir_logica - nro_pagina * tamanio_pagina;

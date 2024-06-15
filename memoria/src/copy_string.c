@@ -8,9 +8,9 @@ void copy_string(int cliente_fd){
     int *desplazamiento_origen = list_get(lista, 3);
     int *marco_destino = list_get(lista, 4);
     int *desplazamiento_destino = list_get(lista, 5);
-	uint32_t *valor_a_copiar = malloc(sizeof(uint32_t));
+	uint32_t valor_a_copiar = malloc(sizeof(uint32_t));
     memcpy(valor_a_copiar, memoria->espacio_usuario + (*marco_origen *tam_pagina) + *desplazamiento_origen, *tamanio);
     memcpy(memoria->espacio_usuario + (*marco_origen *tam_pagina) + *desplazamiento_destino, valor_a_copiar, *tamanio);
-    log_info(logger,"PID: %i- Marco origen: %i Marco destino %i - Valor a copiar: %i",*pid, *marco_origen, *marco_destino, *valor_a_copiar);
+    log_info(logger,"PID: %i- Marco origen: %i Marco destino %i - Valor a copiar: %i",*pid, *marco_origen, *marco_destino, valor_a_copiar);
     free(valor_a_copiar);
 }
