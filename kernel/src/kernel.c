@@ -226,6 +226,7 @@ void procesar_conexion(void *conexion1){
 			//log_error(logger, "AAAAAAAAAAAA");
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_a_sacar_sleep = list_get(paquete,0);
+			log_warning(logger, "me ha llegado ejecutar de vuelta a cpu el pid es %i",*pid_a_sacar_sleep);
 			//log_error(logger, "%i",*pid_a_sacar_sleep);
 			io_sleep_ready(*pid_a_sacar_sleep);
 		break;
