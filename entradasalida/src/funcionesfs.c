@@ -1,37 +1,48 @@
 #include "funcionesfs.h"
 
-/*
+//path_base_dialfs
 void levantarBitMap(){//crea y inicializa en 0 el bitmap
     //CREAR ARCHIVO BITMAP
-    if(fopen(ruta,"rb") == NULL){
-    void* punterobitmap = calloc( block_count/ 8,1);//1 es  un byte y inicializa en 0
-    FILE* archivoBM = fopen(configFS.ruta_bitmap,"wb");
+    
+    if(fopen(rutita_prueba,"rb") == NULL){
+    
+        void* punterobitmap = calloc( block_count/ 8,1);//1 es  un byte y inicializa en 0
+        
+        FILE* archivoBM = fopen(rutita_prueba,"wb");
+        
         if(archivoBM == NULL)
-    {
-        log_error(logger,"no se pudo crear el archivo de bitmap");
-    }
-    fwrite(punterobitmap,1,block_count / 8,archivoBM);
-    fclose(archivoBM);
-    free(punterobitmap);
+        {
+            log_error(logger,"no se pudo crear el archivo de bitmap");
+            exit(EXIT_FAILURE);
+        }
+        //log_warning(logger,"block_count %i, ruta es %s", block_count,rutita_prueba);
+        fwrite(punterobitmap,1,block_count / 8,archivoBM);
+        //log_warning(logger,"block_count %i, ruta es %s", block_count,rutita_prueba);
+        fclose(archivoBM);
+        free(punterobitmap);
     }
     //MAPEAR BITMAP
-    int fd = open(ruta,O_RDWR);
+    int fd = open(rutita_prueba,O_RDWR);
+    log_warning(logger,"fd %i", fd);
     char* bitarray = malloc(block_count / 8);//CHAR?
     bitarray = mmap(NULL,block_count / 8,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0);
     if(bitarray == MAP_FAILED)
     {
         log_error(logger,"no se pudo mapear el archivo de bitmap");
+        exit(EXIT_FAILURE);
     }
     t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
+    //log_info(logger,"se creo bitmap y %s",bitarray);
     msync(bitarray,block_count / 8,MS_SYNC); //estan bien los parametros de msync) o 
-    log_info(logger,"se creo bitmap");
+    //log_info(logger,"se creo bitmap y %s",bitarray);
     close(fd);
     bitarray_destroy(bitmap);
 }
 
 void levantar_archivo_bloques(){
     //ver que ruta le defino
-    int file_descrip_bloques = open(ruta_bloques, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    //luego decidir en que ruta ponemos el bloques.dat por ahora en el raiz
+    int file_descrip_bloques = open("bloques.dat", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (file_descrip_bloques == -1) {
         perror("Error al abrir el archivo de bloques");
         exit(EXIT_FAILURE);
@@ -58,7 +69,7 @@ void levantar_archivo_bloques(){
     // Cerrar el archivo después de asignar el mapeo
     close(file_descrip_bloques);
 }
-
+/*
 void crear_archivo_metadata(char* nombre_archivo){
 
     FILE* archivo_MD;
@@ -121,6 +132,6 @@ void asignarProximoBitDisponible(){ //talvez se pueda achicar aun mas el codigo.
     close(fd);
     bitarray_destroy(bitmap);
 }
-
 */
+
 

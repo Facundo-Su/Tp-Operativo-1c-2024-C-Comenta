@@ -14,6 +14,7 @@ char* path_base_dialfs;
 int block_size;
 int block_count;
 int retraso_compactacion;
+char* rutita_prueba = "bitmap.dat";
 
 char* interfaz_name;
 
