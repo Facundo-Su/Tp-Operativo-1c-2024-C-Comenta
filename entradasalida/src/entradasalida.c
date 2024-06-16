@@ -190,7 +190,7 @@ void procesar_conexion(void *conexion_ptr){
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
 
             
-        	char* palabra_A_enviar = string_substring_until(palabra_usuario,*tamanio_stdin);// de las commons,ajusto la palabra 
+        	char* palabra_A_enviar = string_substring(palabra_usuario,0,*tamanio_stdin);// de las commons,ajusto la palabra 
             log_info(logger, "envio la palabra: %s",palabra_A_enviar);
             enviar_stdin_memoria(*pid_stdin,*marco_stdin,*desplazamiento_stdin,*tamanio_stdin,palabra_A_enviar,conexion_memoria);//pid_stdin es el PID para el log de memoria cuando escribe.
         	int cop;

@@ -123,10 +123,10 @@ typedef struct{
 }t_instruccion;
 
 typedef struct{
-	uint32_t ax;
-	uint32_t bx;
-	uint32_t cx;
-	uint32_t dx;
+	uint8_t ax;
+	uint8_t bx;
+	uint8_t cx;
+	uint8_t dx;
 	uint32_t eax;
 	uint32_t ebx;
 	uint32_t ecx;

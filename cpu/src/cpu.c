@@ -715,16 +715,16 @@ int obtener_valor_registro(t_estrucutra_cpu registros_aux) {
 void asignar_valor_registro(int valor, t_estrucutra_cpu registros_aux) {
     switch (registros_aux) {
         case AX:
-            pcb->registros->ax = valor;
+            pcb->registros->ax = (uint8_t)valor;
             break;
         case BX:
-            pcb->registros->bx = valor;
+            pcb->registros->bx = (uint8_t)valor;
             break;
         case CX:
-            pcb->registros->cx = valor;
+            pcb->registros->cx = (uint8_t)valor;
             break;
         case DX:
-            pcb->registros->dx = valor;
+            pcb->registros->dx = (uint8_t)valor;
             break;
         case EAX:
             pcb->registros->eax = valor;
@@ -990,10 +990,10 @@ t_estrucutra_cpu devolver_registro(char* registro){
 void setear(t_estrucutra_cpu pos, uint32_t valor) {
 
     switch(pos) {
-        case AX: pcb->registros->ax = valor; break;
-        case BX: pcb->registros->bx = valor; break;
-        case CX: pcb->registros->cx = valor; break;
-        case DX: pcb->registros->dx = valor; break;
+        case AX: pcb->registros->ax =(uint8_t) valor; break;
+        case BX: pcb->registros->bx =(uint8_t) valor; break;
+        case CX: pcb->registros->cx =(uint8_t) valor; break;
+        case DX: pcb->registros->dx =(uint8_t) valor; break;
 		case EAX: pcb->registros->eax = valor; break;
 		case EBX: pcb->registros->ebx = valor; break;
 		case ECX: pcb->registros->ecx = valor; break;

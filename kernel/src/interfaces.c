@@ -7,6 +7,7 @@ void io_sleep_ready(int pid){
 	interfaz->pid = -1;
 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
 	//como pongo el bool que muestre true o false en vez de 0 o 1
+	log_error(logger,"ya termine de usar que pase el siguiente ya tengo el estado en uso= %i",interfaz->en_uso);
 	log_error(logger,"el estado de interfaz %s es %i", interfaz->nombre_interface,interfaz->en_uso);
 	vuelta_io_vrr(pcb);
 	//pthread_mutex_unlock(&sem_exec);
