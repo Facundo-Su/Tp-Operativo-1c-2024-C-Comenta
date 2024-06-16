@@ -164,7 +164,8 @@ void procesar_conexion(void *conexion1){
 					char * nombre_de_interfaz_sleep =list_get(paquete,0);
 					log_info(logger,"%s", nombre_de_interfaz_sleep);
 					int *unidad_trabajo_sleep = list_get(paquete,1);
-					ejecutar_io_sleep(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,running);
+					t_pcb* pcb_sleep = running;
+					ejecutar_io_sleep(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,pcb_sleep);
 					//agregar_cola_ready(running);
 					break;
 
@@ -185,8 +186,9 @@ void procesar_conexion(void *conexion1){
 					int *desplzazamiento_stdin_read = list_get(paquete,2);
 					valor_uin32t2 =list_get(paquete,3); //tamanio
 					valor_entero2 = (int) valor_uin32t2;
+					t_pcb* pcb_io_stdin_read = running;
 					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2);
-					ejecutar_io_stdin_read(valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2,running);
+					ejecutar_io_stdin_read(valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2,pcb_io_stdin_read);
 					break;
 				case IO_STDOUT_WRITE:
 					paquete = recibir_paquete(cliente_fd);
@@ -195,9 +197,10 @@ void procesar_conexion(void *conexion1){
 					int *desplzazamiento_stdout_write = list_get(paquete,2);//desplazamiento
 					valor_uin32t2 =list_get(paquete,3); //tamanio
 					valor_entero2 = (int) valor_uin32t2;
+					t_pcb* pcb_io_stdout_write = running;
 					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2);
 					log_warning(logger,"el pid es %i",running->contexto->pid);
-					ejecutar_io_stdin_write(valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2,running);
+					ejecutar_io_stdin_write(valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2,pcb_io_stdout_write);
 					break;
 
 				case IO_FS_CREATE:
