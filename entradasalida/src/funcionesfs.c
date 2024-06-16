@@ -69,40 +69,49 @@ void levantar_archivo_bloques(){
     // Cerrar el archivo después de asignar el mapeo
     close(file_descrip_bloques);
 }
-/*
-void crear_archivo_metadata(char* nombre_archivo){
 
+void crear_archivo_metadata(char* nombre_archivo){
+    char* escribo_key = string_new();
     FILE* archivo_MD;
     char* extension = "txt";
     char* path_archivo = string_new();
     t_config* archivo;
     string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
-        
+    log_warning(logger,"la path es  %s",path_archivo);  
     int primerBloqueLibre = proximoBitDisponible();//probar funcion
+    log_warning(logger,"bit libre %i",primerBloqueLibre); 
     asignarProximoBitDisponible();
-    char* bloqueInicialEnChar = itoa(primerBloqueLibre);
-
+    char* bloqueInicialEnChar = string_itoa(primerBloqueLibre);
+     
     archivo_MD = fopen(path_archivo, "w");
 
-    
-    archivo = config_create(path_archivo);
-    //aca uso las commons del config?
-    config_set_value(path_archivo, "TAMANIO_ARCHIVO", "0");
-    config_set_value(path_archivo, "BLOQUE_INICIAL", bloqueInicialEnChar);
-    config_save(path_archivo);
+    string_append_with_format(&escribo_key, "%s=%s\n", "TAMANIO_ARCHIVO", "0"); //inicializo
+    string_append_with_format(&escribo_key, "%s=%s\n", "BLOQUE_INICIAL", "10");//inicializo
 
-    config_destroy(path_archivo);
+    fwrite(escribo_key, strlen(escribo_key), 1, archivo_MD); 
 
     fclose(archivo_MD);
+     
+    archivo = config_create(path_archivo);
+    //aca uso las commons del config?
+    config_set_value(archivo, "TAMANIO_ARCHIVO", "0");
+    config_set_value(archivo, "BLOQUE_INICIAL", bloqueInicialEnChar);
+    //log_warning(logger,"itoa:  %s",bloqueInicialEnChar);
+    config_save(archivo);
+
+    config_destroy(archivo);
+
+    //fclose(archivo_MD);
 }
 
 int proximoBitDisponible(){
-    int fd = open(ruta_bitmap,O_RDONLY);
+    int fd = open(rutita_prueba,O_RDONLY);
     char* bitarray = malloc(block_count / 8);
     bitarray = mmap(NULL,block_count / 8,PROT_READ ,MAP_SHARED,fd,0);
     if(bitarray == MAP_FAILED)
     {
         log_error(logger,"no se pudo mapear el archivo de bitmap");
+        exit(EXIT_FAILURE);
     }
     t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
     int i = 0;
@@ -115,12 +124,13 @@ int proximoBitDisponible(){
 }
 
 void asignarProximoBitDisponible(){ //talvez se pueda achicar aun mas el codigo.
-    int fd = open(ruta_bitmap,O_RDWR);
+    int fd = open(rutita_prueba,O_RDWR);
     char* bitarray = malloc(block_count / 8);
     bitarray = mmap(NULL,block_count / 8,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0);
     if(bitarray == MAP_FAILED)
     {
         log_error(logger,"no se pudo mapear el archivo de bitmap");
+        exit(EXIT_FAILURE);
     }
     t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
     int i=0;
@@ -132,6 +142,6 @@ void asignarProximoBitDisponible(){ //talvez se pueda achicar aun mas el codigo.
     close(fd);
     bitarray_destroy(bitmap);
 }
-*/
+
 
 

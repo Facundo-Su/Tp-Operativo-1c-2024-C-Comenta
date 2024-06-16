@@ -13,6 +13,12 @@ extern int block_size;
 extern char* path_base_dialfs;
 extern char* rutita_prueba;
 //char* rutadial ="./dialfs";
+typedef struct{
+    char* nombre;
+    uint32_t tamanio_archivo;
+    uint32_t bloq_inicial_archivo;
+    //t_config* config; lo necesitaria?
+}t_metadata; //estructura que podria necesitar para administrar los metadatas?
 
 void levantarBitMap();
 void levantar_archivo_bloques();

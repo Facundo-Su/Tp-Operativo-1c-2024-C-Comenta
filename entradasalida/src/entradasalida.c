@@ -9,6 +9,8 @@ int main(int argc, char* argv[]) {
     obtener_configuracion("teclado.config");
     levantar_archivo_bloques();
     levantarBitMap();
+    crear_archivo_metadata("eurocopa");
+    crear_archivo_metadata("vamos9z");
     log_info(logger, "Inicio de fs bien");
     //pthread_mutex_init(&mutex_respuesta_stdout_write, NULL);
     //pthread_mutex_lock(&mutex_respuesta_stdout_write);
@@ -243,7 +245,12 @@ void procesar_conexion(void *conexion_ptr){
             pthread_mutex_unlock(&mutex_respuesta_stdout_write);
             break;*/
         case EJECUTAR_IO_FS_CREATE:
-        	//TO-DO
+        	/*paquete=recibir_paquete(cliente_fd);
+			char* nombre_archivo=list_get(lista,0);
+
+			log_info(logger, "Crear Archivo: <%s>",nombre_archivo);
+			crear_archivo_metadata(nombre_archivo);
+			enviar_respuesta_crear_archivo(cliente_fd);*/
         	break;
         case EJECUTAR_IO_FS_DELETE:
         	//TO-DO
@@ -302,3 +309,10 @@ void enviar_kernel_ok_stdout(int cliente_fd, int pid){
 	enviar_paquete(paquete, cliente_fd);
 	eliminar_paquete(paquete);
 }
+/*
+void enviar_respuesta_crear_archivo(int cliente_fd) {
+	t_paquete *paquete = crear_paquete(RESPUESTA_CREAR_ARCHIVO);
+	agregar_a_paquete(paquete, 1, sizeof(int));
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}*/
