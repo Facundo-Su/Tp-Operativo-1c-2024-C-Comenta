@@ -6,6 +6,8 @@ void io_sleep_ready(int pid){
 	interfaz->en_uso = false;
 	interfaz->pid = -1;
 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
+	//como pongo el bool que muestre true o false en vez de 0 o 1
+	log_error(logger,"el estado de interfaz %s es %i", interfaz->nombre_interface,interfaz->en_uso);
 	vuelta_io_vrr(pcb);
 	//pthread_mutex_unlock(&sem_exec);
 	if(!queue_is_empty(interfaz->cola_espera->cola)){
@@ -23,6 +25,7 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,
 			finalizar_pcb(pcb);
 		}else{
 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
+			log_warning(logger,"el estado de interfaz nombre: %s es %i", interfaz->nombre_interface,interfaz->en_uso);
 			if(!interfaz->en_uso){
 				interfaz->en_uso = true;
 				interfaz->pid = pcb->contexto->pid;
@@ -179,6 +182,7 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
             list_add(lista_bloqueado_io,pcb);
 			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 			enviar_dormir(pcb->contexto->pid,unidad_trabajo_sleep,interfaz->codigo_cliente);
+			log_warning(logger,"nadie esta en uso , puedo mandar directamente");
 			pthread_mutex_unlock(&sem_exec);
 
         }else{
@@ -189,6 +193,7 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 			blocked->unidad_trabajo = unidad_trabajo_sleep;
 			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
 			sigue = false;
+			log_warning(logger,"hay alguien que esta usando , me paso a bloqueado");
             agregar_cola_bloqueados_interfaces(interfaz,blocked);
 			pthread_mutex_unlock(&sem_exec);
         }

@@ -193,7 +193,7 @@ void procesar_conexion(void *conexion1){
 					valor_char =list_get(paquete,0);// nombre
 					valor_entero =list_get(paquete,1); // nro marco
 					int *desplzazamiento_stdout_write = list_get(paquete,2);//desplazamiento
-					valor_uin32t2 =list_get(paquete,2); //tamanio
+					valor_uin32t2 =list_get(paquete,3); //tamanio
 					valor_entero2 = (int) valor_uin32t2;
 					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2);
 					log_warning(logger,"el pid es %i",running->contexto->pid);

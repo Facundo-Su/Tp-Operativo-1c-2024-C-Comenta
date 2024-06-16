@@ -71,13 +71,22 @@ void procesar_conexion(void* socket){
 					envio_mov_in(cliente_fd);
 					break;
 				case ENVIO_MOV_OUT:
+					void *valor_leido2 = malloc(20);
+    				memcpy(valor_leido2, memoria->espacio_usuario+16, 20);
+					log_warning(logger,"EL DATO ante de ejecutar ES %s",valor_leido2);
 					envio_mov_out(cliente_fd);
+					void *valor_leido3 = malloc(20);
+    				memcpy(valor_leido3, memoria->espacio_usuario+16, 20);
+					log_error(logger,"EL DATO despues de ejecutar ES %s",valor_leido3);
 					break;
 				case COPY_STRING_MEMORIA:
 					copy_string(cliente_fd);
 					break;
 				case EJECUTAR_STDIN_READ:
 					stdin_read(cliente_fd);
+					void *valor_leido = malloc(20);
+    				memcpy(valor_leido, memoria->espacio_usuario+16, 20);
+					log_info(logger,"EL DATO ES %s",valor_leido);
 					break;
 				case EJECUTAR_STDOUT_WRITE:
 					stdout_write(cliente_fd);

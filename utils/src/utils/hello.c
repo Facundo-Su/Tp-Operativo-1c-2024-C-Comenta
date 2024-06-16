@@ -286,8 +286,29 @@ t_contexto_ejecucion* desempaquetar_pcb(t_list* paquete){
 	contexto_ejecucion->pc = *pc;
 	t_registros_pcb* registros = desempaquetar_registros(paquete, puntero_posicion);
 	contexto_ejecucion->registros = registros;
+
+	obtener_los_valores_de_contexto_ejecucion(contexto_ejecucion);
 	return contexto_ejecucion;
 }
+
+void obtener_los_valores_de_contexto_ejecucion(t_contexto_ejecucion* contexto_ejecucion){
+
+	t_registros_pcb* registros = contexto_ejecucion->registros;
+	contexto_ejecucion->registros = registros;
+	log_warning(logger, "PID: %d", contexto_ejecucion->pid);
+	log_warning(logger, "PC: %d", contexto_ejecucion->pc);
+	log_warning(logger, "AX: %d", contexto_ejecucion->registros->ax);
+	log_warning(logger, "BX: %d", contexto_ejecucion->registros->bx);
+	log_warning(logger, "CX: %d", contexto_ejecucion->registros->cx);
+	log_warning(logger, "DX: %d", contexto_ejecucion->registros->dx);
+	log_warning(logger, "EAX: %d", contexto_ejecucion->registros->eax);
+	log_warning(logger, "EBX: %d", contexto_ejecucion->registros->ebx);
+	log_warning(logger, "ECX: %d", contexto_ejecucion->registros->ecx);
+	log_warning(logger, "EDX: %d", contexto_ejecucion->registros->edx);
+	log_warning(logger, "SI: %d", contexto_ejecucion->registros->si);
+	log_warning(logger, "DI: %d", contexto_ejecucion->registros->di);
+}
+
 
 t_registros_pcb* desempaquetar_registros(t_list* paquete, int* posicion) {
     t_registros_pcb* registro = malloc(sizeof(t_registros_pcb));

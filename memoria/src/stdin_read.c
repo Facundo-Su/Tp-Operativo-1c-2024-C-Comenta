@@ -14,11 +14,9 @@ void stdin_read(int cliente_fd){
     void * m = malloc(*tamanio);
     memcpy(m,memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, *tamanio);
     log_info(logger,"el valor leido es %s",m);
-    free(m);
     enviar_respuesta_IO(1, RESPUESTA_STDIN_READ,cliente_fd);
     int dir = (*marco * tam_pagina) + *desplazamiento;
     log_info(logger,"PID: %i- Accion: ESCRIBIR - Direccion fisica: %i- Tamaño:  %i",*pid, dir, *tamanio);
-    free(valor_a_copiar);
 }
 
 

@@ -174,6 +174,6 @@ void mostrar_contexto_ejecucion(t_contexto_ejecucion* contexto_ejecucion);
 t_contexto_ejecucion* desempaquetar_pcb(t_list* paquete);
 t_registros_pcb* desempaquetar_registros(t_list* paquete, int* posicion);
 void enviar_pcb(t_contexto_ejecucion* pcb, int socket_cliente,op_code operacion);
-
+void obtener_los_valores_de_contexto_ejecucion(t_contexto_ejecucion* contexto_ejecucion);
 
 #endif

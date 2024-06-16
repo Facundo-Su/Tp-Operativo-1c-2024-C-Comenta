@@ -668,7 +668,7 @@ void enviar_io_fs_create(char* parametro,char* parametro2,int cliente_fd){
 }
 
 void enviar_io_stdout_write(char* parametro,t_traduccion* traducido,uint32_t parametro3,int cliente_fd){
-	log_error(logger, "ENVIO FWRITE nombre %s,marco %i, despĺazamiento %i, tamanio %i",parametro,traducido->marco,traducido->desplazamiento);
+	log_error(logger, "ENVIO FWRITE nombre %s,marco %i, despĺazamiento %i, tamanio %i",parametro,traducido->marco,traducido->desplazamiento,parametro3);
 	t_paquete* paquete = crear_paquete(IO_STDOUT_WRITE);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
@@ -766,6 +766,7 @@ void enviar_a_memoria_copy_string(int tamanio,t_traduccion* traducido_origen,t_t
 	agregar_a_paquete(paquete,&(traducido_destino->marco),sizeof(int));
 	agregar_a_paquete(paquete,&(traducido_destino->desplazamiento),sizeof(int));
 	enviar_paquete(paquete, conexion_memoria);
+	//quiero ver el marco y
 	eliminar_paquete(paquete);
 }
 
