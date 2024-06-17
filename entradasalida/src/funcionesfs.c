@@ -82,7 +82,7 @@ void crear_archivo_metadata(char* nombre_archivo){
     log_warning(logger,"bit libre %i",primerBloqueLibre); 
     asignarProximoBitDisponible();
     char* bloqueInicialEnChar = string_itoa(primerBloqueLibre);
-     
+    log_warning(logger,"el nombre de archivo es%s",path_archivo);
     archivo_MD = fopen(path_archivo, "w");
 
     string_append_with_format(&escribo_key, "%s=%s\n", "TAMANIO_ARCHIVO", "0"); //inicializo

@@ -14,5 +14,6 @@ t_interfaz * buscar_interfaz_por_pid(int pid, t_list * lista);
 void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb);
 void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb);
 void io_stdout_write_ready(int pid);
+void ejecutar_io_fs_create(char *nombre_interfaz,char* nombre_archivo_f_create,t_pcb* pcb);
 
 #endif

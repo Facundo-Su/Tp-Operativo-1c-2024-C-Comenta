@@ -9,13 +9,13 @@ int main(int argc, char* argv[]) {
     obtener_configuracion("teclado.config");
     levantar_archivo_bloques();
     levantarBitMap();
-    crear_archivo_metadata("eurocopa");
-    crear_archivo_metadata("vamos9z");
+    //crear_archivo_metadata("eurocopa");
+    //crear_archivo_metadata("vamos9z");
     log_info(logger, "Inicio de fs bien");
     //pthread_mutex_init(&mutex_respuesta_stdout_write, NULL);
     //pthread_mutex_lock(&mutex_respuesta_stdout_write);
 
-	//iniciar_consola();	
+	iniciar_consola();	
 
     return EXIT_SUCCESS;
 }
@@ -41,6 +41,12 @@ void iniciar_consola(){
             path_configuracion = "teclado.config";
             obtener_configuracion(path_configuracion);
             iniciar_interfaz_stdin();
+            }
+        else if (strcmp(interfaz_name, "FS") == 0)
+        {
+            path_configuracion = "fs.config";
+            obtener_configuracion(path_configuracion);
+            iniciar_interfaz_fs();
         }else{
             log_error(logger_consola,"Interfaz desconocidad");
         }
@@ -90,6 +96,12 @@ void iniciar_interfaz_stdin() {
 	generar_conexion_con_kernel();
     
 }
+
+void  iniciar_interfaz_fs() {
+    log_info(logger, "Ingreso a la interfaz FS");
+    generar_conexion_con_kernel();
+}
+
 void iniciar_interfaz_stdout() {
     log_info(logger, "Ingreso a la interfaz STDOUT");
 	generar_conexion_con_kernel();
@@ -156,10 +168,10 @@ void procesar_conexion(void *conexion_ptr){
 	t_contexto_ejecucion * contexto;
 	t_paquete * paquete;
 
-    t_paquete* paquete2 = crear_paquete(CONEXION_INTERFAZ);
-    agregar_a_paquete(paquete2, interfaz_name, strlen(interfaz_name)+1);
-	agregar_a_paquete(paquete2, tipo_interfaz, strlen(interfaz_name)+1);
-	enviar_paquete(paquete2, cliente_fd);
+    t_paquete* paquetre2 = crear_paquete(CONEXION_INTERFAZ);
+    agregar_a_paquete(paquetre2, interfaz_name, strlen(interfaz_name)+1);
+	agregar_a_paquete(paquetre2, tipo_interfaz, strlen(interfaz_name)+1);
+	enviar_paquete(paquetre2, cliente_fd);
 
     while (1) {
         int cod_op = recibir_operacion(conexion);
@@ -245,27 +257,19 @@ void procesar_conexion(void *conexion_ptr){
             pthread_mutex_unlock(&mutex_respuesta_stdout_write);
             break;*/
         case EJECUTAR_IO_FS_CREATE:
-        	/*paquete=recibir_paquete(cliente_fd);
-			char* nombre_archivo=list_get(lista,0);
+        	paquete=recibir_paquete(cliente_fd);
+            char* nombre_archivo=list_get(paquete,0);
+            int* pid_f_create = list_get(paquete,1);
+
 
 			log_info(logger, "Crear Archivo: <%s>",nombre_archivo);
 			crear_archivo_metadata(nombre_archivo);
-			enviar_respuesta_crear_archivo(cliente_fd);*/
+            enviar_respuesta_crear_archivo(cliente_fd,*pid_f_create);
         	break;
         case EJECUTAR_IO_FS_DELETE:
         	//TO-DO
         	break;
         case EJECUTAR_IO_FS_TRUNCATE:
-        	//TO-DO
-        	break;
-        case EJECUTAR_IO_FS_WRITE:
-        	//TO-DO
-        	break;
-        case EJECUTAR_IO_FS_READ:
-        	//TO-DO
-        	break;
-            
-        default:
             //(logger, "Operación desconocida. Revisar el protocolo de comunicación.");
             break;
         }
@@ -309,10 +313,10 @@ void enviar_kernel_ok_stdout(int cliente_fd, int pid){
 	enviar_paquete(paquete, cliente_fd);
 	eliminar_paquete(paquete);
 }
-/*
-void enviar_respuesta_crear_archivo(int cliente_fd) {
+
+void enviar_respuesta_crear_archivo(int cliente_fd,int pid) {
 	t_paquete *paquete = crear_paquete(RESPUESTA_CREAR_ARCHIVO);
-	agregar_a_paquete(paquete, 1, sizeof(int));
-	enviar_paquete(paquete, cliente_fd);
+	agregar_a_paquete(paquete, &pid, sizeof(int));
+	enviar_paquete(paquete,cliente_fd);
 	eliminar_paquete(paquete);
-}*/
+}

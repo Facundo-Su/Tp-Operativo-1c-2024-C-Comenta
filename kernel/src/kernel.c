@@ -205,6 +205,9 @@ void procesar_conexion(void *conexion1){
 
 				case IO_FS_CREATE:
 					paquete = recibir_paquete(cliente_fd);
+					char* nombre_interfaz_f_create = list_get(paquete,0);
+					char* nombre_archivo_f_create = list_get(paquete,1);
+					ejecutar_io_fs_create(nombre_interfaz_f_create,nombre_archivo_f_create,running);
 
 					break;
 				case IO_FS_DELETE:
@@ -253,6 +256,12 @@ void procesar_conexion(void *conexion1){
 			//log_pcb_info(pcb_aux);
 			agregar_cola_ready(running);
 			pthread_mutex_unlock(&sem_exec);
+			break;
+		case RESPUESTA_CREAR_ARCHIVO:
+			paquete = recibir_paquete(cliente_fd);
+			int *pid_crear_archivo = list_get(paquete,0);
+			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			io_fs_create_ready(*pid_crear_archivo);
 			break;
 
 		case FINALIZAR:

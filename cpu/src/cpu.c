@@ -520,7 +520,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		parametro = list_get(instrucciones->parametros,0);
 		parametro2 = list_get(instrucciones->parametros,1);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
-		enviar_io_fs_create(parametro,parametro2,parametro3,cliente_fd);
+		enviar_io_fs_create(parametro,parametro2,cliente_fd);
 
 		break;
 	case IO_FS_DELETE:
@@ -664,6 +664,7 @@ void enviar_io_fs_create(char* parametro,char* parametro2,int cliente_fd){
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, parametro2, strlen(parametro2)+1);
 	enviar_paquete(paquete, cliente_fd);
+	log_warning(logger, "Enviando el nombre de archivo a crear: %s",parametro2);
 	eliminar_paquete(paquete);
 }
 

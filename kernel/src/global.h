@@ -50,6 +50,7 @@ typedef struct{
     int nro_marco;
     int tamanio;
     int desplazamiento;
+    char* nombre_archivo_crear;
 }t_blocked_io;
 
 extern sem_t sem_new;
@@ -62,6 +63,7 @@ extern pthread_mutex_t sem_interrupcion;
 extern pthread_mutex_t sem_detener_conexion;
 extern pthread_mutex_t sem_vrr;
 extern pthread_mutex_t sem_quantum;
+extern pthread_mutex_t sem_lista_bloqueado_interfaces;
 extern t_cola * cola_new;
 extern t_cola * cola_ready;
 extern t_cola * cola_blocked;

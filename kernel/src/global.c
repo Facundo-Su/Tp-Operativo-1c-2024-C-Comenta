@@ -10,6 +10,7 @@ pthread_mutex_t sem_interrupcion;
 pthread_mutex_t sem_detener_conexion;
 pthread_mutex_t sem_vrr;
 pthread_mutex_t sem_quantum;
+pthread_mutex_t sem_lista_bloqueado_interfaces;
 
 
 t_cola * cola_new;
@@ -97,6 +98,7 @@ void inicializar_estructuras(){
     pthread_mutex_init(&sem_vrr, NULL);
     pthread_mutex_init(&sem_quantum, NULL);
     pthread_mutex_init(&sem_detener_conexion, NULL);
+    pthread_mutex_init(&sem_lista_bloqueado_interfaces, NULL);
     pthread_mutex_lock(&sem_interrupcion);
     pthread_mutex_lock(&sem_detener);
     pthread_mutex_lock(&sem_detener_largo);
