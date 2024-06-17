@@ -1,6 +1,8 @@
 #include "funcionesfs.h"
 
 //path_base_dialfs
+void *archivo_de_bloques;
+
 void levantarBitMap(){//crea y inicializa en 0 el bitmap
     //CREAR ARCHIVO BITMAP
     
@@ -55,9 +57,9 @@ void levantar_archivo_bloques(){
         exit(EXIT_FAILURE);
     }
 
-    void *bloq = mmap(NULL, tamanio, PROT_READ | PROT_WRITE, MAP_SHARED,file_descrip_bloques, 0);
+    archivo_de_bloques = mmap(NULL, tamanio, PROT_READ | PROT_WRITE, MAP_SHARED,file_descrip_bloques, 0);
 
-    if (bloq != MAP_FAILED) {
+    if (archivo_de_bloques != MAP_FAILED) {
         log_info(logger,"El archivo bloques se ha mapeado correctamente en la memoria.");
 
     } else {
@@ -77,12 +79,13 @@ void crear_archivo_metadata(char* nombre_archivo){
     char* path_archivo = string_new();
     t_config* archivo;
     string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
-    log_warning(logger,"la path es  %s",path_archivo);  
+    //log_warning(logger,"la path es  %s",path_archivo);  
     int primerBloqueLibre = proximoBitDisponible();//probar funcion
-    log_warning(logger,"bit libre %i",primerBloqueLibre); 
+    //log_warning(logger,"bit libre %i",primerBloqueLibre); 
     asignarProximoBitDisponible();
+    ocupar_un_bloque_incio(primerBloqueLibre);
     char* bloqueInicialEnChar = string_itoa(primerBloqueLibre);
-    log_warning(logger,"el nombre de archivo es%s",path_archivo);
+    //log_warning(logger,"el nombre de archivo es%s",path_archivo);
     archivo_MD = fopen(path_archivo, "w");
 
     string_append_with_format(&escribo_key, "%s=%s\n", "TAMANIO_ARCHIVO", "0"); //inicializo
@@ -100,7 +103,7 @@ void crear_archivo_metadata(char* nombre_archivo){
     config_save(archivo);
 
     config_destroy(archivo);
-
+    
     //fclose(archivo_MD);
 }
 
@@ -141,6 +144,18 @@ void asignarProximoBitDisponible(){ //talvez se pueda achicar aun mas el codigo.
     msync(bitarray,block_count / 8,MS_SYNC);//eso o fd? luego ver
     close(fd);
     bitarray_destroy(bitmap);
+}
+
+void ocupar_un_bloque_incio(int bloque){
+    /*FILE* archivoBLoques = fopen("bloques.dat","rb+");
+    //memcpy(0,"x",block_size);
+    fseek(archivoBLoques,0,SEEK_SET);
+    fwrite("xxxxxxxx",strlen("xxxxxxxx"),1,archivoBLoques);
+    fclose(archivoBLoques);*/
+    log_warning(logger,"inicializo el bloque %i",bloque);
+    //char* buffer = (char*)malloc(block_size);
+    memset(archivo_de_bloques+(bloque*block_size), 'a', block_size);
+    //free(buffer);
 }
 
 

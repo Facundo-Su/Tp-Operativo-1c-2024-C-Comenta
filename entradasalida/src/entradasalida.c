@@ -9,13 +9,14 @@ int main(int argc, char* argv[]) {
     obtener_configuracion("teclado.config");
     levantar_archivo_bloques();
     levantarBitMap();
-    //crear_archivo_metadata("eurocopa");
-    //crear_archivo_metadata("vamos9z");
+    crear_archivo_metadata("eurocopa");
+    crear_archivo_metadata("vamos9z");
+    crear_archivo_metadata("fnatic");
     log_info(logger, "Inicio de fs bien");
     //pthread_mutex_init(&mutex_respuesta_stdout_write, NULL);
     //pthread_mutex_lock(&mutex_respuesta_stdout_write);
 
-	iniciar_consola();	
+	//iniciar_consola();	
 
     return EXIT_SUCCESS;
 }

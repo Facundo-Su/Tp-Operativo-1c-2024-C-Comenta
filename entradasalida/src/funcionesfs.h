@@ -25,5 +25,6 @@ void levantar_archivo_bloques();
 void crear_archivo_metadata(char* nombre_archivo);
 int proximoBitDisponible();
 void asignarProximoBitDisponible();
+void ocupar_un_bloque_incio(int bloque);
 
 #endif
