@@ -64,6 +64,7 @@ extern pthread_mutex_t sem_detener_conexion;
 extern pthread_mutex_t sem_vrr;
 extern pthread_mutex_t sem_quantum;
 extern pthread_mutex_t sem_lista_bloqueado_interfaces;
+extern pthread_mutex_t sem_memoria;
 extern t_cola * cola_new;
 extern t_cola * cola_ready;
 extern t_cola * cola_blocked;

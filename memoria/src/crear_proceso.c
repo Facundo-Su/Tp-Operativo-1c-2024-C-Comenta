@@ -7,14 +7,21 @@ void crear_proceso (int cliente_fd){
 	char*ruta = obtener_ruta(aux);
 	cargar_lista_instruccion(*pid, ruta);
     guardar_proceso_en_memoria(*pid);
+    enviar_respuest_kernel(cliente_fd);
 }
-
+void enviar_respuest_kernel(int cliente_fd){
+	t_paquete* paquete = crear_paquete(CREAR_PROCESO);
+    int i = 1;
+	agregar_a_paquete(paquete, &i, sizeof(int));
+	enviar_paquete(paquete, cliente_fd);
+	eliminar_paquete(paquete);
+}
 void cargar_lista_instruccion(int pid, char* ruta) {
     t_instrucciones* instruccion = malloc(sizeof(t_instrucciones));
     instruccion->pid = pid;
     instruccion->instrucciones = list_create();
 
-    ruta = "./prueba.txt";
+    ///ruta = "./prueba.txt";
     log_info(logger, "%s",ruta);
     FILE* archivo = fopen(ruta, "r");
 

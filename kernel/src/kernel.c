@@ -141,7 +141,12 @@ void procesar_conexion(void *conexion1){
 			char * nombre_interfaz = strtok(n, "\n");
 			agregar_interfaces(nombre_interfaz, conexion_obtenido);
 
-			break;	
+			break;
+		case CREAR_PROCESO:
+			paquete = recibir_paquete(cliente_fd);
+			pthread_mutex_unlock(&sem_memoria);
+			log_info(logger,"CARGUE INSTRUCCIONES");
+		break;
 		case RECIBIR_PCB:
 			paquete = recibir_paquete(cliente_fd);
 			contexto= desempaquetar_pcb(paquete);
