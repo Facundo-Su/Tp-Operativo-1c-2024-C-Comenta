@@ -2,7 +2,7 @@
 #define FUNCIONESFS_H_
 
 #include <utils/hello.h>
-
+#include <commons/collections/list.h> 
 #include <fcntl.h>
 #include <commons/string.h>
 #include <commons/bitarray.h>
@@ -18,7 +18,9 @@ typedef struct{
     uint32_t tamanio_archivo;
     uint32_t bloq_inicial_archivo;
     //t_config* config; lo necesitaria?
-}t_metadata; //estructura que podria necesitar para administrar los metadatas?
+}t_metadata; 
+//estructura que podria necesitar para administrar los metadatas?
+extern t_list* metadatas;
 
 void levantarBitMap();
 void levantar_archivo_bloques();
@@ -26,5 +28,8 @@ void crear_archivo_metadata(char* nombre_archivo);
 int proximoBitDisponible();
 void asignarProximoBitDisponible();
 void ocupar_un_bloque_incio(int bloque);
+void borrar_archivo(char* nombre_archivo);
+void inicializar_lista();
+void funcion_prueba_lista();
 
 #endif

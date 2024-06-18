@@ -22,6 +22,7 @@ char* interfaz_name;
 t_log* logger;
 t_config* config;
 
+
 int conexion_memoria_prueba;
 
 int conexion_kernel;

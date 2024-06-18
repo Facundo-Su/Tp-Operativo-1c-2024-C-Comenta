@@ -2,17 +2,22 @@
 
 
 char* palabra_usuario;
+t_list* metadatas;
 
 int main(int argc, char* argv[]) {
+    metadatas=list_create();
     logger = log_create("./entradasalida.log", "I/O", true, LOG_LEVEL_INFO);
     log_info(logger, "Soy el I/O!");
     obtener_configuracion("teclado.config");
     levantar_archivo_bloques();
     levantarBitMap();
+    //inicializar_lista();
     crear_archivo_metadata("eurocopa");
     crear_archivo_metadata("vamos9z");
     crear_archivo_metadata("fnatic");
-    log_info(logger, "Inicio de fs bien");
+    funcion_prueba_lista();
+    
+    
     //pthread_mutex_init(&mutex_respuesta_stdout_write, NULL);
     //pthread_mutex_lock(&mutex_respuesta_stdout_write);
 

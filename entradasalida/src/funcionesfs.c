@@ -2,6 +2,7 @@
 
 //path_base_dialfs
 void *archivo_de_bloques;
+//const t_list* metadatas=list_create();
 
 void levantarBitMap(){//crea y inicializa en 0 el bitmap
     //CREAR ARCHIVO BITMAP
@@ -71,13 +72,30 @@ void levantar_archivo_bloques(){
     // Cerrar el archivo después de asignar el mapeo
     close(file_descrip_bloques);
 }
-
+/*void inicializar_lista(){
+    metadatas=list_create();
+}*/
+void funcion_prueba_lista(){
+    log_warning(logger,"la lista tiene  %i archivos metadata",list_size(metadatas));
+    //t_metadata* aux = (t_metadata*) malloc(sizeof(t_metadata));
+    t_metadata* aux=list_get(metadatas,1);
+    if (aux != NULL) {
+        printf("Nombre del archivo: %s\n", aux->nombre);
+        printf("Tamaño del archivo: %u\n", aux->tamanio_archivo);
+        printf("Bloque inicial del archivo: %u\n", aux->bloq_inicial_archivo);
+    } else {
+        log_warning(logger, "La lista está vacía o el índice es inválido.");
+    }
+ 
+}
 void crear_archivo_metadata(char* nombre_archivo){
     char* escribo_key = string_new();
     FILE* archivo_MD;
     char* extension = "txt";
     char* path_archivo = string_new();
+    t_metadata* nueva_metadata = (t_metadata*) malloc(sizeof(t_metadata));
     t_config* archivo;
+
     string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
     //log_warning(logger,"la path es  %s",path_archivo);  
     int primerBloqueLibre = proximoBitDisponible();//probar funcion
@@ -94,17 +112,26 @@ void crear_archivo_metadata(char* nombre_archivo){
     fwrite(escribo_key, strlen(escribo_key), 1, archivo_MD); 
 
     fclose(archivo_MD);
-     
+
+    nueva_metadata->nombre=nombre_archivo;
+    nueva_metadata->tamanio_archivo=0;
+    nueva_metadata->bloq_inicial_archivo=primerBloqueLibre;
+    
+    list_add(metadatas,nueva_metadata);
+
+    //lo meto en una lista administrativa de metadatas
     archivo = config_create(path_archivo);
     //aca uso las commons del config?
     config_set_value(archivo, "TAMANIO_ARCHIVO", "0");
     config_set_value(archivo, "BLOQUE_INICIAL", bloqueInicialEnChar);
     //log_warning(logger,"itoa:  %s",bloqueInicialEnChar);
     config_save(archivo);
-
+    //log_warning(logger,"archivo:  %s",nueva_metadata->nombre);
+    //log_warning(logger,"tamanio lista  %i",list_size(metadatas));
     config_destroy(archivo);
-    
-    //fclose(archivo_MD);
+    free(nueva_metadata);
+    free(path_archivo);
+
 }
 
 int proximoBitDisponible(){
@@ -156,6 +183,9 @@ void ocupar_un_bloque_incio(int bloque){
     //char* buffer = (char*)malloc(block_size);
     memset(archivo_de_bloques+(bloque*block_size), 'a', block_size);
     //free(buffer);
+}
+void borrar_archivo(char* nombre_archivo){
+    
 }
 
 
