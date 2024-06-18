@@ -78,11 +78,13 @@ void levantar_archivo_bloques(){
 void funcion_prueba_lista(){
     log_warning(logger,"la lista tiene  %i archivos metadata",list_size(metadatas));
     //t_metadata* aux = (t_metadata*) malloc(sizeof(t_metadata));
-    t_metadata* aux=list_get(metadatas,1);
+    t_metadata* aux=list_get(metadatas,2);
+    log_warning(logger,"el nombre de metadata es %s",aux->nombre);
     if (aux != NULL) {
-        printf("Nombre del archivo: %s\n", aux->nombre);
-        printf("Tamaño del archivo: %u\n", aux->tamanio_archivo);
-        printf("Bloque inicial del archivo: %u\n", aux->bloq_inicial_archivo);
+        //cambiame por log_warning
+        log_warning(logger, "Nombre del archivo: %s", aux->nombre);
+        log_warning(logger, "Tamaño del archivo: %u", aux->tamanio_archivo);
+        log_warning(logger, "Bloque inicial del archivo: %u", aux->bloq_inicial_archivo);
     } else {
         log_warning(logger, "La lista está vacía o el índice es inválido.");
     }
@@ -103,7 +105,7 @@ void crear_archivo_metadata(char* nombre_archivo){
     asignarProximoBitDisponible();
     ocupar_un_bloque_incio(primerBloqueLibre);
     char* bloqueInicialEnChar = string_itoa(primerBloqueLibre);
-    //log_warning(logger,"el nombre de archivo es%s",path_archivo);
+    log_warning(logger,"el nombre de archivo es%s",path_archivo);
     archivo_MD = fopen(path_archivo, "w");
 
     string_append_with_format(&escribo_key, "%s=%s\n", "TAMANIO_ARCHIVO", "0"); //inicializo
@@ -129,7 +131,7 @@ void crear_archivo_metadata(char* nombre_archivo){
     //log_warning(logger,"archivo:  %s",nueva_metadata->nombre);
     //log_warning(logger,"tamanio lista  %i",list_size(metadatas));
     config_destroy(archivo);
-    free(nueva_metadata);
+
     free(path_archivo);
 
 }
