@@ -189,6 +189,100 @@ void ocupar_un_bloque_incio(int bloque){
 void borrar_archivo(char* nombre_archivo){
     
 }
+/*void truncar_archivo(char *nombre, int nuevo_tamanio_bytes) {
+
+    t_metadata* meta = devolver_metadata(nombre);
+    
+    if (meta->tamanio_archivo < nuevo_tamanio_bytes) {
+        //aqui podria verificar si hay o no bloques disponibles.
+        ampliar_tam_archivo(meta, nuevo_tamanio_bytes);
+
+    } else if(meta->tamanio_archivo>nuevo_tamanio_bytes){
+        //si un archivo ocupa un bloque se puede reducir? noo creo que prueben eso.
+        reducir_tam_archivo(meta, nuevo_tamanio_bytes);
+        
+    }else{
+        log_info(logger,"el archivo tiene el mismo tamaño para truncar");
+    }
+    //actualizar_meta(meta);
+}
+
+t_metadata* devolver_metadata(char *nombre) {
+    //log_info(logger, "llega el archivo %s",nombre);
+    for (int i = 0; i < list_size(metadatas); i++) {
+        t_metadata* meta_buscado = list_get(metadatas, i);
+        if (strcmp(meta_buscado->nombre, nombre) == 0) {
+            log_info(logger, "se encontro el archivo %s",meta_buscado->nombre);
+
+            return meta_buscado;
+        }
+
+    }
+
+    log_info(logger,"El archivo buscado no se encuentra en la lista.");
+    return NULL;
+}
+
+// ejemplo ampliar_tam_archivo(meta,256) cada bloque tiene 64bytes segun el config.
+// ejemplo ampliar_tam_archivo(meta,280) cada bloque tiene 64bytes segun el config.
+// en el caso de 280 necesito 4,37 bloques lo redondeo a 5.
+
+void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes) {
+    bool espacio_contiguo;
+    //obtengo ultimo bloque
+    int ultimo_bloque_Actual = (int)ceil((double)meta->tamanio_archivo / block_size);
+    //ejemplo 256-64= 192 bytes que tengo que agregar a mi archivo
+    //es 64 porque tomo como ejemplo un archivo de tamaño un bloque podria ser mas.
+    int bytes_nuevos_necesarios = tamanio_nuevo_bytes - meta->tamanio_archivo;
+    // cuantos bloques necesito agregar? multiplo o no? si es nuevo archivo?
+    int cant_nuevos_bloques = calcular_bloq_necesarios(bytes_nuevos_necesarios);
+    //int can_bloques_archivo=meta->bloq_inicial_archivo+cant_nueva_bloques;
+    //chequeo que los proximo bits esten en 0 para asignarlos de lo contrario compactar();
+    
+    espacio_contiguo = hay_bloques_libres_contiguos(cant_nuevos_bloques,ultimo_bloque_Actual);
+    if(espacio_contiguo == true){
+        log_warning(logger, "hay bloques continuos libres suficientes");
+        //asigno_bloque();
+        //asigno_bit();
+        //escribo_nuevo_tam();
+    }else{
+        compactar();
+    }
+   
+    //meta->tamanio_archivo = tamanio_nuevo_bytes;
+}
+
+int calcular_bloq_necesarios_fcb(int bytes_nuevos_necesarios) {
+    int cant_bloq_necesarios;
+    if (tam_bytes % block_size == 0) {//es multipo
+        // ejemplo 192 / 64 =3 con resto 0 porque es multiplo
+        cant_bloq_necesarios = bytes_nuevos_necesarios / block_size; 
+    } else {
+        //aca entraria en el caso de ingresar 280-> 280-64=216 que no es multiplo de 64
+        //los bytes restantes no llegan a ocupar 1 bloque
+        if (bytes_nuevos_necesarios > block_size) {
+            cant_bloq_necesarios = (bytes_nuevos_necesarios / block_size) + 1;
+        } else {
+            //cant bytes<block_size
+            cant_bloq_necesarios = 1;
+        }
+
+    }
+    return cant_bloq_necesarios;
+}
+
+bool hay_bloques_libres_contiguos(int cant_nuevos_bloques,int ultimo_bloque_Actual){
+    //ver en si en el bitmap los proximos bits que necesito(simulan bloques que necesito) 
+    //estan en 0. O si no estan en 0 devuelvo un false porque no tendria espacio contiguo.
+    bool respuesta;
+    //TO-DO
+    return respuesta;
+}
+
+void compactar(){
+    log_warning(logger, "INICIANDO COMPACTACION....");
+}
+*/
 
 
 
