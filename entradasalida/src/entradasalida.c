@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     //crear_archivo_metadata("vamos9z");
     //crear_archivo_metadata("fnatic");
     //funcion_prueba_lista();
-    truncar_archivo("eurocopa",128);
+    truncar_archivo("eurocopa",360);
     
     
     //pthread_mutex_init(&mutex_respuesta_stdout_write, NULL);

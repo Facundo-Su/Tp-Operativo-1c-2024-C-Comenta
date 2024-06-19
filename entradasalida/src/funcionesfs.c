@@ -116,7 +116,7 @@ void crear_archivo_metadata(char* nombre_archivo){
     fclose(archivo_MD);
 
     nueva_metadata->nombre=nombre_archivo;
-    nueva_metadata->tamanio_archivo=0;
+    nueva_metadata->tamanio_archivo=0;//inician con 0 tamanio;
     nueva_metadata->bloq_inicial_archivo=primerBloqueLibre;
     
     list_add(metadatas,nueva_metadata);
@@ -230,12 +230,27 @@ t_metadata* devolver_metadata(char *nombre) {
 
 void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes) {
     bool espacio_contiguo;
-    //obtengo ultimo bloque
-    int ultimo_bloque_Actual = (int)ceil((double)meta->tamanio_archivo / block_size);
-    //ejemplo 256-64= 192 bytes que tengo que agregar a mi archivo
-    //es 64 porque tomo como ejemplo un archivo de tamaño un bloque podria ser mas.
-    int bytes_nuevos_necesarios = tamanio_nuevo_bytes - meta->tamanio_archivo;
+    int cant_bloques_actuales;
+    int ultimo_bloque_Actual;
+    if(meta->tamanio_archivo==0){
+        meta->tamanio_archivo = block_size;
+        cant_bloques_actuales=1;
+        ultimo_bloque_Actual= meta->bloq_inicial_archivo;
+        //caso de nuevo archivo
+    }else{
+        //obtengo ultimo bloque
+        cant_bloques_actuales =(int)ceil((double)meta->tamanio_archivo / block_size);
+        ultimo_bloque_Actual = (meta->bloq_inicial_archivo+cant_bloques_actuales)-1;
+        //el ultimo_bloque esta mal creo, capaz falta sumarle el meta->bloq_inicio_Archivo
+        
+    }
+    int bytes_nuevos_necesarios = tamanio_nuevo_bytes - meta->tamanio_archivo;  
+    log_warning(logger, "necesito %i bytes",bytes_nuevos_necesarios);
+    log_warning(logger, "el archivo me ocupa %i bloques",cant_bloques_actuales);
     // cuantos bloques necesito agregar? multiplo o no? si es nuevo archivo?
+
+    //----------parece funcionar hasta aca------------
+
     int cant_nuevos_bloques = calcular_bloq_necesarios(bytes_nuevos_necesarios);
     //int can_bloques_archivo=meta->bloq_inicial_archivo+cant_nueva_bloques;
     //chequeo que los proximo bits esten en 0 para asignarlos de lo contrario compactar();
@@ -243,15 +258,20 @@ void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes) {
     espacio_contiguo = hay_bloques_libres_contiguos(cant_nuevos_bloques,ultimo_bloque_Actual);
     if(espacio_contiguo == true){
         log_warning(logger, "hay bloques continuos libres suficientes");
-        
-        //asignarBits(cant_nuevos_bloques,ultimo_bloque_Actual);
-        //asigno_bloque();?
-        //escribo_nuevo_tam();
+        log_warning(logger, "tengo que agregar %i bloques",cant_nuevos_bloques);
+        log_warning(logger, "ultimo bloque del archivo es %i ",ultimo_bloque_Actual);
+
+        //meta->bloq_inicial_archivo=primerBloqueLibre;
+        //el bloque inicial podria cambiar solo cuando compacto o no? 
+        asignarBits(cant_nuevos_bloques,ultimo_bloque_Actual);
+        modificar_config_tam(meta->nombre,tamanio_nuevo_bytes); //escribo en el config(txt) metadata
     }else{
         compactar();
     }
-   
-    //meta->tamanio_archivo = tamanio_nuevo_bytes;
+    meta->tamanio_archivo=tamanio_nuevo_bytes;//actualizo nuevo tamaño
+    
+    
+
 }
 
 int calcular_bloq_necesarios(int bytes_nuevos_necesarios) {
@@ -309,9 +329,9 @@ void reducir_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes){
     log_warning(logger, "reducir tamaño");
 }
 void asignarBits(int cant_nuevos_bits,int ultimo_bit){
-    int fd = open(rutita_prueba,O_RDONLY);
+    int fd = open(rutita_prueba,O_RDWR);
     char* bitarray = malloc(block_count / 8);
-    bitarray = mmap(NULL,block_count / 8,PROT_READ ,MAP_SHARED,fd,0);
+    bitarray = mmap(NULL,block_count / 8,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0);
     if(bitarray == MAP_FAILED)
     {
         log_error(logger,"no se pudo mapear el archivo de bitmap");
@@ -319,8 +339,10 @@ void asignarBits(int cant_nuevos_bits,int ultimo_bit){
     }
     t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
     int proximo=ultimo_bit+1;
+    //int proximo= ultimo_bit;
     for(int i=0;i<cant_nuevos_bits;i++){
         bitarray_set_bit(bitmap,proximo);
+        
         proximo++;
     }
     
@@ -329,5 +351,22 @@ void asignarBits(int cant_nuevos_bits,int ultimo_bit){
     bitarray_destroy(bitmap);
 }
 
+void modificar_config_tam(char* nombre_archivo, int tamanio_nuevo_bytes){
+    char* extension = "txt";
+    char* path_archivo = string_new();
+    t_config* archivo;
 
+    string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
+    log_warning(logger,"el nombre de archivo a modificar es%s",path_archivo);
+
+    archivo = config_create(path_archivo);
+
+    char* nuevo_tam = string_itoa(tamanio_nuevo_bytes);
+    config_set_value(archivo, "TAMANIO_ARCHIVO", nuevo_tam);
+    //config_set_value(archivo, "BLOQUE_INICIAL", bloqueInicialEnChar);
+    config_save(archivo);
+    config_destroy(archivo);
+    free(path_archivo);
+
+}
 
