@@ -31,5 +31,13 @@ void ocupar_un_bloque_incio(int bloque);
 void borrar_archivo(char* nombre_archivo);
 void inicializar_lista();
 void funcion_prueba_lista();
+void truncar_archivo(char *nombre, int nuevo_tamanio_bytes);
+t_metadata* devolver_metadata(char *nombre);
+void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes);
+void reducir_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes);
+int calcular_bloq_necesarios(int bytes_nuevos_necesarios);
+bool hay_bloques_libres_contiguos(int cant_nuevos_bloques,int ultimo_bloque_Actual);
+void compactar(); 
+void asignarBits(int cant_nuevos_bits,int ultimo_bit);
 
 #endif

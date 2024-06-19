@@ -187,9 +187,10 @@ void ocupar_un_bloque_incio(int bloque){
     //free(buffer);
 }
 void borrar_archivo(char* nombre_archivo){
-    
+    //TO-DO
 }
-/*void truncar_archivo(char *nombre, int nuevo_tamanio_bytes) {
+
+void truncar_archivo(char *nombre, int nuevo_tamanio_bytes) {
 
     t_metadata* meta = devolver_metadata(nombre);
     
@@ -242,8 +243,9 @@ void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes) {
     espacio_contiguo = hay_bloques_libres_contiguos(cant_nuevos_bloques,ultimo_bloque_Actual);
     if(espacio_contiguo == true){
         log_warning(logger, "hay bloques continuos libres suficientes");
-        //asigno_bloque();
-        //asigno_bit();
+        
+        //asignarBits(cant_nuevos_bloques,ultimo_bloque_Actual);
+        //asigno_bloque();?
         //escribo_nuevo_tam();
     }else{
         compactar();
@@ -252,9 +254,9 @@ void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes) {
     //meta->tamanio_archivo = tamanio_nuevo_bytes;
 }
 
-int calcular_bloq_necesarios_fcb(int bytes_nuevos_necesarios) {
+int calcular_bloq_necesarios(int bytes_nuevos_necesarios) {
     int cant_bloq_necesarios;
-    if (tam_bytes % block_size == 0) {//es multipo
+    if (bytes_nuevos_necesarios % block_size == 0) {//es multipo
         // ejemplo 192 / 64 =3 con resto 0 porque es multiplo
         cant_bloq_necesarios = bytes_nuevos_necesarios / block_size; 
     } else {
@@ -274,15 +276,58 @@ int calcular_bloq_necesarios_fcb(int bytes_nuevos_necesarios) {
 bool hay_bloques_libres_contiguos(int cant_nuevos_bloques,int ultimo_bloque_Actual){
     //ver en si en el bitmap los proximos bits que necesito(simulan bloques que necesito) 
     //estan en 0. O si no estan en 0 devuelvo un false porque no tendria espacio contiguo.
-    bool respuesta;
-    //TO-DO
+    bool respuesta=true;
+    int fd = open(rutita_prueba,O_RDONLY);
+    char* bitarray = malloc(block_count / 8);
+    bitarray = mmap(NULL,block_count / 8,PROT_READ ,MAP_SHARED,fd,0);
+    if(bitarray == MAP_FAILED)
+    {
+        log_error(logger,"no se pudo mapear el archivo de bitmap");
+        exit(EXIT_FAILURE);
+    }
+    t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
+    //int i = 0;
+    int proximo=ultimo_bloque_Actual+1;
+
+    //devuelve bool bitarray_test_bit  true=1;
+    for(int i=0;i<cant_nuevos_bloques;i++){
+        if(bitarray_test_bit(bitmap,proximo)==1){//verifica si esta en 1 el proximo bit.
+            respuesta=false;
+        }
+        proximo++;
+    }
+    
+    close(fd);
+    bitarray_destroy(bitmap);
     return respuesta;
 }
 
 void compactar(){
     log_warning(logger, "INICIANDO COMPACTACION....");
 }
-*/
+void reducir_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes){
+    log_warning(logger, "reducir tamaño");
+}
+void asignarBits(int cant_nuevos_bits,int ultimo_bit){
+    int fd = open(rutita_prueba,O_RDONLY);
+    char* bitarray = malloc(block_count / 8);
+    bitarray = mmap(NULL,block_count / 8,PROT_READ ,MAP_SHARED,fd,0);
+    if(bitarray == MAP_FAILED)
+    {
+        log_error(logger,"no se pudo mapear el archivo de bitmap");
+        exit(EXIT_FAILURE);
+    }
+    t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
+    int proximo=ultimo_bit+1;
+    for(int i=0;i<cant_nuevos_bits;i++){
+        bitarray_set_bit(bitmap,proximo);
+        proximo++;
+    }
+    
+    msync(bitarray,block_count / 8,MS_SYNC);//eso o fd? luego ver
+    close(fd);
+    bitarray_destroy(bitmap);
+}
 
 
 

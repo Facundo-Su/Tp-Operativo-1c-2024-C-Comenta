@@ -13,9 +13,10 @@ int main(int argc, char* argv[]) {
     levantarBitMap();
     //inicializar_lista();
     crear_archivo_metadata("eurocopa");
-    crear_archivo_metadata("vamos9z");
-    crear_archivo_metadata("fnatic");
-    funcion_prueba_lista();
+    //crear_archivo_metadata("vamos9z");
+    //crear_archivo_metadata("fnatic");
+    //funcion_prueba_lista();
+    truncar_archivo("eurocopa",128);
     
     
     //pthread_mutex_init(&mutex_respuesta_stdout_write, NULL);
