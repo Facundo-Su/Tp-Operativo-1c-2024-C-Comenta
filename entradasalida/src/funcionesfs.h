@@ -30,7 +30,7 @@ int proximoBitDisponible();
 void asignarProximoBitDisponible();
 void ocupar_un_bloque_incio(int bloque);
 void borrar_archivo(char* nombre_archivo);
-void inicializar_lista();
+//void inicializar_lista();
 void funcion_prueba_lista();
 void truncar_archivo(char *nombre, int nuevo_tamanio_bytes);
 t_metadata* devolver_metadata(char *nombre);
@@ -42,5 +42,5 @@ void compactar();
 void asignarBits(int cant_nuevos_bits,int ultimo_bit);
 void liberarBits(int cant_bloq_a_liberar,int ultimo_bloque_Actual);
 void modificar_config_tam(char* nombre_archivo,int tamanio_nuevo_bytes);
-
+void saco_metadata_de_lista(char* nombre_archivo);
 #endif

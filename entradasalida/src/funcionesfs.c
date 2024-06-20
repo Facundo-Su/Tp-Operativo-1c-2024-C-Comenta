@@ -187,7 +187,39 @@ void ocupar_un_bloque_incio(int bloque){
     //free(buffer);
 }
 void borrar_archivo(char* nombre_archivo){
-    //TO-DO
+    char* extension = "txt";
+    char* path_archivo = string_new();
+    t_metadata* meta = devolver_metadata(nombre_archivo);
+    //elimino elemento de la lista
+    saco_metadata_de_lista(nombre_archivo);
+
+    //libero sus bits del bitmap
+    int cant_bloques_actuales =(int)ceil((double)meta->tamanio_archivo / block_size);
+    int ultimo_bloque_Actual = (meta->bloq_inicial_archivo+cant_bloques_actuales)-1;
+    liberarBits(cant_bloques_actuales, ultimo_bloque_Actual);
+    //elimino archivo metadata(txt)
+    string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
+    if (remove(path_archivo) == 0) {
+        log_info(logger,"El archivo %s ha sido eliminado exitosamente.\n", nombre_archivo);
+
+    } else {
+        log_warning(logger,"Error al eliminar el archivo");
+    }
+}
+
+void saco_metadata_de_lista(char* nombre_archivo){
+    for (int i = 0; i < list_size(metadatas); i++) {
+        t_metadata* meta_buscado = list_get(metadatas, i);
+        if (strcmp(meta_buscado->nombre, nombre_archivo) == 0) {
+            
+            list_remove(metadatas, i);
+            log_info(logger, "se elmina %s de la lista",meta_buscado->nombre);
+        }
+
+    }
+
+    log_info(logger,"El archivo buscado no se encuentra en la lista ya fue eliminado antes..");
+
 }
 
 void truncar_archivo(char *nombre, int nuevo_tamanio_bytes) {
