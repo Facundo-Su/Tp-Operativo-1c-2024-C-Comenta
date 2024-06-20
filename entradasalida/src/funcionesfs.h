@@ -40,6 +40,7 @@ int calcular_bloq_necesarios(int bytes_nuevos_necesarios);
 bool hay_bloques_libres_contiguos(int cant_nuevos_bloques,int ultimo_bloque_Actual);
 void compactar(); 
 void asignarBits(int cant_nuevos_bits,int ultimo_bit);
+void liberarBits(int cant_bloq_a_liberar,int ultimo_bloque_Actual);
 void modificar_config_tam(char* nombre_archivo,int tamanio_nuevo_bytes);
 
 #endif

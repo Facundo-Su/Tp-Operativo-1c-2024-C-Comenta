@@ -325,9 +325,28 @@ bool hay_bloques_libres_contiguos(int cant_nuevos_bloques,int ultimo_bloque_Actu
 void compactar(){
     log_warning(logger, "INICIANDO COMPACTACION....");
 }
+
 void reducir_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes){
-    log_warning(logger, "reducir tamaño");
+    int cant_bloques_actuales;
+    int ultimo_bloque_Actual;
+    int cant_bloques_final;
+    if(meta->tamanio_archivo==0){
+        log_warning(logger, "no podes reducir un archivo de un bloque, para eso eliminalo..");
+    }
+    cant_bloques_actuales =(int)ceil((double)meta->tamanio_archivo / block_size);
+    cant_bloques_final =(int)ceil((double)tamanio_nuevo_bytes / block_size);
+    //me paro en el ultimo bloque actual.
+    ultimo_bloque_Actual = (meta->bloq_inicial_archivo+cant_bloques_actuales)-1;
+    //libero bloques(bits del bitmap) desde el final..
+    int diferencia_bytes = meta->tamanio_archivo - tamanio_nuevo_bytes;
+    //int cant_bloq_a_liberar = calcular_bloq_necesarios(diferencia_bytes);
+    int cant_bloq_a_liberar = cant_bloques_actuales - cant_bloques_final;
+    //cant_liberar se ve mejor con cuentas/grafico.
+    liberarBits(cant_bloq_a_liberar,ultimo_bloque_Actual);
+    meta->tamanio_archivo = tamanio_nuevo_bytes;
+    modificar_config_tam(meta->nombre,tamanio_nuevo_bytes);
 }
+
 void asignarBits(int cant_nuevos_bits,int ultimo_bit){
     int fd = open(rutita_prueba,O_RDWR);
     char* bitarray = malloc(block_count / 8);
@@ -347,6 +366,27 @@ void asignarBits(int cant_nuevos_bits,int ultimo_bit){
     }
     
     msync(bitarray,block_count / 8,MS_SYNC);//eso o fd? luego ver
+    close(fd);
+    bitarray_destroy(bitmap);
+}
+
+void liberarBits(int cant_bloq_a_liberar,int ultimo_bloque_Actual){
+    int fd = open(rutita_prueba,O_RDWR);
+    char* bitarray = malloc(block_count / 8);
+    bitarray = mmap(NULL,block_count / 8,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0);
+    if(bitarray == MAP_FAILED)
+    {
+        log_error(logger,"no se pudo mapear el archivo de bitmap");
+    }
+    t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
+ 
+    for(int i=0;i<cant_bloq_a_liberar;i++){
+        bitarray_clean_bit(bitmap,ultimo_bloque_Actual);
+   
+        ultimo_bloque_Actual--;
+    }
+
+    msync(bitarray,block_count / 8,MS_SYNC);
     close(fd);
     bitarray_destroy(bitmap);
 }
