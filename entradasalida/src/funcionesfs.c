@@ -103,6 +103,7 @@ void crear_archivo_metadata(char* nombre_archivo){
     int primerBloqueLibre = proximoBitDisponible();//probar funcion
     //log_warning(logger,"bit libre %i",primerBloqueLibre); 
     asignarProximoBitDisponible();
+    //OCUPAR NO ES NECESARIO
     ocupar_un_bloque_incio(primerBloqueLibre);
     char* bloqueInicialEnChar = string_itoa(primerBloqueLibre);
     log_warning(logger,"el nombre de archivo es%s",path_archivo);

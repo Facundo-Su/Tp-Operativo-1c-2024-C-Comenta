@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     //funcion_prueba_lista();
     truncar_archivo("eurocopa",850);
     //borrar_archivo("eurocopa");
-    escribir_archivo_bloque(64*4,"eurocopa","DATO");
+    escribir_archivo_bloque(64*4,"eurocopa","HAKUNA MATATA");
     
     //pthread_mutex_init(&mutex_respuesta_stdout_write, NULL);
     //pthread_mutex_lock(&mutex_respuesta_stdout_write);
@@ -276,11 +276,25 @@ void procesar_conexion(void *conexion_ptr){
             enviar_respuesta_crear_archivo(cliente_fd,*pid_f_create);
         	break;
         case EJECUTAR_IO_FS_DELETE:
-        	//TO-DO
+        	/*paquete=recibir_paquete(cliente_fd);
+            char* nombre_arch=list_get(paquete,0);
+            int* pid_f_delete = list_get(paquete,1);
+
+
+			log_info(logger, "Crear Archivo: <%s>",nombre_arch);
+			borrar_archivo(nombre_arch);
+            enviar_respuesta_borrar_archivo(cliente_fd,*pid_f_delete);*/
         	break;
         case EJECUTAR_IO_FS_TRUNCATE:
-            //(logger, "Operación desconocida. Revisar el protocolo de comunicación.");
+            
             break;
+        case EJECUTAR_IO_FS_WRITE:
+
+            break;
+        case EJECUTAR_IO_FS_READ:
+
+            break;
+
         }
     }
 
@@ -329,3 +343,10 @@ void enviar_respuesta_crear_archivo(int cliente_fd,int pid) {
 	enviar_paquete(paquete,cliente_fd);
 	eliminar_paquete(paquete);
 }
+
+/*void enviar_respuesta_borrar_archivo(int cliente_fd,int pid){
+    t_paquete *paquete = crear_paquete(RESPUESTA_BORRAR_ARCHIVO);
+	agregar_a_paquete(paquete, &pid, sizeof(int));
+	enviar_paquete(paquete,cliente_fd);
+	eliminar_paquete(paquete);
+}*/
