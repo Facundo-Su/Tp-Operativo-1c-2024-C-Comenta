@@ -12,14 +12,14 @@ int main(int argc, char* argv[]) {
     levantar_archivo_bloques();
     levantarBitMap();
     //inicializar_lista();
-    crear_archivo_metadata("fnatic");
+    //crear_archivo_metadata("fnatic");
     crear_archivo_metadata("eurocopa");
     //crear_archivo_metadata("vamos9z");
     
     //funcion_prueba_lista();
     truncar_archivo("eurocopa",850);
-    borrar_archivo("eurocopa");
-
+    //borrar_archivo("eurocopa");
+    escribir_archivo_bloque(64*4,"eurocopa","DATO");
     
     //pthread_mutex_init(&mutex_respuesta_stdout_write, NULL);
     //pthread_mutex_lock(&mutex_respuesta_stdout_write);

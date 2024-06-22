@@ -442,3 +442,17 @@ void modificar_config_tam(char* nombre_archivo, int tamanio_nuevo_bytes){
 
 }
 
+void escribir_archivo_bloque(int puntero, char* nombre,void* a_escribir){
+    log_warning(logger,"dato %s",(char*)a_escribir);
+    t_metadata* meta = devolver_metadata(nombre);
+    uint32_t numero_bloque = puntero / block_size;
+    //me paro en el bloque que voy a escribir
+    uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque)-1;
+    log_warning(logger,"el bloque a escribir es %i",bloque_escribir);
+    memcpy(archivo_de_bloques  + (bloque_escribir * block_size), a_escribir, block_size);
+    //escribo el tamaño de un bloque o uso el tamanio que me pasa kernel?
+    
+    msync(archivo_de_bloques,block_count*block_size, MS_SYNC);
+    //tamanio_Archivo_bloques =block_count*block_size
+}
+

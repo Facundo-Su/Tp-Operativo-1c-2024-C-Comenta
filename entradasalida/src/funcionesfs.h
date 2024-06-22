@@ -43,4 +43,5 @@ void asignarBits(int cant_nuevos_bits,int ultimo_bit);
 void liberarBits(int cant_bloq_a_liberar,int ultimo_bloque_Actual);
 void modificar_config_tam(char* nombre_archivo,int tamanio_nuevo_bytes);
 void saco_metadata_de_lista(char* nombre_archivo);
+void escribir_archivo_bloque(int puntero, char* nombre,void* a_escribir);
 #endif
