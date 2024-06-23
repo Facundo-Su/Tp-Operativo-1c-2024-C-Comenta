@@ -456,4 +456,15 @@ void escribir_archivo_bloque(int puntero, char* nombre,void* a_escribir){
     msync(archivo_de_bloques,block_count*block_size, MS_SYNC);
     //tamanio_Archivo_bloques =block_count*block_size
 }
+/*void *leer_archivo_bloque(int puntero, char* nombre,int tamanio, uint32_t tamanioALeer)
+{
+    t_metadata* meta = devolver_metadata(nombre);
+    uint32_t numero_bloque = puntero / block_size;
+    uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque)-1;
+    // log_debug(logger, "SE VA A LEER EN UN BLOQUE");
+    void *datoLeido = malloc(block_size);//block size o tamanioleer?
+    //void *datoLeido = malloc(tamanioALeer);//block size o tamanioleer?
+    memcpy(datoLeido, archivo_de_bloques  + (numero_bloque_del_fs * block_size), tamanioALeer);
 
+    return datoLeido;
+}*/
