@@ -217,16 +217,37 @@ void procesar_conexion(void *conexion1){
 					break;
 				case IO_FS_DELETE:
 					paquete = recibir_paquete(cliente_fd);
+					char* nombre_interfaz_f_delete = list_get(paquete,0);
+					char* nombre_archivo_f_delete = list_get(paquete,1);
+					ejecutar_io_fs_delete(nombre_interfaz_f_delete,nombre_archivo_f_delete,running);
 					break;
 
 				case IO_FS_TRUNCATE:
 					paquete = recibir_paquete(cliente_fd);
+					char* nombre_interfaz_f_truncate = list_get(paquete,0);
+					char* nombre_archivo_f_truncate = list_get(paquete,1);
+					int *tamanio_f_truncate = list_get(paquete,2);
+					ejecutar_io_fs_truncate(nombre_interfaz_f_truncate,nombre_archivo_f_truncate,*tamanio_f_truncate,running);
 					break;
 				case IO_FS_WRITE:
 					paquete = recibir_paquete(cliente_fd);
+					char* nombre_interfaz_f_write = list_get(paquete,0);
+					char* nombre_archivo_f_write = list_get(paquete,1);
+					int *marco_f_write = list_get(paquete,2);
+					int *desplazamiento_f_write = list_get(paquete,3);
+					int *tamanio_f_write = list_get(paquete,4);
+					int *puntero_f_write = list_get(paquete,5);
+					ejecutar_io_fs_write(nombre_interfaz_f_write,nombre_archivo_f_write,*marco_f_write,*desplazamiento_f_write,*tamanio_f_write,*puntero_f_write,running);
 					break;
 				case IO_FS_READ:
-					paquete = recibir_paquete(cliente_fd);		
+					paquete = recibir_paquete(cliente_fd);
+					char* nombre_interfaz_f_read = list_get(paquete,0);
+					char* nombre_archivo_f_read = list_get(paquete,1);
+					int *marco_f_read = list_get(paquete,2);
+					int *desplazamiento_f_read = list_get(paquete,3);
+					int *tamanio_f_read = list_get(paquete,4);
+					int *puntero_f_read = list_get(paquete,5);
+					ejecutar_io_fs_read(nombre_interfaz_f_read,nombre_archivo_f_read,*marco_f_read,*desplazamiento_f_read,*tamanio_f_read,*puntero_f_read,running);
 					break;
 				default:
 					//log_error(logger, "che no se que me mandaste");
@@ -268,7 +289,33 @@ void procesar_conexion(void *conexion1){
 			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			io_fs_create_ready(*pid_crear_archivo);
 			break;
+		case RESPUESTA_BORRAR_ARCHIVO:
+			paquete = recibir_paquete(cliente_fd);
+			int *pid_eliminar_archivo = list_get(paquete,0);
+			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			io_fs_delete_ready(*pid_eliminar_archivo);
+		
+			break;
 
+		case RESPUESTA_ESCRIBIR_ARCHIVO:
+			paquete = recibir_paquete(cliente_fd);
+			int *pid_escribir_archivo = list_get(paquete,0);
+			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			io_fs_write_ready(*pid_escribir_archivo);
+			break;
+		case RESPUESTA_LEER_ARCHIVO:
+			paquete = recibir_paquete(cliente_fd);
+			int *pid_leer_archivo = list_get(paquete,0);
+			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			io_fs_read_ready(*pid_leer_archivo);
+			break;
+
+		case RESPUESTA_TRUNCAR_ARCHIVO:
+			paquete = recibir_paquete(cliente_fd);
+			int *pid_truncar_archivo = list_get(paquete,0);
+			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			io_fs_truncate_ready(*pid_truncar_archivo);
+			break;
 		case FINALIZAR:
 			paquete = recibir_paquete(cliente_fd);
 			contexto = desempaquetar_pcb(paquete);

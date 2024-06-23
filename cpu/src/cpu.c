@@ -519,6 +519,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		hayInterrupcion = true;
 		parametro = list_get(instrucciones->parametros,0);
 		parametro2 = list_get(instrucciones->parametros,1);
+		parametro2 =strtok(parametro2, "\n");
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_io_fs_create(parametro,parametro2,cliente_fd);
 
@@ -532,9 +533,9 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		break;
 	case IO_FS_TRUNCATE:
 		hayInterrupcion = true;
-		parametro = list_get(instrucciones->parametros,0);
-		parametro2 = list_get(instrucciones->parametros,1);
-		parametro3 = list_get(instrucciones->parametros,2);
+		parametro = list_get(instrucciones->parametros,0);//nombre interfaz
+		parametro2 = list_get(instrucciones->parametros,1);//nombre archivo
+		parametro3 = list_get(instrucciones->parametros,2);// tamanio
 		registro_aux = devolver_registro(parametro3);
 		valor_uint1 = obtener_valor(registro_aux);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
@@ -555,8 +556,10 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		valor_uint2 = obtener_valor(registro_aux2);
 		valor_uint3 = obtener_valor(registro_aux3);
 
+		t_traduccion* traducido_f_write = mmu_traducir(valor_uint1);
+
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
-		enviar_io_fs_write(parametro,parametro2,parametro3,parametro4,parametro5,cliente_fd);
+		enviar_io_fs_write(parametro,parametro2,traducido_f_write,valor_uint2,valor_uint3,cliente_fd);
 
 		break;
 	
@@ -576,8 +579,11 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		valor_uint2 = obtener_valor(registro_aux2);
 		valor_uint3 = obtener_valor(registro_aux3);
 
+		t_traduccion* traducido_f_read = mmu_traducir(valor_uint1);
+
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
-		enviar_io_fs_read(parametro,parametro2,parametro3,parametro4,parametro5,cliente_fd);
+		enviar_io_fs_read(parametro,parametro2,traducido_f_write,valor_uint2,valor_uint3,cliente_fd);
+
 		break;
 
 	case EXIT:
@@ -620,24 +626,26 @@ void enviar_traduccion(t_traduccion* traducido,op_code operacion){
 }
 
 
-void enviar_io_fs_read(char* parametro,char* parametro2,uint32_t parametro3,uint32_t parametro4,uint32_t parametro5,int cliente_fd){
+void enviar_io_fs_read(char* nombre_interfaz,char* nombre_archivo,t_traduccion* traducido,uint32_t tamanio,uint32_t puntero,int cliente_fd){
 	t_paquete* paquete = crear_paquete(IO_FS_READ);
-	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
-	agregar_a_paquete(paquete, parametro2, strlen(parametro2)+1);
-	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
-	agregar_a_paquete(paquete, &parametro4, sizeof(uint32_t));
-	agregar_a_paquete(paquete, &parametro5, sizeof(uint32_t));
+	agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
+	agregar_a_paquete(paquete, nombre_archivo, strlen(nombre_archivo)+1);
+	agregar_a_paquete(paquete, &(traducido->marco), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
+	agregar_a_paquete(paquete, &puntero, sizeof(uint32_t));
 	enviar_paquete(paquete, cliente_fd);
 	eliminar_paquete(paquete);
 }
 
-void enviar_io_fs_write(char* parametro,char* parametro2,uint32_t parametro3,uint32_t parametro4,uint32_t parametro5,int cliente_fd){
+void enviar_io_fs_write(char* nombre_interfaz,char* nombre_archivo,t_traduccion* traducido,uint32_t tamanio,uint32_t puntero,int cliente_fd){
 	t_paquete* paquete = crear_paquete(IO_FS_WRITE);
-	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
-	agregar_a_paquete(paquete, parametro2, strlen(parametro2)+1);
-	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
-	agregar_a_paquete(paquete, &parametro4, sizeof(uint32_t));
-	agregar_a_paquete(paquete, &parametro5, sizeof(uint32_t));
+	agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
+	agregar_a_paquete(paquete, nombre_archivo, strlen(nombre_archivo)+1);
+	agregar_a_paquete(paquete, &(traducido->marco), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &(traducido->desplazamiento), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &tamanio, sizeof(uint32_t));
+	agregar_a_paquete(paquete, &puntero, sizeof(uint32_t));
 	enviar_paquete(paquete, cliente_fd);
 	eliminar_paquete(paquete);
 }

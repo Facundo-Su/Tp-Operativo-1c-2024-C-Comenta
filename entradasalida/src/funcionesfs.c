@@ -245,6 +245,8 @@ t_metadata* devolver_metadata(char *nombre) {
     //log_info(logger, "llega el archivo %s",nombre);
     for (int i = 0; i < list_size(metadatas); i++) {
         t_metadata* meta_buscado = list_get(metadatas, i);
+        log_warning(logger,"el nombre es %s",meta_buscado->nombre);
+        log_warning(logger,"el nombre es %s",nombre);
         if (strcmp(meta_buscado->nombre, nombre) == 0) {
             log_info(logger, "se encontro el archivo %s",meta_buscado->nombre);
 
@@ -443,20 +445,20 @@ void modificar_config_tam(char* nombre_archivo, int tamanio_nuevo_bytes){
 
 }
 
-void escribir_archivo_bloque(int puntero, char* nombre,void* a_escribir){
+void escribir_archivo_bloque(int puntero, char* nombre,int tamanio,void* a_escribir){
     log_warning(logger,"dato %s",(char*)a_escribir);
     t_metadata* meta = devolver_metadata(nombre);
     uint32_t numero_bloque = puntero / block_size;
     //me paro en el bloque que voy a escribir
     uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque)-1;
     log_warning(logger,"el bloque a escribir es %i",bloque_escribir);
-    memcpy(archivo_de_bloques  + (bloque_escribir * block_size), a_escribir, block_size);
+    memcpy(archivo_de_bloques  + (bloque_escribir * block_size), a_escribir, tamanio);
     //escribo el tamaño de un bloque o uso el tamanio que me pasa kernel?
     
     msync(archivo_de_bloques,block_count*block_size, MS_SYNC);
     //tamanio_Archivo_bloques =block_count*block_size
 }
-/*void *leer_archivo_bloque(int puntero, char* nombre,int tamanio, uint32_t tamanioALeer)
+void *leer_archivo_bloque(int puntero, char* nombre,int tamanio)
 {
     t_metadata* meta = devolver_metadata(nombre);
     uint32_t numero_bloque = puntero / block_size;
@@ -464,7 +466,7 @@ void escribir_archivo_bloque(int puntero, char* nombre,void* a_escribir){
     // log_debug(logger, "SE VA A LEER EN UN BLOQUE");
     void *datoLeido = malloc(block_size);//block size o tamanioleer?
     //void *datoLeido = malloc(tamanioALeer);//block size o tamanioleer?
-    memcpy(datoLeido, archivo_de_bloques  + (numero_bloque_del_fs * block_size), tamanioALeer);
+    memcpy(datoLeido, archivo_de_bloques  + (bloque_escribir * block_size), tamanio);
 
     return datoLeido;
-}*/
+}

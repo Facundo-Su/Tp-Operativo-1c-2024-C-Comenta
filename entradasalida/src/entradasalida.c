@@ -13,18 +13,18 @@ int main(int argc, char* argv[]) {
     levantarBitMap();
     //inicializar_lista();
     //crear_archivo_metadata("fnatic");
-    crear_archivo_metadata("eurocopa");
+    //crear_archivo_metadata("eurocopa");
     //crear_archivo_metadata("vamos9z");
     
     //funcion_prueba_lista();
-    truncar_archivo("eurocopa",850);
+    //truncar_archivo("eurocopa",850);
     //borrar_archivo("eurocopa");
-    escribir_archivo_bloque(64*4,"eurocopa","HAKUNA MATATA");
+    //escribir_archivo_bloque(64*4,"eurocopa","HAKUNA MATATA");
     
     //pthread_mutex_init(&mutex_respuesta_stdout_write, NULL);
     //pthread_mutex_lock(&mutex_respuesta_stdout_write);
 
-	//iniciar_consola();	
+	iniciar_consola();	
 
     return EXIT_SUCCESS;
 }
@@ -276,33 +276,88 @@ void procesar_conexion(void *conexion_ptr){
             enviar_respuesta_crear_archivo(cliente_fd,*pid_f_create);
         	break;
         case EJECUTAR_IO_FS_DELETE:
-        	/*paquete=recibir_paquete(cliente_fd);
+        	paquete=recibir_paquete(cliente_fd);
             char* nombre_arch=list_get(paquete,0);
             int* pid_f_delete = list_get(paquete,1);
 
 
 			log_info(logger, "Crear Archivo: <%s>",nombre_arch);
 			borrar_archivo(nombre_arch);
-            enviar_respuesta_borrar_archivo(cliente_fd,*pid_f_delete);*/
+            enviar_respuesta_borrar_archivo(cliente_fd,*pid_f_delete);
         	break;
         case EJECUTAR_IO_FS_TRUNCATE:
-            
+            paquete=recibir_paquete(cliente_fd);
+            char* nombre_archivo_truncar = list_get(paquete,0);
+            int* tamanio_truncar = list_get(paquete,1);
+            int* pid_f_truncate = list_get(paquete,2);
+            log_info(logger, "Truncar Archivo: <%s>",nombre_archivo_truncar);
+            log_warning(logger,"el tamanio es %i",*tamanio_truncar);
+            truncar_archivo(nombre_archivo_truncar,*tamanio_truncar);
+            enviar_respuesta_truncar_archivo(cliente_fd,*pid_f_truncate);
             break;
         case EJECUTAR_IO_FS_WRITE:
+            paquete = recibir_paquete(cliente_fd);
+            char* nomre_archivo_write = list_get(paquete,0);
+            int* marco_write = list_get(paquete,1);
+            int* desplazamiento_write = list_get(paquete,2);
+            int* tamanio_write = list_get(paquete,3);
+            int* puntero_write = list_get(paquete,4);
+            int* pid_f_write = list_get(paquete,5);
+            
+            conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
+            enviar_direccion_memoria(*pid_f_write,*marco_write,*desplazamiento_write,*tamanio_write,conexion_memoria);//agrego pid por si memoria lo necesita para sus logs en acceso de lectura.
+           // void* informacion = malloc(*tamanio_write);
+            int cop4;
+            recv(conexion_memoria, &cop4, sizeof(cop), 0);
+			log_info(logger,"recibi el codigo de operacion %i",cop2);
+			t_list* lista3=list_create();
+			log_error(logger,"el codigo socket es %i",cliente_fd);
+			lista3= recibir_paquete(conexion_memoria);
+			void* auxiliar_10 = list_get(lista3,0);
+			//paquete2 = recibir_paquete(conexion_memoria);
+            //void* informacion = malloc(R_tamanio);
+            //pthread_mutex_lock(&mutex_respuesta_stdout_write);
+            //log_warning(logger,"PASEEEEEEEE");//recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
+			//usleep(tiempo_unidad_trabajo*1000);
+            close(conexion_memoria);
+            escribir_archivo_bloque(*puntero_write,nomre_archivo_write,*tamanio_write,auxiliar_10);
+
+            enviar_respuesta_escribir_archivo(cliente_fd,*pid_f_write);
 
             break;
         case EJECUTAR_IO_FS_READ:
+            paquete = recibir_paquete(cliente_fd);
+            char* nomre_archivo_read = list_get(paquete,0);
+            int* marco_read = list_get(paquete,1);
+            int* desplazamiento_read = list_get(paquete,2);
+            int* tamanio_read = list_get(paquete,3);
+            int* puntero_read = list_get(paquete,4);
+            int* pid_f_read = list_get(paquete,5);
+            
+            void* auxiliar_read = leer_archivo_bloque(*puntero_read,nomre_archivo_read,*tamanio_read);
 
+            conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
+            enviar_stdin_memoria(*pid_f_read,*marco_read,*desplazamiento_read,*tamanio_read,auxiliar_read,conexion_memoria);//pid_stdin es el PID para el log de memoria cuando escribe.
+            //void* informacion = malloc(*tamanio_read);
+            int cop3;
+            recv(conexion_memoria, &cop3, sizeof(cop), 0);
+			//paquete2 = recibir_paquete(conexion_memoria);
+            //void* informacion = malloc(R_tamanio);
+            //pthread_mutex_lock(&mutex_respuesta_stdout_read);
+            //log_warning(logger,"PASEEEEEEEE");//recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
+			//usleep(tiempo_unidad_trabajo*1000);
+            close(conexion_memoria);
+
+
+            enviar_respuesta_leer_archivo(cliente_fd,*pid_f_read);
             break;
 
         }
     }
-
 }
 
-
 void enviar_stdin_memoria(int pid, int marco, int desplazamiento, int tamanio,char* palabra_A_enviar, int conexion_memoria ){//Se agrega PID para el log de memoria cuando escribe.
-	t_paquete* paquete=crear_paquete(EJECUTAR_STDIN_READ);
+	t_paquete* paquete=crear_paquete(EJECUTAR_IO_FS_READ);
     agregar_a_paquete(paquete, &pid, sizeof(int));
 	agregar_a_paquete(paquete,&marco,sizeof(int));
     agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
@@ -344,9 +399,31 @@ void enviar_respuesta_crear_archivo(int cliente_fd,int pid) {
 	eliminar_paquete(paquete);
 }
 
-/*void enviar_respuesta_borrar_archivo(int cliente_fd,int pid){
+void enviar_respuesta_borrar_archivo(int cliente_fd,int pid){
     t_paquete *paquete = crear_paquete(RESPUESTA_BORRAR_ARCHIVO);
 	agregar_a_paquete(paquete, &pid, sizeof(int));
 	enviar_paquete(paquete,cliente_fd);
 	eliminar_paquete(paquete);
-}*/
+}
+
+void enviar_respuesta_escribir_archivo(int cliente_fd,int pid){
+    t_paquete *paquete = crear_paquete(RESPUESTA_ESCRIBIR_ARCHIVO);
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+    enviar_paquete(paquete,cliente_fd);
+    eliminar_paquete(paquete);
+}
+
+void enviar_respuesta_leer_archivo(int cliente_fd,int pid){
+    t_paquete *paquete = crear_paquete(RESPUESTA_LEER_ARCHIVO);
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+    enviar_paquete(paquete,cliente_fd);
+    eliminar_paquete(paquete);
+}
+
+void  enviar_respuesta_truncar_archivo(int cliente_fd,int pid_f_truncate){
+
+    t_paquete *paquete = crear_paquete(RESPUESTA_TRUNCAR_ARCHIVO);
+    agregar_a_paquete(paquete, &pid_f_truncate, sizeof(int));
+    enviar_paquete(paquete,cliente_fd);
+    eliminar_paquete(paquete);
+}

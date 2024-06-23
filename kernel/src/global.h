@@ -51,6 +51,9 @@ typedef struct{
     int tamanio;
     int desplazamiento;
     char* nombre_archivo_crear;
+    char* nombre_archivo_eliminar;
+    char* nombre_archivo;
+    int puntero;
 }t_blocked_io;
 
 extern sem_t sem_new;
