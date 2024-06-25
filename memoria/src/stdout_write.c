@@ -1,7 +1,7 @@
 #include "stdout_write.h"
 
 
-void stdout_write(int cliente_fd){ 
+void stdout_write(int cliente_fd,op_code codigo_respuesta){ 
     t_list* lista = recibir_paquete(cliente_fd);
 	int *pid = list_get(lista, 0);
     int *marco = list_get(lista,1);
@@ -10,7 +10,7 @@ void stdout_write(int cliente_fd){
 	void *valor_leido = malloc(*tamanio);
 	log_info(logger, "me llego para fwrite pid %i, marco %i, desplazamiento %i, tamanio %i",*pid, *marco,*desplazamiento, *tamanio);
     memcpy(valor_leido, memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, *tamanio);
-	enviar_registro_leido_IO(valor_leido, RESPUESTA_STDOUT_WRITE,*tamanio,cliente_fd);
+	enviar_registro_leido_IO(valor_leido, codigo_respuesta,*tamanio,cliente_fd);
 	int dir = (*marco * tam_pagina) + *desplazamiento;
 	log_info(logger,"PID: %i- Accion: LEER - Direccion fisica: %i- Tamaño:  %i",*pid, dir, *tamanio);
 	log_info(logger,"EL DATO ES %s",valor_leido);

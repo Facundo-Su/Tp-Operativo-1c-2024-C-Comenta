@@ -182,7 +182,67 @@ char* obtener_ruta(char* valor_recibido) {
     return ruta;
 }
 void listar_proceso_por_estado(){
+    t_list *new = obtener_procesos_cola(cola_new);
+    t_list *ready = list_create();
+    t_list *bloqueado = list_create();
 
+    // Juntar todos los ready en una lista
+    t_list *ready_cola = obtener_procesos_cola(cola_ready);
+    if (ready_cola != NULL) {
+        for (int i = 0; i < list_size(ready_cola); i++) {
+            list_add(ready, list_get(ready_cola, i));
+        }
+    }
+    t_list *ready_vrr = obtener_procesos_cola(cola_vrr);
+    if (ready_vrr != NULL) {
+        for (int i = 0; i < list_size(ready_vrr); i++) {
+            list_add(ready, list_get(ready_vrr, i));
+        }
+    }
+
+    // Juntar todos los bloqueados en una lista
+    t_list *bloqueado_io = obtener_procesos_lista(lista_bloqueado_io);
+    if (bloqueado_io != NULL) {
+        for (int i = 0; i < list_size(bloqueado_io); i++) {
+            list_add(bloqueado, list_get(bloqueado_io, i));
+        }
+    }
+    t_list *bloqueado_espera_io = obtener_procesos_bloqueados_io();
+    if (bloqueado_espera_io != NULL) {
+        for (int i = 0; i < list_size(bloqueado_espera_io); i++) {
+            list_add(bloqueado, list_get(bloqueado_espera_io, i));
+        }
+    }
+    t_list *bloqueado_recursos = obtener_procesos_bloqueados_recursos();
+    if (bloqueado_recursos != NULL) {
+        for (int i = 0; i < list_size(bloqueado_recursos); i++) {
+            list_add(bloqueado, list_get(bloqueado_recursos, i));
+        }
+    }
+
+    printf("Listar procesos por estado:\n");
+	 printf("Estado NEW:\n");
+    if (new != NULL && list_size(new) > 0) {
+
+        for (int i = 0; i < list_size(new); i++) {
+            int pid = (int) list_get(new, i);
+            printf("  Proceso %d\n", pid);
+        }
+    }
+	printf("Estado READY:\n");
+    if (ready != NULL && list_size(ready) > 0) {
+        for (int i = 0; i < list_size(ready); i++) {
+            int pid = (int) list_get(ready, i);
+            printf("  Proceso %d\n", pid);
+        }
+    }
+	printf("Estado BLOQUEADO:\n");
+    if (bloqueado != NULL && list_size(bloqueado) > 0) {
+        for (int i = 0; i < list_size(bloqueado); i++) {
+            int pid = (int) list_get(bloqueado, i);
+            printf("  Proceso %d\n", pid);
+        }
+    }
 }
 
 t_list * obtener_procesos_cola(t_cola*cola){

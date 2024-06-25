@@ -83,13 +83,19 @@ void procesar_conexion(void* socket){
 					copy_string(cliente_fd);
 					break;
 				case EJECUTAR_STDIN_READ:
-					stdin_read(cliente_fd);
-					void *valor_leido = malloc(20);
+					stdin_read(cliente_fd,RESPUESTA_STDIN_READ);
+					/*void *valor_leido = malloc(20);
     				memcpy(valor_leido, memoria->espacio_usuario+16, 20);
-					log_info(logger,"EL DATO ES %s",valor_leido);
+					log_info(logger,"EL DATO ES %s",valor_leido);*/
 					break;
 				case EJECUTAR_STDOUT_WRITE:
-					stdout_write(cliente_fd);
+					stdout_write(cliente_fd,RESPUESTA_STDOUT_WRITE);
+					break;
+				case EJECUTAR_IO_FS_WRITE:
+					stdout_write(cliente_fd,RESPUESTA_ESCRIBIR_ARCHIVO);
+					break;
+				case EJECUTAR_IO_FS_READ:
+					stdin_read(cliente_fd,RESPUESTA_LEER_ARCHIVO);
 					break;
 	    		case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");

@@ -2,6 +2,6 @@
 #define STOUD_WRITE_H_
 
 #include "global.h"
-void stdout_write(int);
+void stdout_write(int,op_code);
 void enviar_registro_leido_IO(void*, op_code,int,int);
 #endif 
