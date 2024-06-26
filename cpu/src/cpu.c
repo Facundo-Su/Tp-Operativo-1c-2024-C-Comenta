@@ -803,6 +803,7 @@ t_traduccion* mmu_traducir(int dir_logica){
 			//log_error(logger, "LLEGUE HASTA ACA");
 			marco_encontrado = marco_obtenido;
 		}else{
+			
 			log_error(logger, "TLB HIT");
 		}
 	}else{
@@ -820,7 +821,6 @@ t_traduccion* mmu_traducir(int dir_logica){
 
 	return traducido;
 }
-
 
 void obtener_el_marco(int nro_pagina,op_code operacion){
 	//log_error(logger, "%i", nro_pagina,pcb->pid);
@@ -1058,6 +1058,8 @@ int consultar_tlb(int nro_pagina,int pid) {
 	for (int i = 0; i < cantidad_entrada_tlb; i++) {
 		t_estructura_tlb *tlb_aux = list_get(tlb, i);
 		if (tlb_aux->pid == pid && tlb_aux->pagina == nro_pagina) {
+			tlb_aux->last_time_lru =0;
+			actualizar_algortimos();
 			return tlb_aux->marco;
 		}
 	}
@@ -1172,6 +1174,7 @@ void actualizar_lru(){
 		t_estructura_tlb *aux= (t_estructura_tlb*)list_iterator_next(iterador);
 		if(!aux->is_free && !aux->last_time_lru ==0){
 			aux->last_time_lru ++;
+			log_info(logger,"ACTUALICE LRU");
 		}
 	}
 	list_iterator_destroy(iterador);

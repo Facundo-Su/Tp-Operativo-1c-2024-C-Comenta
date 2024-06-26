@@ -79,7 +79,7 @@ void iniciar_consola(){
 				
 				break;
 			case '6':
-				//listar_proceso_estado();
+				listar_proceso_por_estado();
 				break;
 			case '7':
 				//finalizar_programa();
