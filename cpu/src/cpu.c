@@ -1091,7 +1091,7 @@ void insertar_tlb(int pid, int nro_pagina) {
 	}else{
 		log_info(logger, "TLB llena");
 		int aux = ejecutar_algoritmo();
-		log_warning(logger, "hola como estas");
+		log_warning(logger, "hola como estas el valor retornado es :%i ^+^ ",aux);
 		t_estructura_tlb *tlb_aux = list_get(tlb, aux);
 		tlb_aux->pid = pid;
 		tlb_aux->pagina = nro_pagina;
@@ -1147,6 +1147,7 @@ int ejecutar_lru(){
 			//log_error(logger, "marco %i tiempo lru : %i ",marco->num_marco,marco->last_time_lru);
 			tiempo = aux->last_time_lru;
 			numero = i;
+			log_warning(logger, "llegue hasta aca porque encontre algo");
 		}
 		i++;
 	}
@@ -1172,9 +1173,9 @@ void actualizar_lru(){
 	t_list_iterator* iterador = list_iterator_create(tlb);
 	while(list_iterator_has_next(iterador)){
 		t_estructura_tlb *aux= (t_estructura_tlb*)list_iterator_next(iterador);
-		if(!aux->is_free && !aux->last_time_lru ==0){
+		if(!aux->is_free){
 			aux->last_time_lru ++;
-			log_info(logger,"ACTUALICE LRU");
+			log_error(logger,"ACTUALICE LRU");
 		}
 	}
 	list_iterator_destroy(iterador);
