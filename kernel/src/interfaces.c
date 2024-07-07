@@ -7,8 +7,8 @@ void io_sleep_ready(int pid){
 	interfaz->pid = -1;
 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
 	//como pongo el bool que muestre true o false en vez de 0 o 1
-	log_error(logger,"ya termine de usar que pase el siguiente ya tengo el estado en uso= %i",interfaz->en_uso);
-	log_error(logger,"el estado de interfaz %s es %i", interfaz->nombre_interface,interfaz->en_uso);
+	//log_error(logger,"ya termine de usar que pase el siguiente ya tengo el estado en uso= %i",interfaz->en_uso);
+	//log_error(logger,"el estado de interfaz %s es %i", interfaz->nombre_interface,interfaz->en_uso);
 	vuelta_io_vrr(pcb);
 	//pthread_mutex_unlock(&sem_exec);
 	if(!queue_is_empty(interfaz->cola_espera->cola)){
@@ -22,7 +22,7 @@ void io_sleep_ready(int pid){
 void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
-			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
@@ -57,7 +57,7 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,
 void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
-			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
@@ -82,8 +82,8 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento
 				blocked->nro_marco = marco;
 				blocked->tamanio = tamanio;
 				blocked->desplazamiento=desplazamiento;
-				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE FWRITE %i, %i, %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
-				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+				//log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE FWRITE %i, %i, %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
+				log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
 				sigue = false;
 				agregar_cola_bloqueados_interfaces(interfaz,blocked);
 				pthread_mutex_unlock(&sem_exec);
@@ -94,7 +94,7 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento
 
 void enviar_a_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb,int codigo_cliente){
 	t_paquete* paquete=crear_paquete(EJECUTAR_STDOUT_WRITE);
-	log_error(logger,"ENVIEE PID %i, MARCO %i, DESPLAZAMIENTO %i, tamanio %i,",pcb->contexto->pid,marco,desplazamiento,tamanio);
+	//log_error(logger,"ENVIE PID %i, MARCO %i, DESPLAZAMIENTO %i, tamanio %i,",pcb->contexto->pid,marco,desplazamiento,tamanio);
 	agregar_a_paquete(paquete, &(pcb->contexto->pid), sizeof(int));
 	agregar_a_paquete(paquete,&marco,sizeof(int));
 	agregar_a_paquete(paquete,&desplazamiento,sizeof(int));
@@ -111,8 +111,8 @@ void enviar_a_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,
 	agregar_a_paquete(paquete,&tamanio,sizeof(int));
 
 	enviar_paquete(paquete, codigo_cliente);
-	log_warning(logger,"mensaje enviado");
-	log_warning(logger,"envie con el codigo de cliente %i",codigo_cliente);
+	//log_warning(logger,"mensaje enviado");
+	//log_warning(logger,"envie con el codigo de cliente %i",codigo_cliente);
 	eliminar_paquete(paquete);
 }
 
@@ -130,7 +130,7 @@ void io_stdout_write_ready(int pid){
 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
 		//agregar_cola_ready(pcb_blocked);
-		log_error(logger, "SALI DE BLOQUEADO FWRITE");
+		//log_error(logger, "SALI DE BLOQUEADO FWRITE");
 		ejecutar_io_stdin_write(interfaz->nombre_interface, blocked->nro_marco,blocked->desplazamiento, blocked->tamanio,blocked->pcb);
 	}
 }
@@ -253,10 +253,9 @@ void io_fs_truncate_ready(int pid){
 void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,t_pcb * pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_de_interfaz_sleep,lista_interfaces);
 	if(interfaz == NULL){
-		log_error(logger,"No se encontro la interfaz %s", nombre_de_interfaz_sleep);
+		//log_error(logger,"No se encontro la interfaz %s", nombre_de_interfaz_sleep);
 		finalizar_pcb(pcb);
 	}else{
-		log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
         if(!interfaz->en_uso){
 			interfaz->en_uso = true;
 			interfaz->pid = pcb->contexto->pid;
@@ -265,9 +264,9 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 			pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
             list_add(lista_bloqueado_io,pcb);
 			pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
-			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
+			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 			enviar_dormir(pcb->contexto->pid,unidad_trabajo_sleep,interfaz->codigo_cliente);
-			log_warning(logger,"nadie esta en uso , puedo mandar directamente");
+			//log_warning(logger,"nadie esta en uso , puedo mandar directamente");
 			pthread_mutex_unlock(&sem_exec);
 
         }else{
@@ -278,7 +277,6 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 			blocked->unidad_trabajo = unidad_trabajo_sleep;
 			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
 			sigue = false;
-			log_warning(logger,"hay alguien que esta usando , me paso a bloqueado");
             agregar_cola_bloqueados_interfaces(interfaz,blocked);
 			pthread_mutex_unlock(&sem_exec);
         }
@@ -288,7 +286,7 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 void ejecutar_io_fs_create(char *nombre_interfaz,char* nombre_archivo_f_create,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
-			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);

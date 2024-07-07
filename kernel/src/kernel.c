@@ -4,7 +4,6 @@ int main(int argc, char* argv[]) {
     //iniciar_recurso();
 	iniciar();
 	//char * e = planificador_a_string(planificador);
-	//log_info(logger, "%s",e);
 	log_info(logger,"%i", quantum);
 	generar_conexion();
 	inciar_planificadores();
@@ -18,9 +17,8 @@ int main(int argc, char* argv[]) {
 
 void iniciar_servidor_kernel(){
 	int kernel_fd = iniciar_servidor(puerto_escucha);
-	log_info(logger, "Servidor listo para recibir al cliente");
+	//log_info(logger, "Servidor listo para recibir al cliente");
 	//generar_conexion_memoria();
-	//log_info(logger, "genere conexion con memoria");
 
 	while(1){
 	    int cliente_fd = esperar_cliente(kernel_fd);
@@ -145,7 +143,6 @@ void procesar_conexion(void *conexion1){
 		case CREAR_PROCESO:
 			paquete = recibir_paquete(cliente_fd);
 			pthread_mutex_unlock(&sem_memoria);
-			log_info(logger,"CARGUE INSTRUCCIONES");
 		break;
 		case RECIBIR_PCB:
 			paquete = recibir_paquete(cliente_fd);
@@ -167,7 +164,7 @@ void procesar_conexion(void *conexion1){
 				case IO_SLEEP:
 					paquete = recibir_paquete(cliente_fd);
 					char * nombre_de_interfaz_sleep =list_get(paquete,0);
-					log_info(logger,"%s", nombre_de_interfaz_sleep);
+					//log_info(logger,"%s", nombre_de_interfaz_sleep);
 					int *unidad_trabajo_sleep = list_get(paquete,1);
 					t_pcb* pcb_sleep = running;
 					ejecutar_io_sleep(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,pcb_sleep);
@@ -192,7 +189,7 @@ void procesar_conexion(void *conexion1){
 					valor_uin32t2 =list_get(paquete,3); //tamanio
 					valor_entero2 = (int) valor_uin32t2;
 					t_pcb* pcb_io_stdin_read = running;
-					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2);
+					//log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2);
 					ejecutar_io_stdin_read(valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2,pcb_io_stdin_read);
 					break;
 				case IO_STDOUT_WRITE:
@@ -203,8 +200,8 @@ void procesar_conexion(void *conexion1){
 					valor_uin32t2 =list_get(paquete,3); //tamanio
 					valor_entero2 = (int) valor_uin32t2;
 					t_pcb* pcb_io_stdout_write = running;
-					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2);
-					log_warning(logger,"el pid es %i",running->contexto->pid);
+					//log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2);
+					//log_warning(logger,"el pid es %i",running->contexto->pid);
 					ejecutar_io_stdin_write(valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2,pcb_io_stdout_write);
 					break;
 
@@ -255,10 +252,9 @@ void procesar_conexion(void *conexion1){
 			}
 			break;
 		case EJECUTAR_IO_SLEEP:
-			//log_error(logger, "AAAAAAAAAAAA");
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_a_sacar_sleep = list_get(paquete,0);
-			log_warning(logger, "me ha llegado ejecutar de vuelta a cpu el pid es %i",*pid_a_sacar_sleep);
+			//log_warning(logger, "me ha llegado ejecutar de vuelta a cpu el pid es %i",*pid_a_sacar_sleep);
 			//log_error(logger, "%i",*pid_a_sacar_sleep);
 			io_sleep_ready(*pid_a_sacar_sleep);
 		break;
@@ -271,7 +267,7 @@ void procesar_conexion(void *conexion1){
 		case EJECUTAR_STDOUT_WRITE:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_stdin_write = list_get(paquete,0);
-			log_warning(logger, "el pid es %i",*pid_stdin_write);
+			//log_warning(logger, "el pid es %i",*pid_stdin_write);
 			io_stdout_write_ready(*pid_stdin_write);
 			break;
 
@@ -286,13 +282,13 @@ void procesar_conexion(void *conexion1){
 		case RESPUESTA_CREAR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_crear_archivo = list_get(paquete,0);
-			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			io_fs_create_ready(*pid_crear_archivo);
 			break;
 		case RESPUESTA_BORRAR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_eliminar_archivo = list_get(paquete,0);
-			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			io_fs_delete_ready(*pid_eliminar_archivo);
 		
 			break;
@@ -300,20 +296,20 @@ void procesar_conexion(void *conexion1){
 		case RESPUESTA_ESCRIBIR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_escribir_archivo = list_get(paquete,0);
-			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			io_fs_write_ready(*pid_escribir_archivo);
 			break;
 		case RESPUESTA_LEER_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_leer_archivo = list_get(paquete,0);
-			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			io_fs_read_ready(*pid_leer_archivo);
 			break;
 
 		case RESPUESTA_TRUNCAR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_truncar_archivo = list_get(paquete,0);
-			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			io_fs_truncate_ready(*pid_truncar_archivo);
 			break;
 		case FINALIZAR:
@@ -322,7 +318,7 @@ void procesar_conexion(void *conexion1){
 			running->contexto = contexto;
 			exit= running;
 			finalizar_pcb(exit);
-			log_warning(logger, "Finaliza el proceso %i - Motivo: SUCCES",exit->contexto->pid);
+			//log_warning(logger, "Finaliza el proceso %i - Motivo: SUCCESS",exit->contexto->pid);
 			break;
 
 		case -1:

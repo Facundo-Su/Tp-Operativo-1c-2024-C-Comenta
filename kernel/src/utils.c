@@ -127,12 +127,10 @@ t_list* leer_script(FILE* pseudocodigo){
     // Recorro el archivo de pseudocodigo y parseo las instrucciones
     while (getline(&instruccion, &len, pseudocodigo) != -1){
 
-    	//log_info(logger_consola_memoria,"el valor es %s" ,instruccion);
     	char* valor_remplazo = strdup(instruccion);
         list_add(instrucciones,valor_remplazo);
         char *instruc_aux_nose23 = list_get(instrucciones,j);
         j++;
-       log_info(logger,"la instruccion es  %s",instruc_aux_nose23);
     }
     return instrucciones;
 }
@@ -144,15 +142,14 @@ void ejecutar_script(char* ruta){
     } else {
         t_list* auxiliar = leer_script(archivo);
         fclose(archivo);
-		log_info(logger, "%i",list_size(auxiliar));
+		//log_info(logger, "%i",list_size(auxiliar));
 		for(int i =0; i< list_size(auxiliar);i++){
 
 			char * instruccion = list_get(auxiliar, i);
 			char** instruccion_parseada = string_split(instruccion, " ");
-			//log_info(logger, "ASASASASAS");
-			log_info(logger, "%s",instruccion_parseada[0]);
+			//log_info(logger, "%s",instruccion_parseada[0]);
 			if (strcmp(instruccion_parseada[0], "INICIAR_PROCESO") == 0){
-				log_info(logger, "%s",instruccion_parseada[1]);
+				//log_info(logger, "%s",instruccion_parseada[1]);
 				//char *ruta_proceso = instruccion[1];
 				iniciar_proceso(instruccion_parseada[1]);
 			}
@@ -169,7 +166,7 @@ char* obtener_ruta(char* valor_recibido) {
     // Asignar memoria suficiente para la ruta (incluyendo el carácter nulo)
     char* ruta = malloc(longitud_total);
     if (ruta == NULL) {
-        log_info(logger, "Error: No se pudo asignar memoria para la ruta\n");
+       //log_info(logger, "Error: No se pudo asignar memoria para la ruta\n");
         return NULL; // Manejar el error de asignación de memoria
     }
 

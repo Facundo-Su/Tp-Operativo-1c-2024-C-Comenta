@@ -63,13 +63,11 @@ void planificador_corto_plazo(){
 	}
     while (1)
     {
-        log_info(logger,"hasta aca llegue 3");
         sem_wait(&sem_ready);
         pthread_mutex_lock(&sem_exec);
         if(detener){
             pthread_mutex_lock(&sem_detener);
         }
-        log_info(logger,"hasta aca llegue 4");
         sigue = true;
         switch (planificador)
         {
@@ -113,19 +111,19 @@ void *interrupcion_quantum(){
                 if(planificador == VRR){
                     inicio_vrr = temporal_create();
                 }
-                log_error(logger,"%i", queue_size(cola_vrr->cola));
+                //log_error(logger,"%i", queue_size(cola_vrr->cola));
                 if(!queue_is_empty(cola_vrr->cola)){
                     pthread_mutex_lock(&(cola_vrr->sem_mutex));
                     t_pcb* pcb = queue_peek(cola_vrr->cola);
                     pthread_mutex_unlock(&(cola_vrr->sem_mutex));
-                    log_error(logger,"EJECUTA QUANTUM DE %i",pcb->contexto->quantum);
+                    //log_error(logger,"EJECUTA QUANTUM DE %i",pcb->contexto->quantum);
                     if(planificador == VRR){
                         pthread_mutex_unlock(&sem_vrr);
                     }
                     pthread_mutex_lock(&sem_quantum);
                     usleep(pcb->contexto->quantum * 1000);
                     if(sigue){
-                        log_error(logger,"INTERRUPCION POR QUANTUM RESTANTE");
+                        log_info(logger,"PID: %i - Desalojado por fin de Quantum", 1); //TODO Agregar el PID!!
                         enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
                     }
                 }else{
@@ -136,12 +134,11 @@ void *interrupcion_quantum(){
                     pthread_mutex_lock(&sem_quantum);
                     usleep(quantum * 1000);
                     if(sigue){
-                        log_error(logger,"INTERRUPCION POR QUANTUM");
+                        log_info(logger,"PID: %i - Desalojado por fin de Quantum", 1); //TODO Agregar el PID!!
                         enviar_mensaje_instrucciones("interrumpido por quantum",conexion_cpu_interrupt,ENVIAR_DESALOJAR);
                     }
                 }
             }
-        //}
 }
 void enviar_por_dispatch(t_pcb* pcb) {
 	char * estado_anterior = estado_a_string(pcb->estado);

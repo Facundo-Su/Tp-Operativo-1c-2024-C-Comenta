@@ -10,13 +10,12 @@ int main(int argc, char* argv[]) {
 	config = cargar_config(rutaConfig);
 
     logger = log_create("./cpu.log", "CPU", true, LOG_LEVEL_INFO);
-    log_info(logger, "Soy la cpu!");
 	instruccion_a_realizar = malloc(sizeof(t_instruccion));
     //iniciar configuraciones
 	obtener_configuracion();
 	iniciar_recurso();
 	//iniciar_consola();
-	log_info(logger, "se inicio el servidor\n");
+	//log_info(logger, "se inicio el servidor\n");
 	pthread_t servidor_interrupt;
 	pthread_t servidor_dispatch;
 	pthread_create(&servidor_interrupt,NULL,(void*)iniciar_servidor_interrupt,(void *) puerto_escucha_interrupt);
@@ -63,7 +62,7 @@ void iniciar_servidor_cpu(){
 	int cpu_fd = iniciar_servidor(puerto_escucha_dispatch);
 	log_info(logger, "Servidor listo para recibir al cliente");
 	generar_conexion_memoria();
-	log_info(logger, "genere conexion con memoria");
+	//log_info(logger, "genere conexion con memoria");
 	//enviar_mensaje_instrucciones("genere conexion con memoria",conexion_memoria,MENSAJE);
 
 	while(1){
@@ -98,7 +97,7 @@ void iniciar_servidor_interrupt(char * puerto){
 			case ENVIAR_DESALOJAR:
 				recibir_mensaje(cliente_fd);
 				hay_desalojo = true;
-				log_error(logger, "Instruccion DESALOJAR");
+				//log_error(logger, "Instruccion DESALOJAR");
 				break;
 			case ENVIAR_FINALIZAR:
 				recibir_mensaje(cliente_fd);
@@ -131,16 +130,16 @@ void procesar_conexion(void *conexion1){
 		switch (cod_op) {
 		case MENSAJE:
 			recibir_mensaje(cliente_fd);
-			log_info(logger,"hola como estas capo");
+			//log_info(logger,"hola como estas capo");
 			//enviar_mensaje("hola che",cliente_fd);
 			break;
 		case INSTRUCCIONES_A_MEMORIA:
 			char* auxiliar =recibir_instruccion(cliente_fd);
-			log_info(logger,"me llego la siguiente instruccion %s",auxiliar);
+			//log_info(logger,"me llego la siguiente instruccion %s",auxiliar);
 			transformar_en_instrucciones(auxiliar);
 //			hayInterrupcion = false;
 			recibi_archivo=true;
-			log_info(logger, "Recibi las instrucciones");
+			//log_info(logger, "Recibi las instrucciones");
 			sem_post(&contador_instruccion);
 			break;
 		case PAQUETE:
@@ -150,19 +149,16 @@ void procesar_conexion(void *conexion1){
 			break;
 		case ENVIARREGISTROCPU:
 			lista= recibir_paquete(cliente_fd);
-			//log_info(logger, "ME LLEGARON");
 			break;
 			//TODO
 			//preguntar porque si lo meto dentro de una funcion no me reconoce
 		case RECIBIR_PCB:
-			log_info(logger, "Estoy por recibir un PCB");
 			lista = recibir_paquete(cliente_fd);
 			pcb = desempaquetar_pcb(lista);
 			//recibir_pcb(cliente_fd);
 			hayInterrupcion = false;
 			hay_finalizar = false;
 			hay_desalojo= false;
-			//log_pcb_info(pcb);
 			ejecutar_ciclo_de_instruccion(cliente_fd);
 
 			break;
@@ -170,7 +166,6 @@ void procesar_conexion(void *conexion1){
 			lista = recibir_paquete(cliente_fd);
 			int *auxiliar2 = list_get(lista,0);
 			marco_obtenido = *auxiliar2;
-			//log_info(logger, "el valor del marco es %i",marco_obtenido);
 			pthread_mutex_unlock(&contador_marco_obtenido);
 
 			break;
@@ -179,7 +174,7 @@ void procesar_conexion(void *conexion1){
 			lista= recibir_paquete(cliente_fd);
 			enteros= list_get(lista,0);
 			tamanio_pagina= *enteros;
-			log_warning(logger, "El tamanio de la pagina es %i",tamanio_pagina);
+			//log_warning(logger, "El tamanio de la pagina es %i",tamanio_pagina);
 			break;
 		case RESIZE_TAM:
 			lista= recibir_paquete(cliente_fd);
@@ -247,7 +242,7 @@ void solicitar_instruccion_ejecutar_segun_pc(int pc,int pid){
 	agregar_a_paquete(paquete, &pc, sizeof(int));
 	agregar_a_paquete(paquete, &pid, sizeof(int));
 	enviar_paquete(paquete, conexion_memoria);
-	log_info(logger,"Solicite instrucciones");
+	//log_info(logger,"Solicite instrucciones");
 
 }
 
@@ -404,12 +399,11 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		enviar_recurso_a_kernel(recurso,EJECUTAR_SIGNAL,cliente_fd);
 		break;
 	case RESIZE:
-	//TODO hacer en la parte de memoria
 		parametro = list_get(instrucciones->parametros,0);
+		log_info(logger,"PID: %i - Ejecutando RESIZE: %s -",pcb->pid,parametro);
 		int tamanio_modificar = atoi(parametro);
 		enviar_memoria_ajustar_tam(tamanio_modificar);
 		pthread_mutex_lock(&sem_resize);
-		//log_info(logger,"PID: %i - Ejecutando SIGNAL: %s",pcb->pid,recurso);
 		if(valor_retorno_resize == -1){
 			hayInterrupcion=true;
 			enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
@@ -433,15 +427,11 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 
 		valor_uint1 = (uint32_t) registro_por_mov;
 
-		log_warning(logger,"el valor que lei de memoria es %i",valor_uint1);
-
 		setear(registro_aux, valor_uint1);
 		int dir_fisica = traducido->marco* tamanio_pagina + traducido->desplazamiento;
 		log_info(logger, "PID: %i - Acción: LEER - Dirección Física: %i - Valor: %u",pcb->pid,dir_fisica,valor_uint1);
 		break;
 	case MOV_OUT:
-		log_error(logger,"PID: %i - Ejecutando MOV_OUT",pcb->pid);
-
 		parametro= list_get(instrucciones->parametros,0);//REGISTROS  DATOS
 		parametro2= list_get(instrucciones->parametros,1);// REGISTROS DIRECCION
 
@@ -462,6 +452,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	case COPY_STRING:
 	// MMU
 		parametro = list_get(instrucciones->parametros,0);
+		log_info(logger,"PID: %i - Ejecutando COPY_STRING: %s -",pcb->pid,parametro);
 		int tamanio_copy_string = atoi(parametro);
 		t_traduccion * traducido_copy_string_origen = mmu_traducir(pcb->registros->si);
 		t_traduccion * traducido_copy_string_destino = mmu_traducir(pcb->registros->di);
@@ -472,6 +463,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		hayInterrupcion = true;
 		parametro = list_get(instrucciones->parametros,0);
 		parametro2 = list_get(instrucciones->parametros,1);
+		log_info(logger,"PID: %i - Ejecutando IO_GEN_SLEEP: %s-%s",pcb->pid,parametro,parametro2);
 		char * nombre_io_sleep = strtok(parametro, "\n");
 		int entero_sleep = atoi(parametro2);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
@@ -485,6 +477,8 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		parametro2 = list_get(instrucciones->parametros,1);// valor de registro direccion
 		parametro3 = list_get(instrucciones->parametros,2); //registro tamanio
 
+		log_info(logger,"PID: %i - Ejecutando IO_STDIN_READ: %s-%s-%s",pcb->pid,parametro,parametro2, parametro3);
+
 		registro_aux = devolver_registro(parametro2);
 		valor_uint1 = obtener_valor(registro_aux);
 
@@ -492,7 +486,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 
 		registro_aux2 = devolver_registro(parametro3);
 		valor_uint2 = obtener_valor(registro_aux2);
-		log_info(logger,"ENVIO %u %u",valor_uint1, valor_uint2);
+		//log_info(logger,"ENVIO %u %u",valor_uint1, valor_uint2);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_io_stdin_read(parametro,aux,valor_uint2,cliente_fd);
 
@@ -503,6 +497,8 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		parametro = list_get(instrucciones->parametros,0);
 		parametro2 = list_get(instrucciones->parametros,1);
 		parametro3 = list_get(instrucciones->parametros,2);
+
+		log_info(logger,"PID: %i - Ejecutando IO_STDOUT_WRITE: %s-%s-%s",pcb->pid,parametro,parametro2, parametro3);
 
 		registro_aux = devolver_registro(parametro2);
 		valor_uint1 = obtener_valor(registro_aux);
@@ -519,6 +515,8 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		hayInterrupcion = true;
 		parametro = list_get(instrucciones->parametros,0);
 		parametro2 = list_get(instrucciones->parametros,1);
+		log_info(logger,"PID: %i - Ejecutando IO_FS_CREATE: %s-%s",pcb->pid,parametro,parametro2);
+
 		parametro2 =strtok(parametro2, "\n");
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_io_fs_create(parametro,parametro2,cliente_fd);
@@ -528,6 +526,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		hayInterrupcion = true;
 		parametro = list_get(instrucciones->parametros,0);
 		parametro2 = list_get(instrucciones->parametros,1);
+		log_info(logger,"PID: %i - Ejecutando IO_FS_DELETE: %s-%s",pcb->pid,parametro,parametro2);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_io_fs_delete(parametro,parametro2,cliente_fd);
 		break;
@@ -536,6 +535,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		parametro = list_get(instrucciones->parametros,0);//nombre interfaz
 		parametro2 = list_get(instrucciones->parametros,1);//nombre archivo
 		parametro3 = list_get(instrucciones->parametros,2);// tamanio
+		log_info(logger,"PID: %i - Ejecutando IO_FS_TRUNCATE: %s-%s-%s",pcb->pid,parametro,parametro2, parametro3);
 		registro_aux = devolver_registro(parametro3);
 		valor_uint1 = obtener_valor(registro_aux);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
@@ -548,6 +548,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		parametro3 = list_get(instrucciones->parametros,2);//valor de registro direccion
 		parametro4 = list_get(instrucciones->parametros,3);//valor de registro tamanio
 		parametro5 = list_get(instrucciones->parametros,4);//valor de puntero archivo
+		log_info(logger,"PID: %i - Ejecutando IO_FS_WRITE: %s-%s-%s-%s-%s",pcb->pid,parametro,parametro2, parametro3, parametro4, parametro5);
 		
 		registro_aux= devolver_registro(parametro3);
 		registro_aux2= devolver_registro(parametro4);
@@ -564,13 +565,13 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		break;
 	
 	case IO_FS_READ:
-		log_warning(logger, "Estoy por leer un archivo");
 		hayInterrupcion = true;
 		parametro = list_get(instrucciones->parametros,0); //nombre interfaz
 		parametro2 = list_get(instrucciones->parametros,1);//nombre archivo
 		parametro3 = list_get(instrucciones->parametros,2);//valor de registro direccion
 		parametro4 = list_get(instrucciones->parametros,3);//valor de registro tamanio
 		parametro5 = list_get(instrucciones->parametros,4);//valor de puntero archivo
+		log_info(logger,"PID: %i - Ejecutando IO_FS_READ: %s-%s-%s-%s-%s",pcb->pid,parametro,parametro2, parametro3, parametro4, parametro5);
 		
 		registro_aux= devolver_registro(parametro3);
 		registro_aux2= devolver_registro(parametro4);
@@ -672,12 +673,11 @@ void enviar_io_fs_create(char* parametro,char* parametro2,int cliente_fd){
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, parametro2, strlen(parametro2)+1);
 	enviar_paquete(paquete, cliente_fd);
-	log_warning(logger, "Enviando el nombre de archivo a crear: %s",parametro2);
 	eliminar_paquete(paquete);
 }
 
 void enviar_io_stdout_write(char* parametro,t_traduccion* traducido,uint32_t parametro3,int cliente_fd){
-	log_error(logger, "ENVIO FWRITE nombre %s,marco %i, despĺazamiento %i, tamanio %i",parametro,traducido->marco,traducido->desplazamiento,parametro3);
+	//log_error(logger, "ENVIO FWRITE nombre %s,marco %i, despĺazamiento %i, tamanio %i",parametro,traducido->marco,traducido->desplazamiento,parametro3);
 	t_paquete* paquete = crear_paquete(IO_STDOUT_WRITE);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
@@ -761,7 +761,7 @@ void enviar_IO_SLEEP(char* parametro,int parametro2,int cliente_fd){
 	t_paquete* paquete = crear_paquete(IO_SLEEP);
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &parametro2, sizeof(int));
-	log_warning(logger,"PID: %i - Ejecutando IO_SLEEP: %s - %i",pcb->pid,parametro,parametro2);
+	//log_warning(logger,"PID: %i - Ejecutando IO_SLEEP: %s - %i",pcb->pid,parametro,parametro2);
 	enviar_paquete(paquete, cliente_fd);
 	eliminar_paquete(paquete);
 }
@@ -775,7 +775,6 @@ void enviar_a_memoria_copy_string(int tamanio,t_traduccion* traducido_origen,t_t
 	agregar_a_paquete(paquete,&(traducido_destino->marco),sizeof(int));
 	agregar_a_paquete(paquete,&(traducido_destino->desplazamiento),sizeof(int));
 	enviar_paquete(paquete, conexion_memoria);
-	//quiero ver el marco y
 	eliminar_paquete(paquete);
 }
 
@@ -794,17 +793,13 @@ t_traduccion* mmu_traducir(int dir_logica){
 	if(cantidad_entrada_tlb>0){
 		marco_encontrado = consultar_tlb(nro_pagina, pcb->pid);
 		if(marco_encontrado == -1){
-			log_error(logger, "TLB MIS");
+			log_info(logger,"PID: %i - TLB MISS - Pagina: %s",pcb->pid,nro_pagina);
 			obtener_el_marco(nro_pagina,OBTENER_MARCO);
 			pthread_mutex_lock(&contador_marco_obtenido);
-			//log_error(logger, "LLEGUE HASTA ACA");
-			
 			insertar_tlb(pcb->pid,nro_pagina);
-			//log_error(logger, "LLEGUE HASTA ACA");
 			marco_encontrado = marco_obtenido;
 		}else{
-			
-			log_error(logger, "TLB HIT");
+			log_info(logger,"PID: %i - TLB HIT - Pagina: %s",pcb->pid,nro_pagina);
 		}
 	}else{
 
@@ -823,7 +818,6 @@ t_traduccion* mmu_traducir(int dir_logica){
 }
 
 void obtener_el_marco(int nro_pagina,op_code operacion){
-	//log_error(logger, "%i", nro_pagina,pcb->pid);
 	t_paquete* paquete = crear_paquete(operacion);
 	agregar_a_paquete(paquete, &(pcb->pid), sizeof(int));
 	agregar_a_paquete(paquete, &nro_pagina, sizeof(int));
@@ -845,7 +839,7 @@ void generar_conexion_memoria(){
 	pthread_t conexion_memoria_hilo_cpu;
 	conexion_memoria = crear_conexion(ip_memoria, puerto_memoria);
 	pthread_create(&conexion_memoria_hilo_cpu,NULL,(void*) procesar_conexion,(void *)&conexion_memoria);
-	log_info(logger, "mandame intrucciones\n");
+	//log_info(logger, "mandame intrucciones\n");
 	enviar_mensaje_instrucciones("mandame las instrucciones plz ",conexion_memoria,MANDAME_PAGINA);
 }
 
@@ -869,9 +863,8 @@ void obtener_configuracion(){
 void transformar_en_instrucciones(char* auxiliar){
 	instruccion_a_realizar->parametros= list_create();
 	int cantidad_parametros=0;
-	log_error(logger,"el valor recibido es %s",auxiliar);
 	char** instruccion_parseada = parsear_instruccion(auxiliar);
-			log_warning(logger,"%s",instruccion_parseada[0]);
+			//log_warning(logger,"%s",instruccion_parseada[0]);
 	        if (strcmp(instruccion_parseada[0], "SET") == 0) {
 	        	instruccion_a_realizar->nombre = SET;
 	            cantidad_parametros = 2;
@@ -952,7 +945,7 @@ void transformar_en_instrucciones(char* auxiliar){
 	    	t_list* parametros = list_create();
 
 	        for(int i=1;i<cantidad_parametros+1;i++){
-				log_error(logger, "%s", instruccion_parseada[i]);
+				//log_error(logger, "%s", instruccion_parseada[i]);
 	            list_add(parametros,instruccion_parseada[i]);
 	        }
 
@@ -1045,7 +1038,7 @@ uint32_t obtener_valor(t_estrucutra_cpu pos) {
 		case DI:
 			valor_retorno =pcb->registros->di;
 			break;
-        default: //log_info(logger, "Registro no reconocido");
+        default:
         	return 0;
 
     }
@@ -1091,7 +1084,6 @@ void insertar_tlb(int pid, int nro_pagina) {
 	}else{
 		log_info(logger, "TLB llena");
 		int aux = ejecutar_algoritmo();
-		log_warning(logger, "hola como estas el valor retornado es :%i ^+^ ",aux);
 		t_estructura_tlb *tlb_aux = list_get(tlb, aux);
 		tlb_aux->pid = pid;
 		tlb_aux->pagina = nro_pagina;
@@ -1113,7 +1105,6 @@ int ejecutar_algoritmo(){
 		return ejecutar_lru();
 		break;
 	default:
-		//log_info(logger,"ERROR Planificador");
 		return -1;
 	break;
 	}
@@ -1147,7 +1138,7 @@ int ejecutar_lru(){
 			//log_error(logger, "marco %i tiempo lru : %i ",marco->num_marco,marco->last_time_lru);
 			tiempo = aux->last_time_lru;
 			numero = i;
-			log_warning(logger, "llegue hasta aca porque encontre algo");
+			//log_warning(logger, "llegue hasta aca porque encontre algo");
 		}
 		i++;
 	}
@@ -1175,7 +1166,7 @@ void actualizar_lru(){
 		t_estructura_tlb *aux= (t_estructura_tlb*)list_iterator_next(iterador);
 		if(!aux->is_free){
 			aux->last_time_lru ++;
-			log_error(logger,"ACTUALICE LRU");
+			//log_error(logger,"ACTUALICE LRU");
 		}
 	}
 	list_iterator_destroy(iterador);
