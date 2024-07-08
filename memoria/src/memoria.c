@@ -37,7 +37,7 @@ void procesar_conexion(void* socket){
 	            switch (cod_op) {
 	            case MENSAJE:
 	                recibir_mensaje(cliente_fd);
-	                log_info(logger_memoria,"hola como estas capo");
+	                //log_info(logger_memoria,"hola como estas capo");
 					enviar_mensaje_instrucciones("recibi el mensaje", cliente_fd, MENSAJE);
 	                break;
 	            case PAQUETE:
@@ -73,11 +73,9 @@ void procesar_conexion(void* socket){
 				case ENVIO_MOV_OUT:
 					void *valor_leido2 = malloc(20);
     				memcpy(valor_leido2, memoria->espacio_usuario+16, 20);
-					log_warning(logger,"EL DATO ante de ejecutar ES %s",valor_leido2);
 					envio_mov_out(cliente_fd);
 					void *valor_leido3 = malloc(20);
     				memcpy(valor_leido3, memoria->espacio_usuario+16, 20);
-					log_error(logger,"EL DATO despues de ejecutar ES %s",valor_leido3);
 					break;
 				case COPY_STRING_MEMORIA:
 					copy_string(cliente_fd);
@@ -100,7 +98,7 @@ void procesar_conexion(void* socket){
 	    		case -1:
 	                log_error(logger_memoria, "El cliente se desconectó. Terminando servidor");
 	                close(cliente_fd);
-	                return; // Salir del bucle interno para esperar un nuevo cliente
+	                return;
 	            	default:
 	                log_warning(logger_memoria, "Operación desconocida. No quieras meter la pata");
 	                break;

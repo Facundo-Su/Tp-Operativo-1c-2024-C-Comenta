@@ -222,8 +222,8 @@ void envio_resize(int cliente_fd){
 	int* tamanio = list_get(lista,1);
 	t_tabla_paginas *tabla = tabla_paginas_segun_pid(*pid);
 	int tamanio_proceso = tabla->tamanio_proceso;
-	log_error(logger_memoria, "TAMAÑIO proceso %i", tamanio_proceso);
-	log_error(logger_memoria, "TAMAÑIO memoria %i", memoria->espacio_disponible);
+	//log_error(logger_memoria, "TAMAÑIO proceso %i", tamanio_proceso);
+	//log_error(logger_memoria, "TAMAÑIO memoria %i", memoria->espacio_disponible);
 	
 	if(*tamanio<tamanio_proceso){
 		int tamanio_a_eliminar = tamanio_proceso-*tamanio;
@@ -232,9 +232,9 @@ void envio_resize(int cliente_fd){
 	}
 	else{
 		int tamanio_a_agregar = *tamanio - tamanio_proceso;
-		log_error(logger_memoria, "TAMAÑIO a agregar %i", tamanio_a_agregar);
+		//log_error(logger_memoria, "TAMAÑIO a agregar %i", tamanio_a_agregar);
 		if(tamanio_a_agregar > memoria->espacio_disponible){
-			log_error(logger_memoria,"ERROR NO PUEDO AGRANDAR");
+			//log_error(logger_memoria,"ERROR NO PUEDO AGRANDAR");
 			enviar_respuesta_resize(cliente_fd, -1);
 		}else{
 			ejecutar_ampliacion(tamanio_a_agregar,tabla);
@@ -248,6 +248,7 @@ void ejecutar_ampliacion(int tamanio_a_agregar, t_tabla_paginas * tabla){
 	tabla->tamanio_proceso += tamanio_a_agregar;
 	int cant_paginas_nuevas = (tamanio_a_agregar + tam_pagina -1)/tam_pagina;
 	int cant_paginas = list_size(tabla);
+	log_info(logger_memoria, "PID: %i - Tamaño Actual: %i - Tamaño a Ampliar: %i",tabla->pid, cant_paginas, tamanio_a_agregar);
 	crear_paginas(cant_paginas_nuevas,cant_paginas,tabla);
 	
 }
@@ -265,13 +266,13 @@ void asignar_marco(int pid, t_pagina * pagina){
 
 	int i = encontrar_marco_libre();
 	if(i ==-1){
-		log_error(logger_memoria,"ERROR GIL");
+		//log_error(logger_memoria,"ERROR GIL");
 	}
 	t_marco * marco = list_get(memoria->marcos, i);
 	marco = list_get(memoria->marcos,i);
 	marco->is_free = false; 
 	marco->pid = pid;
-	log_warning(logger_memoria,"asigne el marco %d",marco->num_marco);
+	//log_warning(logger_memoria,"asigne el marco %d",marco->num_marco);
 	pagina->num_marco = i;
 }
 int encontrar_marco_libre() {
@@ -290,6 +291,7 @@ void ejecutar_reduccion(int tamanio_a_eliminar, t_tabla_paginas * tabla){
 	int cant_paginas_a_eliminar = (tamanio_a_eliminar + tam_pagina -1)/tam_pagina;
 	int i=0;
 	int cantidad_paginas = list_size(tabla->paginas);
+	log_info(logger_memoria, "PID: %i - Tamaño Actual: %i - Tamaño a Reducir: %i",tabla->pid, cantidad_paginas, cant_paginas_a_eliminar);
 	while(i!= cant_paginas_a_eliminar){
 		
 		t_pagina * pagina =list_get(tabla->paginas,(cantidad_paginas+i-cant_paginas_a_eliminar));

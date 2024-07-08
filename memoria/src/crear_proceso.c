@@ -22,7 +22,7 @@ void cargar_lista_instruccion(int pid, char* ruta) {
     instruccion->instrucciones = list_create();
 
     //ruta = "./prueba.txt";
-    log_info(logger, "%s",ruta);
+    //log_info(logger, "%s",ruta);
     FILE* archivo = fopen(ruta, "r");
 
     if (archivo == NULL) {
@@ -81,7 +81,7 @@ t_list* leer_pseudocodigo(FILE* pseudocodigo){
         list_add(instrucciones_del_pcb,valor_remplazo);
         char *instruc_aux_nose23 = list_get(instrucciones_del_pcb,j);
         j++;
-       log_info(logger_memoria,"la instruccion es  %s",instruc_aux_nose23);
+       //log_info(logger_memoria,"la instruccion es  %s",instruc_aux_nose23);
     }
     return instrucciones_del_pcb;
 
@@ -108,6 +108,7 @@ void enviar_instrucciones(int cliente_fd){
 
 void guardar_proceso_en_memoria(int pid) {
     t_tabla_paginas * tabla_paginas = crear_tabla_pagina(pid);
+    log_info(logger,"PID: %i- Tamaño: %i", pid, 0);
 	list_add(memoria->lista_tabla_paginas,tabla_paginas);
 }
 

@@ -8,11 +8,11 @@ void stdin_read(int cliente_fd, op_code codigo_respuesta){
     int *tamanio = list_get(lista,3);
 	void *valor_a_copiar = malloc(*tamanio);
     valor_a_copiar= list_get(lista,4);
-    log_info(logger, "me llego para fread pid %i, marco %i, desplazamiento %i, tamanio %i, palabra %s",*pid, *marco,*desplazamiento, *tamanio,valor_a_copiar);
+    //log_info(logger, "me llego para fread pid %i, marco %i, desplazamiento %i, tamanio %i, palabra %s",*pid, *marco,*desplazamiento, *tamanio,valor_a_copiar);
     memcpy(memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, valor_a_copiar, *tamanio);
     void * m = malloc(*tamanio);
     memcpy(m,memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, *tamanio);
-    log_info(logger,"el valor leido es %s",m);
+    //log_info(logger,"el valor leido es %s",m);
     enviar_respuesta_IO(1, codigo_respuesta,cliente_fd);
     int dir = (*marco * tam_pagina) + *desplazamiento;
     log_info(logger,"PID: %i- Accion: ESCRIBIR - Direccion fisica: %i- Tamaño:  %i",*pid, dir, *tamanio);

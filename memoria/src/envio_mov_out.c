@@ -7,26 +7,18 @@ void envio_mov_out (int cliente_fd){
 	int *pagina = list_get(lista,2);
 	int *pid = list_get(lista,3);
 	uint32_t *valor_remplazar = list_get(lista,4);
-
 	int tamanio;
-
 	if(*valor_remplazar <255){
 		tamanio =1;
 	}else{
 		tamanio =4;
 	}
 	memcpy(memoria->espacio_usuario + (*marco * tam_pagina) + *desplazamiento, valor_remplazar, tamanio);
-	//enviar_respuesta(cliente_fd, ENVIO_MOV_OUT);	//Aca no estoy seguro si es el codigo de operacion correcto
     int dir_mov = (*marco * tam_pagina) + *desplazamiento;
 	int prueba;
 	memcpy(&prueba,memoria->espacio_usuario + (*marco * tam_pagina) + *desplazamiento, tamanio);
-	log_warning(logger_memoria,"el valor que almacene es %i",prueba);
-	
 	void *valor_leido = malloc(36);
     memcpy(valor_leido, memoria->espacio_usuario+ (*marco * tam_pagina) + *desplazamiento, 36);
-	log_info(logger,"EL DATO ES %s",valor_leido);
-	//t_pagina* pagina_mov_out = obtener_pagina(*pid, *pagina);
-	//pagina_mov_out->m=1;
 	log_info(logger_memoria,"PID: %i- Accion: ESCRIBIR - Direccion fisica: %i- Tamaño:  %i",*pid,dir_mov, tamanio);
 	
 }

@@ -192,8 +192,8 @@ void procesar_conexion(void *conexion_ptr){
         case EJECUTAR_IO_SLEEP:
 			paquete = recibir_paquete(cliente_fd);
             int *pid = list_get(paquete, 0);
-            log_error(logger, "%i",*pid);
 			int *amount = list_get(paquete, 1);
+            log_info(logger, "PID: < %i > - Operacion: < IO_STDIN_READ >",*pid);
 			usleep(*amount * tiempo_unidad_trabajo*10000);
 
             t_paquete* paquete_finalizar_sleep = crear_paquete(EJECUTAR_IO_SLEEP);
@@ -212,14 +212,14 @@ void procesar_conexion(void *conexion_ptr){
         	int *tamanio_stdin = list_get(paquete, 3);
         	log_info(logger,"Ingrese una palabra por teclado:");
             palabra_usuario= readline(">");
-        	//log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDIN_READ >",*pid_stdin);//esta bien que la operacion sea asi?
-            log_warning(logger,"el tamanio es %i",*tamanio_stdin);
+        	log_info(logger, "PID: < %i > - Operacion: < IO_STDIN_READ >",*pid_stdin);
+            //log_warning(logger,"el tamanio es %i",*tamanio_stdin);
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
 
             
         	char* palabra_A_enviar = string_substring(palabra_usuario,0,*tamanio_stdin);
             void* palabra_stdin_read =(void*) palabra_A_enviar;
-            log_info(logger, "envio la palabra: %s",palabra_A_enviar);
+            //log_info(logger, "envio la palabra: %s",palabra_A_enviar);
             enviar_stdin_memoria(*pid_stdin,*marco_stdin,*desplazamiento_stdin,*tamanio_stdin,palabra_stdin_read,conexion_memoria,EJECUTAR_STDIN_READ);//pid_stdin es el PID para el log de memoria cuando escribe.
         	free(palabra_stdin_read);
             int cop;
@@ -237,15 +237,15 @@ void procesar_conexion(void *conexion_ptr){
             int *marco_stdout = list_get(paquete, 1);
             int *desplazamiento_stdout = list_get(paquete, 2);
         	int *tamanio_stdout = list_get(paquete, 3);
-            log_warning(logger,"RECIBI PID %i, marco %i, desplamiento %i, tamanio %i",*pid_stdout, *marco_stdout ,*desplazamiento_stdout,*tamanio_stdout);
+            //log_warning(logger,"RECIBI PID %i, marco %i, desplamiento %i, tamanio %i",*pid_stdout, *marco_stdout ,*desplazamiento_stdout,*tamanio_stdout);
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
             enviar_direccion_memoria(*pid_stdout,*marco_stdout,*desplazamiento_stdout,*tamanio_stdout,conexion_memoria,EJECUTAR_STDOUT_WRITE);//agrego pid por si memoria lo necesita para sus logs en acceso de lectura.
             void* informacion = malloc(*tamanio_stdout);
             int cop2;
             recv(conexion_memoria, &cop2, sizeof(cop), 0);
-			log_info(logger,"recibi el codigo de operacion %i",cop2);
+			//log_info(logger,"recibi el codigo de operacion %i",cop2);
 			t_list* lista2=list_create();
-			log_error(logger,"el codigo socket es %i",cliente_fd);
+			//log_error(logger,"el codigo socket es %i",cliente_fd);
 			lista2= recibir_paquete(conexion_memoria);
 			void* auxiliar = list_get(lista2,0);
 			//paquete2 = recibir_paquete(conexion_memoria);
@@ -254,9 +254,9 @@ void procesar_conexion(void *conexion_ptr){
             //log_warning(logger,"PASEEEEEEEE");//recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
 			//usleep(tiempo_unidad_trabajo*1000);
             close(conexion_memoria);
-			log_info(logger	, "El resultado de lo buscado en memoria es: < %s >",auxiliar);
+			//log_info(logger	, "El resultado de lo buscado en memoria es: < %s >",auxiliar);
 			//log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDOUT_WRITE >",*pid);
-            log_warning(logger,"el pid es %i",*pid_stdout);
+            //log_warning(logger,"el pid es %i",*pid_stdout);
             enviar_kernel_ok_stdout(cliente_fd,*pid_stdout);
             free(informacion);//aviso q termine accio
         	break;
@@ -273,7 +273,7 @@ void procesar_conexion(void *conexion_ptr){
             int* pid_f_create = list_get(paquete,1);
 
 
-			log_info(logger, "Crear Archivo: <%s>",nombre_archivo);
+			log_info(logger, "PID: %i Crear Archivo: <%s>", *pid_f_create, nombre_archivo);
 			crear_archivo_metadata(nombre_archivo);
             enviar_respuesta_crear_archivo(cliente_fd,*pid_f_create);
         	break;
@@ -364,7 +364,7 @@ void enviar_stdin_memoria(int pid, int marco, int desplazamiento, int tamanio,vo
     agregar_a_paquete(paquete,&tamanio,sizeof(int));
 	agregar_a_paquete(paquete,palabra_A_enviar,tamanio);//+1 para agregar centinela pero no lo quiero
 	enviar_paquete(paquete, conexion_memoria);
-    log_warning(logger,"el palabra que envie es %s",palabra_A_enviar);
+    //log_warning(logger,"el palabra que envie es %s",palabra_A_enviar);
 	eliminar_paquete(paquete);
 }
 

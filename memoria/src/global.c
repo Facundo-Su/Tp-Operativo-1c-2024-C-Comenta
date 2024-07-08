@@ -36,10 +36,10 @@ void inicializar_estructuras(){
     lista_instrucciones = list_create();
     memoria->lista_tabla_paginas = list_create();
     memoria->marcos = list_create();
-    log_warning(logger_memoria, "cantidad de marcos es - %d", memoria->cantidad_marcos);
-    log_warning(logger_memoria, "tamanio de marco es - %d", memoria->tamanio_marcos);
-    log_warning(logger_memoria, "tamanio de memoria es - %d", tam_memoria);
-    log_warning(logger_memoria, "tamanio de pagina es - %d", tam_pagina);
+    //log_warning(logger_memoria, "cantidad de marcos es - %d", memoria->cantidad_marcos);
+    //log_warning(logger_memoria, "tamanio de marco es - %d", memoria->tamanio_marcos);
+    //log_warning(logger_memoria, "tamanio de memoria es - %d", tam_memoria);
+    //log_warning(logger_memoria, "tamanio de pagina es - %d", tam_pagina);
     inicializar_marcos();
 }
 
@@ -60,7 +60,7 @@ void inicializar_marcos() {
 void enviar_ok(int cliente_fd) {
     t_paquete* paquete = crear_paquete(RESPUESTA_OK_CPU_MEMORIA);
     int auxiliar2 = 0;
-    log_error(logger_memoria, "envie ok a cpu");
+    //log_error(logger_memoria, "envie ok a cpu");
     agregar_a_paquete(paquete, &auxiliar2, sizeof(int));
     enviar_paquete(paquete, cliente_fd);
     eliminar_paquete(paquete);
@@ -71,12 +71,12 @@ t_tabla_paginas* tabla_paginas_segun_pid(int pid)
 	t_tabla_paginas* aux = NULL;
     for (int i = 0; i < list_size(memoria->lista_tabla_paginas); i++)
     {
-        log_error(logger_memoria, " PID de tabla paginas segun pid - %d", pid);
+        //log_error(logger_memoria, " PID de tabla paginas segun pid - %d", pid);
         aux = list_get(memoria->lista_tabla_paginas, i);
         if (pid == aux->pid)
             return aux;
     }
 
-	log_error(logger_memoria, "PID - %d No se encontro la Tabla de Paginas", pid);
+	//log_error(logger_memoria, "PID - %d No se encontro la Tabla de Paginas", pid);
     return NULL;
 }

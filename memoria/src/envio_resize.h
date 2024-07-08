@@ -14,4 +14,4 @@ void enviar_respuesta_resize(int , int );
 //void asignar_marco(int pid, t_pagina * pagina, int ultimo_marco);
 void asignar_marco(int , t_pagina *);
 //int obtener_marco_disponible_ultimo(ultimo_marco_usado_por_el_pid);
-#endif W
+#endif
