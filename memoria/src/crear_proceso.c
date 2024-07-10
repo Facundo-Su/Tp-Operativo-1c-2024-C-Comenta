@@ -21,7 +21,7 @@ void cargar_lista_instruccion(int pid, char* ruta) {
     instruccion->pid = pid;
     instruccion->instrucciones = list_create();
 
-    //ruta = "./prueba.txt";
+    ruta = "./prueba.txt";
     //log_info(logger, "%s",ruta);
     FILE* archivo = fopen(ruta, "r");
 

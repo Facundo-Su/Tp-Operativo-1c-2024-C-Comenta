@@ -298,6 +298,48 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 }	
 
 
+// void ejecutar_io_sleep2(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,t_pcb * pcb){
+// 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_de_interfaz_sleep,lista_interfaces);
+// 	if(interfaz == NULL){
+// 		//log_error(logger,"No se encontro la interfaz %s", nombre_de_interfaz_sleep);
+// 		finalizar_pcb(pcb);
+// 	}else{
+// 		agregar_cola_bloqueados_interfaces(interfaz,pcb);
+
+// 		if(!queue_is_empty(interfaz->cola_espera->cola)){
+// 			t_pcb* pcb= quitar_cola_bloqueados_interfaces(interfaz);
+// 			//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
+// 			//agregar_cola_ready(pcb_blocked);
+// 			ejecutar_io_sleep2(interfaz->nombre_interface,unidad_trabajo_sleep,pcb);
+// 		}
+
+//         if(!interfaz->en_uso){
+// 			interfaz->en_uso = true;
+// 			interfaz->pid = pcb->contexto->pid;
+//             pcb->estado = WAITING;
+// 			sigue = false;
+// 			pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
+//             list_add(lista_bloqueado_io,pcb);
+// 			pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
+// 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
+// 			enviar_dormir(pcb->contexto->pid,unidad_trabajo_sleep,interfaz->codigo_cliente);
+// 			//log_warning(logger,"nadie esta en uso , puedo mandar directamente");
+// 			pthread_mutex_unlock(&sem_exec);
+
+//         }else{
+// 			pcb->contexto->quantum= obtener_tiempo_vrr();
+// 			pcb->estado = WAITING;
+// 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+// 			blocked->pcb = pcb;
+// 			blocked->unidad_trabajo = unidad_trabajo_sleep;
+// 			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+// 			sigue = false;
+//             agregar_cola_bloqueados_interfaces(interfaz,blocked);
+// 			pthread_mutex_unlock(&sem_exec);
+//         }
+// 	}
+// }	
+
 
 
 void ejecutar_io_fs_create(char *nombre_interfaz,char* nombre_archivo_f_create,t_pcb* pcb){

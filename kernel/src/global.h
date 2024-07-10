@@ -103,7 +103,6 @@ extern t_list* lista_interfaces;
 extern t_temporal* inicio_vrr;
 
 
-
 //
 
 void asignar_algoritmo(char *);
@@ -118,5 +117,6 @@ void liberar_proceso(t_pcb * );
 char* estado_a_string(t_estado );
 t_registros_pcb* crear_registro();
 t_pcb* retorno_pcb();
+void manejo_sleep();
 
 #endif

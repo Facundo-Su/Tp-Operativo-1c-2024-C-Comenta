@@ -115,6 +115,8 @@ void inicializar_estructuras(){
     lista_bloqueado_io = list_create();
     
 }
+
+
 void inicializar_recursos(){
     int i = 0;
     while(recursos_config[i]!= NULL){
