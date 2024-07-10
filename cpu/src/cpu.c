@@ -66,6 +66,7 @@ void iniciar_servidor_cpu(){
 	//enviar_mensaje_instrucciones("genere conexion con memoria",conexion_memoria,MENSAJE);
 
 	while(1){
+		log_error(logger, "Esperando cliente");
 	    int cliente_fd = esperar_cliente(cpu_fd);
 		pthread_t atendiendo_cpu;
 		pthread_create(&atendiendo_cpu,NULL,(void*)procesar_conexion,(void *) &cliente_fd);
@@ -95,8 +96,18 @@ void iniciar_servidor_interrupt(char * puerto){
 				//list_iterate(lista, (void*) iterator);
 				break;
 			case ENVIAR_DESALOJAR:
-				recibir_mensaje(cliente_fd);
-				hay_desalojo = true;
+				log_error(logger, "Instruccion DESALOJAR");
+				//recibir_mensaje(cliente_fd);
+				lista = recibir_paquete(cliente_fd);
+				int* pid_aux = list_get(lista,0);
+				log_warning(logger,"los valores que comparo son: %d y %d",pcb->pid,*pid_aux);
+				if(*pid_aux == pcb->pid){
+					hay_desalojo = true;
+
+				}else{
+					log_error(logger, "No hay un proceso con ese PID por ende no desalojo");
+				}
+				
 				//log_error(logger, "Instruccion DESALOJAR");
 				break;
 			case ENVIAR_FINALIZAR:
@@ -218,7 +229,7 @@ void ejecutar_ciclo_de_instruccion(int cliente_fd){
 			return;
 		}
 		fetch(cliente_fd);
-
+		log_error(logger,"En ejecucion");
 	}
 
 
@@ -274,7 +285,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		valor_uint1 = strtoul(parametro2, NULL, 10);
 		registro_aux = devolver_registro(parametro);
 		setear(registro_aux,valor_uint1);
-		usleep(1000*1000);
+		//usleep(1000*1000);
 		break;
 	case SUB:
 
@@ -982,8 +993,10 @@ t_estrucutra_cpu devolver_registro(char* registro){
 		v = EDX;
 	} else if(strcmp(registro,"SI")==0|| strcmp(registro,"SI\n")==0){
 		v = SI;
-	} else{
-		v=DI;
+	} else if(strcmp(registro,"DI")==0|| strcmp(registro,"DI\n")==0){
+		v= DI;
+	}else {
+		v = PC;
 	}
     return v;
 }
@@ -1002,6 +1015,7 @@ void setear(t_estrucutra_cpu pos, uint32_t valor) {
 		case EDX: pcb->registros->edx = valor; break;
 		case SI: pcb->registros->si = valor; break;
 		case DI: pcb->registros->di = valor; break;
+		case PC: pcb->pc = valor; break;
     }
 }
 

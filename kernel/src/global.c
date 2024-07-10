@@ -18,6 +18,7 @@ t_cola * cola_new;
 t_cola * cola_ready;
 t_cola * cola_blocked;
 t_cola * cola_vrr;
+t_cola * cola_rr;
 
 t_list* lista_interfaces;
 t_list* lista_bloqueado_io;

@@ -254,7 +254,7 @@ void procesar_conexion(void *conexion_ptr){
             //log_warning(logger,"PASEEEEEEEE");//recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
 			//usleep(tiempo_unidad_trabajo*1000);
             close(conexion_memoria);
-			//log_info(logger	, "El resultado de lo buscado en memoria es: < %s >",auxiliar);
+			log_info(logger	, "El resultado de lo buscado en memoria es: < %s >",auxiliar);
 			//log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDOUT_WRITE >",*pid);
             //log_warning(logger,"el pid es %i",*pid_stdout);
             enviar_kernel_ok_stdout(cliente_fd,*pid_stdout);
@@ -396,6 +396,7 @@ void enviar_respuesta_crear_archivo(int cliente_fd,int pid) {
 	t_paquete *paquete = crear_paquete(RESPUESTA_CREAR_ARCHIVO);
 	agregar_a_paquete(paquete, &pid, sizeof(int));
 	enviar_paquete(paquete,cliente_fd);
+    log_warning(logger, "Se ha creado el archivo con PID: %d y fue enviado CON EL CODIGO DE CLIENTE: %i", pid, cliente_fd);
 	eliminar_paquete(paquete);
 }
 

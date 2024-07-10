@@ -61,7 +61,8 @@ typedef enum{
     ECX,
     EDX,
     SI,
-    DI
+    DI,
+	PC
 }t_estrucutra_cpu;
 
 typedef struct{

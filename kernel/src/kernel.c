@@ -254,7 +254,13 @@ void procesar_conexion(void *conexion1){
 		case EJECUTAR_IO_SLEEP:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_a_sacar_sleep = list_get(paquete,0);
-			//log_warning(logger, "me ha llegado ejecutar de vuelta a cpu el pid es %i",*pid_a_sacar_sleep);
+			log_warning(logger, "me ha llegado ejecutar de vuelta a cpu el pid es %i",*pid_a_sacar_sleep);
+
+			//los elementos en la lista bloqueados son
+			for(int i=0;i<list_size(lista_bloqueado_io);i++){
+				t_pcb* pcb_aux = list_get(lista_bloqueado_io,i);
+				log_error(logger, "el pid es %i",pcb_aux->contexto->pid);
+			}
 			//log_error(logger, "%i",*pid_a_sacar_sleep);
 			io_sleep_ready(*pid_a_sacar_sleep);
 		break;
@@ -275,6 +281,7 @@ void procesar_conexion(void *conexion1){
 			paquete = recibir_paquete(cliente_fd);
 			contexto= desempaquetar_pcb(paquete);
 			running->contexto = contexto;
+			log_error(logger, "el pid llegea desalojar es %i",running->contexto->pid);
 			//log_pcb_info(pcb_aux);
 			agregar_cola_ready(running);
 			pthread_mutex_unlock(&sem_exec);
@@ -282,7 +289,7 @@ void procesar_conexion(void *conexion1){
 		case RESPUESTA_CREAR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_crear_archivo = list_get(paquete,0);
-			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			io_fs_create_ready(*pid_crear_archivo);
 			break;
 		case RESPUESTA_BORRAR_ARCHIVO:
@@ -318,6 +325,7 @@ void procesar_conexion(void *conexion1){
 			running->contexto = contexto;
 			exit= running;
 			finalizar_pcb(exit);
+			enviar_memoria_finalizar(exit->contexto->pid);
 			//log_warning(logger, "Finaliza el proceso %i - Motivo: SUCCESS",exit->contexto->pid);
 			break;
 
@@ -332,3 +340,9 @@ void procesar_conexion(void *conexion1){
 	return;
 }
 
+void enviar_memoria_finalizar(int pid){
+	t_paquete* paquete = crear_paquete(FINALIZAR);
+	agregar_a_paquete(paquete, &pid, sizeof(int));
+	enviar_paquete(paquete,conexion_memoria);
+	eliminar_paquete(paquete);
+}

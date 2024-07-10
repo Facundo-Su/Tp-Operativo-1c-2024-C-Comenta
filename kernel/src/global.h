@@ -72,6 +72,7 @@ extern t_cola * cola_new;
 extern t_cola * cola_ready;
 extern t_cola * cola_blocked;
 extern t_cola * cola_vrr;
+extern t_cola * cola_rr;
 
 extern t_list * lista_bloqueado_io;
 

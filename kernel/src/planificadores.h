@@ -16,5 +16,6 @@ void de_ready_a_vrr();
 void *interrupcion_quantum();
 void enviar_por_dispatch(t_pcb* );
 void inciar_planificadores();
+void *interrupcion_quantum_rr(int);
 #endif
 

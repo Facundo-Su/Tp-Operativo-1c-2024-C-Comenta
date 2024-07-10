@@ -287,7 +287,7 @@ t_contexto_ejecucion* desempaquetar_pcb(t_list* paquete){
 	t_registros_pcb* registros = desempaquetar_registros(paquete, puntero_posicion);
 	contexto_ejecucion->registros = registros;
 
-	obtener_los_valores_de_contexto_ejecucion(contexto_ejecucion);
+	//obtener_los_valores_de_contexto_ejecucion(contexto_ejecucion);
 	return contexto_ejecucion;
 }
 

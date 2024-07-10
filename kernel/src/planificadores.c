@@ -56,11 +56,11 @@ void planificador_largo_plazo(){
     
 }
 void planificador_corto_plazo(){
-    if(planificador == RR || planificador == VRR){
-		 pthread_t hilo_quantum;
-		 pthread_create(&hilo_quantum, NULL, interrupcion_quantum, NULL);
-		 pthread_detach(hilo_quantum);
-	}
+    // if(planificador == RR || planificador == VRR){
+	// 	 pthread_t hilo_quantum;
+	// 	 pthread_create(&hilo_quantum, NULL, interrupcion_quantum, NULL);
+	// 	 pthread_detach(hilo_quantum);
+	// }
     while (1)
     {
         sem_wait(&sem_ready);
@@ -140,12 +140,39 @@ void *interrupcion_quantum(){
                 }
             }
 }
+
+void iniciar_quantum(int pid)
+{
+    pthread_t hilo_quantum;
+    pthread_create(&hilo_quantum, NULL, interrupcion_quantum_rr, pid);
+    pthread_detach(hilo_quantum);
+}
+
+void *interrupcion_quantum_rr(int pid)
+{
+    usleep(quantum * 1000);
+    interrumpir_cpu(pid);
+}
+
+void interrumpir_cpu(int pid){
+    log_warning(logger, "PID: %i - Interrumpido por fin de Quantum", pid);
+    t_paquete* paquete = crear_paquete(ENVIAR_DESALOJAR);
+    agregar_a_paquete(paquete, &pid, sizeof(int));
+    enviar_paquete(paquete, conexion_cpu_interrupt);
+    eliminar_paquete(paquete);
+}
+
 void enviar_por_dispatch(t_pcb* pcb) {
 	char * estado_anterior = estado_a_string(pcb->estado);
 	log_info(logger, "PID: %i - Estado Anterior: %s - Estado Actual: RUNNING",pcb->contexto->pid,estado_anterior);
     pcb->estado=RUNNING;
     running= pcb;
     enviar_pcb(pcb->contexto,conexion_cpu,RECIBIR_PCB);
+
+    if(planificador == RR){
+        iniciar_quantum(pcb->contexto->pid);
+    }
+
     pthread_mutex_unlock(&sem_quantum);
 }
 

@@ -32,7 +32,6 @@ void procesar_conexion(void* socket){
 	while (1) {
 	            int cod_op = recibir_operacion(cliente_fd);
 	            t_list * lista;
-	            usleep(retardo_respuesta);
 
 	            switch (cod_op) {
 	            case MENSAJE:
@@ -54,8 +53,10 @@ void procesar_conexion(void* socket){
 					break;
 				case FINALIZAR:
 					t_list* paquete = recibir_paquete(cliente_fd);
-					t_contexto_ejecucion* pcb = desempaquetar_pcb(paquete);
-					finalizar_proceso(pcb->pid);
+					int* pid_finalizar =list_get(paquete,0);
+					log_error(logger_memoria,"pid a finalizar %i",*pid_finalizar);
+					//t_contexto_ejecucion* pcb = desempaquetar_pcb(paquete);
+					//finalizar_proceso(pcb->pid);
 					break;
 				case OBTENER_MARCO:
 	    			mandar_marco(cliente_fd);

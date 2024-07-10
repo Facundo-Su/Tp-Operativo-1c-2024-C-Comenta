@@ -3,6 +3,20 @@
 void io_sleep_ready(int pid){
 	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
     t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
+
+	if(pcb==NULL){
+		log_error(logger,"No se encontro el pcb con el pid %i",pid);
+		//mostrar la lista de bloqueado
+		for(int i=0;i<list_size(lista_bloqueado_io);i++){
+			t_pcb* pcb = list_get(lista_bloqueado_io,i);
+			log_info(logger,"en bloqueado PID: %i",pcb->contexto->pid);
+		}
+	}
+
+	if(interfaz == NULL){
+		log_error(logger,"No se encontro la interfaz con el pid %i",pid);
+	}
+
 	interfaz->en_uso = false;
 	interfaz->pid = -1;
 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
@@ -283,6 +297,9 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 	}
 }	
 
+
+
+
 void ejecutar_io_fs_create(char *nombre_interfaz,char* nombre_archivo_f_create,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
@@ -348,6 +365,7 @@ void ejecutar_io_fs_write(char *nombre_interfaz,char* nombre_archivo_f_write,int
 				blocked->tamanio = tamanio;
 				blocked->desplazamiento=desplazamiento;
 				blocked->puntero = puntero;
+
 				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE FWRITE %i, %i, %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
 				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_WRITE con el nombre de archivo %s",blocked->nombre_archivo);
 				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
