@@ -57,6 +57,10 @@ t_pcb * encontrar_pcb(int pid){
 	}
 	if(running!=NULL){
 		//enviar_mensaje_instrucciones("kernel a interrupt", conexion_cpu_interrupt,ENVIAR_FINALIZAR);
+		t_paquete* paquete = crear_paquete(ENVIAR_FINALIZAR);
+		agregar_a_paquete(paquete, &(running->contexto->pid), sizeof(int));
+		enviar_paquete(paquete, conexion_cpu_interrupt);
+		eliminar_paquete(paquete);
 		return running;
 	}
 	t_pcb * bloqueado_io = buscar_pcb_listas(pid,lista_bloqueado_io);

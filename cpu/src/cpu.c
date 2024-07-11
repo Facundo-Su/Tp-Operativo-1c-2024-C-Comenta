@@ -111,7 +111,9 @@ void iniciar_servidor_interrupt(char * puerto){
 				//log_error(logger, "Instruccion DESALOJAR");
 				break;
 			case ENVIAR_FINALIZAR:
-				recibir_mensaje(cliente_fd);
+				lista = recibir_paquete(cliente_fd);
+				int* pid_fin = list_get(lista,0);
+				log_error(logger, "Instruccion FINALIZAR el pid es: %d",*pid_fin);
 				hay_finalizar= true;
 				break;
 			case -1:
@@ -226,6 +228,7 @@ void ejecutar_ciclo_de_instruccion(int cliente_fd){
 
 		if(hay_desalojo){
 			enviar_pcb(pcb,cliente_fd,ENVIAR_DESALOJAR);
+			log_error(logger,"En desalojo el proceso pid %i",pcb->pid);
 			return;
 		}
 		fetch(cliente_fd);
@@ -798,19 +801,23 @@ void enviar_memoria_ajustar_tam(int tamanio_modificar){
 }
 
 t_traduccion* mmu_traducir(int dir_logica){
+
 	t_traduccion* traducido= malloc(sizeof(t_traduccion));
 	int nro_pagina =  floor(dir_logica / tamanio_pagina);
 	int marco_encontrado;
+	log_warning(logger,"PID: %i - Ejecutando MMU TRADUCIR: %i",pcb->pid,dir_logica);
+	log_warning(logger,"PID: %i - Tamanio Pagina: %i",pcb->pid,tamanio_pagina);
+	log_warning(logger,"PID: %i - Pagina: %i",pcb->pid,nro_pagina);
 	if(cantidad_entrada_tlb>0){
 		marco_encontrado = consultar_tlb(nro_pagina, pcb->pid);
 		if(marco_encontrado == -1){
-			log_info(logger,"PID: %i - TLB MISS - Pagina: %s",pcb->pid,nro_pagina);
+			log_info(logger,"PID: %i - TLB MISS - Pagina: %i",pcb->pid,nro_pagina);
 			obtener_el_marco(nro_pagina,OBTENER_MARCO);
 			pthread_mutex_lock(&contador_marco_obtenido);
 			insertar_tlb(pcb->pid,nro_pagina);
 			marco_encontrado = marco_obtenido;
 		}else{
-			log_info(logger,"PID: %i - TLB HIT - Pagina: %s",pcb->pid,nro_pagina);
+			log_info(logger,"PID: %i - TLB HIT - Pagina: %i",pcb->pid,nro_pagina);
 		}
 	}else{
 

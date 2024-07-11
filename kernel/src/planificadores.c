@@ -173,7 +173,7 @@ void *interrupcion_quantum_rr(int pid)
 }
 
 void interrumpir_cpu(int pid){
-    log_warning(logger, "PID: %i - Interrumpido por fin de Quantum", pid);
+    //log_warning(logger, "PID: %i - Interrumpido por fin de Quantum", pid);
     t_paquete* paquete = crear_paquete(ENVIAR_DESALOJAR);
     agregar_a_paquete(paquete, &pid, sizeof(int));
     enviar_paquete(paquete, conexion_cpu_interrupt);

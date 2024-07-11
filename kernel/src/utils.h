@@ -13,4 +13,5 @@ t_list * obtener_procesos_bloqueados_io();
 t_list * obtener_procesos_lista(t_list * );
 t_list * obtener_procesos_cola(t_cola*);
 void listar_proceso_por_estado();
+void eliminar_pcb(int pid);
 #endif

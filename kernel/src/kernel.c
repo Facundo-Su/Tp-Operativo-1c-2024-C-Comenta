@@ -62,6 +62,7 @@ void iniciar_consola(){
 				log_info(logger_consola, "Ingrese el pid de proceso a finalizar");
 				char* valor = readline(">");
 				int pid_finalizar = atoi(valor);
+
 				eliminar_pcb(pid_finalizar);
 				break;
 			case '4':
@@ -319,6 +320,16 @@ void procesar_conexion(void *conexion1){
 			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			io_fs_truncate_ready(*pid_truncar_archivo);
 			break;
+		case ENVIAR_FINALIZAR:
+			paquete = recibir_paquete(cliente_fd);
+			contexto = desempaquetar_pcb(paquete);
+			running->contexto = contexto;
+			exit= running;
+			finalizar_pcb(exit);
+			enviar_memoria_finalizar(exit->contexto->pid);
+			log_warning(logger, "Finaliza el proceso %i - Motivo: INTERRUPTED_BY_USER",exit->contexto->pid);
+			break;
+		
 		case FINALIZAR:
 			paquete = recibir_paquete(cliente_fd);
 			contexto = desempaquetar_pcb(paquete);

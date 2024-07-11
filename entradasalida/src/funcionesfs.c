@@ -226,7 +226,7 @@ void saco_metadata_de_lista(char* nombre_archivo){
 void truncar_archivo(char *nombre, int nuevo_tamanio_bytes) {
 
     t_metadata* meta = devolver_metadata(nombre);
-    
+    log_info(logger,"los valores que estoy comparando son %i y %i",nuevo_tamanio_bytes,meta->tamanio_archivo);
     if (meta->tamanio_archivo < nuevo_tamanio_bytes) {
         //aqui podria verificar si hay o no bloques disponibles.
         ampliar_tam_archivo(meta, nuevo_tamanio_bytes);
