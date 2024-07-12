@@ -13,6 +13,7 @@ extern int block_count;
 extern int block_size;
 extern char* path_base_dialfs;
 extern char* rutita_prueba;
+extern int retraso_compactacion;
 //char* rutadial ="./dialfs";
 typedef struct{
     char* nombre;
@@ -20,6 +21,7 @@ typedef struct{
     int cantidad_bloques;
     void* datos;
     uint32_t bloq_inicial_archivo;
+    int cantidad_bloque_agrandar;
     //t_config* config; lo necesitaria?
 }t_metadata; 
 //estructura que podria necesitar para administrar los metadatas?
@@ -40,7 +42,7 @@ void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes);
 void reducir_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes);
 int calcular_bloq_necesarios(int bytes_nuevos_necesarios);
 bool hay_bloques_libres_contiguos(int cant_nuevos_bloques,int ultimo_bloque_Actual);
-void compactar(); 
+void compactar(t_metadata* meta,int); 
 void asignarBits(int cant_nuevos_bits,int ultimo_bit);
 void liberarBits(int cant_bloq_a_liberar,int ultimo_bloque_Actual);
 void modificar_config_tam(char* nombre_archivo,int tamanio_nuevo_bytes);

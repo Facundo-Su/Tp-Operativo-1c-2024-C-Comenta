@@ -1,5 +1,7 @@
 #include "entradasalida.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
 
 char* palabra_usuario;
 t_list* metadatas;
@@ -11,6 +13,7 @@ int main(int argc, char* argv[]) {
     obtener_configuracion("teclado.config");
     levantar_archivo_bloques();
     levantarBitMap();
+    
     //inicializar_lista();
     //crear_archivo_metadata("fnatic");
     //crear_archivo_metadata("eurocopa");
@@ -27,6 +30,119 @@ int main(int argc, char* argv[]) {
 	iniciar_consola();	
 
     return EXIT_SUCCESS;
+}
+
+void listFiles(const char *path) {
+
+    char* ruta1 = "./dialfs/";
+    int bloque_inicial_config;
+    int tamanio_bloque_config;
+
+    struct dirent *entry;
+    DIR *dp = opendir(path);
+
+    if (dp == NULL) {
+        perror("opendir");
+        return;
+    }
+
+    printf("Archivos en el directorio %s:\n", path);
+    while ((entry = readdir(dp))) {
+        // Ignorar . y ..
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        // Copiar el nombre del archivo
+        char name[256];
+        strncpy(name, entry->d_name, sizeof(name));
+        name[sizeof(name) - 1] = '\0';  // Asegurar que la cadena esté terminada en '\0'
+
+        // Encontrar la última ocurrencia de '.'
+        char *dot = strrchr(name, '.');
+        if (dot && strcmp(dot, ".txt") == 0) {
+            *dot = '\0';  // Truncar la cadena en el punto para eliminar la extensión
+        }
+
+        char* extension = "txt";
+        char* path_archivo = string_new();
+
+        string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, name,extension);
+        log_error(logger, "%s", path_archivo);
+        t_config* archivo = config_create(path_archivo);
+        bloque_inicial_config =config_get_int_value(archivo, "BLOQUE_INICIAL");
+        tamanio_bloque_config = config_get_int_value(archivo, "TAMANIO_ARCHIVO");
+
+        t_metadata * nueva_metadata = malloc(sizeof(t_metadata));
+        nueva_metadata->nombre=name;
+        nueva_metadata->tamanio_archivo=tamanio_bloque_config;
+        nueva_metadata->bloq_inicial_archivo=bloque_inicial_config;
+        list_add(metadatas, nueva_metadata);
+
+        
+
+        log_error(logger,"el nombre del archivo es : %s", nueva_metadata->nombre);
+        log_error(logger, "tamanio del archivo es : %i", nueva_metadata->tamanio_archivo);
+        log_error(logger, "bloque inicial del archivo es : %i", nueva_metadata->bloq_inicial_archivo);
+
+
+        log_error(logger, " ====================================================================\n");
+        //nueva_metadata->nombre=name;
+        //list_add(metadatas,nueva_metadata);
+        printf("%s\n", name);
+    }
+
+        for(int j=0; j<list_size(metadatas); j++){
+            t_metadata* metadata2 = list_get(metadatas, j);
+            log_error(logger, "el nombre del archivo es : %s", metadata2->nombre);
+            log_error(logger, "tamanio del archivo es : %i", metadata2->tamanio_archivo);
+            log_error(logger, "bloque inicial del archivo es : %i", metadata2->bloq_inicial_archivo);
+        }
+
+
+}
+
+
+void processFile(const char *filePath) {
+    FILE *file = fopen(filePath, "r");
+    if (file == NULL) {
+        perror("fopen");
+        return;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        // Eliminar el salto de línea al final de la línea
+        size_t len = strlen(line);
+        if (len > 0 && line[len - 1] == '\n') {
+            line[len - 1] = '\0';
+        }
+
+        // Dividir la línea en nombre de variable y valor
+        char *name = strtok(line, "=");
+        char *value = strtok(NULL, "=");
+
+        if (name != NULL && value != NULL) {
+            printf("Variable: %s, Valor: %s\n", name, value);
+        }
+    }
+
+    fclose(file);
+}
+
+void obtener_configuracion_metadata(char *path_configuration){
+	config = cargar_config(path_configuration);
+    tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
+    tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
+    ip_kernel = config_get_string_value(config, "IP_KERNEL");
+    puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
+    ip_memoria = config_get_string_value(config, "IP_MEMORIA");
+    
+    puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
+    path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
+    block_size = config_get_int_value(config, "BLOCK_SIZE");
+    block_count = config_get_int_value(config, "BLOCK_COUNT");
+	retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
 }
 
 
@@ -113,6 +229,7 @@ void iniciar_interfaz_stdin() {
 
 void  iniciar_interfaz_fs() {
     log_info(logger, "Ingreso a la interfaz FS");
+    listFiles("./dialfs");
     generar_conexion_con_kernel();
 }
 

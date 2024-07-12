@@ -33,6 +33,7 @@ void* info_stdout_write;
 pthread_t conexion_kernel_hilo;
 pthread_mutex_t mutex_respuesta_stdout_write;
 
+
 void asignar_algoritmo(char *algoritmo);
 void obtener_configuracion();
 void iniciar_consola();
