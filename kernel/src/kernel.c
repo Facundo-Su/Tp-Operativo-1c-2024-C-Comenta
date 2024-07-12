@@ -290,6 +290,7 @@ void procesar_conexion(void *conexion1){
 			paquete = recibir_paquete(cliente_fd);
 			contexto= desempaquetar_pcb(paquete);
 			running->contexto = contexto;
+			running->contexto->quantum=0;
 			log_error(logger, "el pid llegea desalojar es %i",running->contexto->pid);
 			//log_pcb_info(pcb_aux);
 			agregar_cola_ready(running);

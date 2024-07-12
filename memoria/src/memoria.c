@@ -56,7 +56,7 @@ void procesar_conexion(void* socket){
 					int* pid_finalizar =list_get(paquete,0);
 					log_error(logger_memoria,"pid a finalizar %i",*pid_finalizar);
 					//t_contexto_ejecucion* pcb = desempaquetar_pcb(paquete);
-					//finalizar_proceso(pcb->pid);
+					finalizar_proceso(*pid_finalizar);
 					break;
 				case OBTENER_MARCO:
 	    			mandar_marco(cliente_fd);
