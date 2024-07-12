@@ -38,4 +38,5 @@ void io_stdin_read_ready(int pid, char* nombre_interfaz);
 
 void control_acceso(t_interfaz * interfaz);
 void dial_fs_ready(char* nombre_interfaz);
+int obtener_tiempo_vrr(t_pcb * pcb);
 #endif

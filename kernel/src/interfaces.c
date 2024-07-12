@@ -70,7 +70,7 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,
 		}else{
 			pcb->estado = WAITING;
 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-			pcb->contexto->quantum= obtener_tiempo_vrr();
+			pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 			blocked->pcb = pcb;
 			blocked->unidad_trabajo = 0;
 			blocked->desplazamiento=desplazamiento;
@@ -125,7 +125,7 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento
 		}else{
 				pcb->estado = WAITING;
 				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-				pcb->contexto->quantum= obtener_tiempo_vrr();
+				pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 				blocked->pcb = pcb;
 				blocked->unidad_trabajo = 0;
 				blocked->nro_marco = marco;
@@ -333,7 +333,7 @@ void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,
 			pthread_mutex_unlock(&sem_exec);
 
         }else{
-			pcb->contexto->quantum= obtener_tiempo_vrr();
+			pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 			pcb->estado = WAITING;
 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
 			blocked->pcb = pcb;
@@ -353,12 +353,12 @@ void ejecutar_io_sleep2(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep
 		//log_error(logger,"No se encontro la interfaz %s", nombre_de_interfaz_sleep);
 		finalizar_pcb(pcb);
 	}else{
-		pcb->contexto->quantum= obtener_tiempo_vrr();
+		pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 		pcb->estado = WAITING;
 		t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
 		blocked->pcb = pcb;
 		blocked->unidad_trabajo = unidad_trabajo_sleep;
-		//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+		log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2 CON QUANTUM RESTANTE DE %i",pcb->contexto->pid,pcb->contexto->quantum);
 		sigue = false;
 		agregar_cola_bloqueados_interfaces(interfaz,blocked);
 	}
@@ -407,7 +407,7 @@ void ejecutar_io_fs_create(char *nombre_interfaz,char* nombre_archivo_f_create,t
 		}else{
 			pcb->estado = WAITING;
 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-			pcb->contexto->quantum= obtener_tiempo_vrr();
+			pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 			blocked->pcb = pcb;
 			blocked->operacion = CREATE;
 			blocked->nombre_archivo = nombre_archivo_f_create;
@@ -472,7 +472,7 @@ void ejecutar_io_fs_write(char *nombre_interfaz,char* nombre_archivo_f_write,int
 		}else{
 			pcb->estado = WAITING;
 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-			pcb->contexto->quantum= obtener_tiempo_vrr();
+			pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 			blocked->pcb = pcb;
 			blocked->nombre_archivo = nombre_archivo_f_write;
 			blocked->unidad_trabajo = 0;
@@ -534,7 +534,7 @@ void ejecutar_io_fs_read(char *nombre_interfaz,char* nombre_archivo_f_read,int m
 		}else{
 			pcb->estado = WAITING;
 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-			pcb->contexto->quantum= obtener_tiempo_vrr();
+			pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 			blocked->pcb = pcb;
 			blocked->nombre_archivo = nombre_archivo_f_read;
 			blocked->unidad_trabajo = 0;
@@ -590,7 +590,7 @@ void ejecutar_io_fs_delete(char *nombre_interfaz,char* nombre_archivo_f_delete,t
 		}else{
 			pcb->estado = WAITING;
 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-			pcb->contexto->quantum= obtener_tiempo_vrr();
+			pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 			blocked->pcb = pcb;
 			blocked->nombre_archivo_eliminar = nombre_archivo_f_delete;
 			log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo_eliminar);
@@ -643,7 +643,7 @@ void ejecutar_io_fs_truncate(char *nombre_interfaz,char* nombre_archivo_f_trunca
 		}else{
 			pcb->estado = WAITING;
 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-			pcb->contexto->quantum= obtener_tiempo_vrr();
+			pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 			blocked->pcb = pcb;
 			blocked->nombre_archivo = nombre_archivo_f_truncate;
 			blocked->tamanio = tamanio;
@@ -807,36 +807,43 @@ void control_acceso(t_interfaz * interfaz){
 		t_tipo_fs tipo = interfaz->tipo_fs;
 		if(tipo == GENERICA){
 			enviar_dormir(blocked->pcb->contexto->pid,blocked->unidad_trabajo,interfaz->codigo_cliente);
+			pthread_mutex_unlock(&sem_exec);
 
 		}
 		if(tipo == STDOUT){
 			enviar_a_io_stdin_write(interfaz->nombre_interface,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->pcb,interfaz->codigo_cliente);
 			//TODO
+			pthread_mutex_unlock(&sem_exec);
 		}
 		if(tipo == STDIN){
 			
 			enviar_a_io_stdin_read(interfaz->nombre_interface,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->pcb,interfaz->codigo_cliente);
-
+			pthread_mutex_unlock(&sem_exec);
 		}
 		if(tipo == DIALFS){
 			switch(blocked->operacion){
 				case CREATE:
 					enviar_a_io_f_create(interfaz->nombre_interface,blocked->nombre_archivo,blocked->pcb,interfaz->codigo_cliente);
+					pthread_mutex_unlock(&sem_exec);
 					break;
 
 				case DELETE:
 					enviar_a_io_f_delete(interfaz->nombre_interface,blocked->nombre_archivo,blocked->pcb,interfaz->codigo_cliente);
+					pthread_mutex_unlock(&sem_exec);
 					break;
 				
 				case WRITE:
 					enviar_a_io_fs_write(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb,interfaz->codigo_cliente);
+					pthread_mutex_unlock(&sem_exec);
 					break;
 
 				case READ:
 					enviar_a_io_fs_read(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb,interfaz->codigo_cliente);
+					pthread_mutex_unlock(&sem_exec);
 					break;
 				case TRUNCATE:
 					enviar_a_io_f_truncate(interfaz->nombre_interface,blocked->nombre_archivo,blocked->tamanio,blocked->pcb,interfaz->codigo_cliente);
+					pthread_mutex_unlock(&sem_exec);
 					break;
 			}
 
@@ -848,29 +855,32 @@ void control_acceso(t_interfaz * interfaz){
 		log_error(logger, "LLEGUE HASTA ACA");
 		blocked->pcb->estado =READY;
 		vuelta_io_vrr(blocked->pcb);
-		pthread_mutex_unlock(&sem_exec);
+		
 	}
 }
 
-int obtener_tiempo_vrr(){
+int obtener_tiempo_vrr(t_pcb * pcb){
 	int restante =0;
 	if(planificador == VRR){
 		int tiempo = temporal_gettime(inicio_vrr);
 		temporal_destroy(inicio_vrr);
-		if(tiempo < quantum){
+		if((pcb->contexto->quantum==0) && (quantum>tiempo)){
 			restante = quantum-tiempo;
-			log_info(logger, "%i",tiempo);
-			log_info(logger, "%i",restante);
+			//log_info(logger, "%i",tiempo);
+			//log_info(logger, "%i",restante);
+		}if((pcb->contexto->quantum!=0)&& (pcb->contexto->quantum > tiempo)){
+			restante = pcb->contexto->quantum - tiempo;
 		}
+
 	}
 	return restante;
 }
 void vuelta_io_vrr(t_pcb * pcb){
 	if(planificador== VRR){
-		log_info(logger,"PID: %i - Agregado cola de prioridades vrr",pcb->contexto->pid);
 		if(pcb->contexto->quantum ==0){
 			agregar_cola_ready(pcb);
 		}else{
+			log_info(logger,"PID: %i - Agregado cola de prioridades vrr",pcb->contexto->pid);
 			agregar_cola_vrr(pcb);
 		}
 	}else{

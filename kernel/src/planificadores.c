@@ -91,11 +91,9 @@ void de_ready_a_fifo(){
     enviar_por_dispatch(pcb);
 }
 void de_ready_a_round_robin(){
-    pthread_mutex_unlock(&sem_interrupcion);
     de_ready_a_fifo();
 }
 void de_ready_a_vrr(){
-    pthread_mutex_unlock(&sem_interrupcion);
     //pthread_mutex_lock(&sem_vrr);
     if(!queue_is_empty(cola_vrr->cola)){
         t_pcb* pcb =quitar_cola_vrr();
@@ -141,21 +139,23 @@ void *interrupcion_quantum(){
             }
 }
 
-// void iniciar_quantum_vrr(int pid, int quantum_restante){
-//     pthread_t hilo_quantum_vrr;
-//     pthread_create(&hilo_quantum_vrr, NULL, interrupcion_quantum_vrr, pid, quantum_restante);
-//     pthread_detach(hilo_quantum_vrr);
-// }
+void iniciar_quantum_vrr(t_parametros_vrr * parametros){
+    pthread_t hilo_quantum_vrr;
+    pthread_create(&hilo_quantum_vrr, NULL, interrupcion_quantum_vrr, parametros);
+    pthread_detach(hilo_quantum_vrr);
+}
 
-void *interrupcion_quantum_vrr(int pid, int quantum_restante)
-{
-    if(quantum_restante > 0){
-        usleep(quantum_restante * 1000);
+void *interrupcion_quantum_vrr(t_parametros_vrr * parametros)
+{   
+    inicio_vrr = temporal_create();
+    if(parametros->quantum_restante > 0){
+        log_warning(logger, "EJECUTANDO PID %i QUATUM RESTANTE DE %i",parametros->pid,parametros->quantum_restante);
+        usleep(parametros->quantum_restante * 1000);
         
     }else{
         usleep(quantum * 1000);
     }
-    interrumpir_cpu(pid);
+    interrumpir_cpu(parametros->pid);
 
 }
 
@@ -191,7 +191,10 @@ void enviar_por_dispatch(t_pcb* pcb) {
         iniciar_quantum(pcb->contexto->pid);
     }
     if(planificador == VRR){
-        //iniciar_quantum_vrr(pcb->contexto->pid,pcb->contexto->quantum);
+        t_parametros_vrr * parametros = malloc(sizeof(t_parametros_vrr));
+        parametros->pid = pcb->contexto->pid;
+        parametros->quantum_restante = pcb->contexto->quantum;
+        iniciar_quantum_vrr(parametros);
     }
 
     pthread_mutex_unlock(&sem_quantum);

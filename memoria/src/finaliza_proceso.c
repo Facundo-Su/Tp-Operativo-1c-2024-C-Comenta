@@ -11,15 +11,14 @@ void finalizar_proceso(int pid) {
 void liberar_marcos(int pid, t_tabla_paginas* tabla) {
     int paginas = list_size(tabla->paginas);
     log_info(logger,"PID: %i- Tamaño: %i", pid, paginas);
-
-    for (int j = 0; j <= paginas; j++)
+    for (int j = 0; j < paginas; j++)
     {
         t_pagina* pagina = list_get(tabla->paginas, j);
 		t_marco* marco = marco_segun_pagina(pagina);
         if (marco != NULL) {
             marco->is_free = true;
             marco->pid = -1;
-    }
+        }
     }
 }
 
