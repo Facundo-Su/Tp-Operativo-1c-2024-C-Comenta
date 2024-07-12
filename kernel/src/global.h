@@ -19,12 +19,23 @@ typedef struct{
     t_cola* cola_bloqueados;
 }t_recurso;
 
+typedef enum{
+    GENERICA,
+    STDIN,
+    STDOUT,
+    DIALFS
+}t_tipo_fs;
 typedef struct{
     int codigo_cliente;
     char* nombre_interface;
+    t_tipo_fs tipo_fs;
     bool en_uso;
     int pid;
+    sem_t semaforo_contador;
+    sem_t semaforo_uso;
     t_cola* cola_espera;
+    sem_t semaforo_uso_ejecucion;
+    t_cola* cola_en_ejecucion;
 }t_interfaz;
 
 typedef struct{

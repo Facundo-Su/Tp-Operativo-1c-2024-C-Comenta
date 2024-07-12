@@ -136,9 +136,14 @@ void procesar_conexion(void *conexion1){
 		case CONEXION_INTERFAZ:
 			paquete = recibir_paquete(cliente_fd);
 			char*n = list_get(paquete,0);
+			char* tipo_interfaz =list_get(paquete,1);
 			int conexion_obtenido = cliente_fd;
 			char * nombre_interfaz = strtok(n, "\n");
-			agregar_interfaces(nombre_interfaz, conexion_obtenido);
+			char *tipo_interfaz_limpio = strtok(tipo_interfaz, "\n");
+
+			t_tipo_fs tipo_enum = obtener_el_tipo_fs(tipo_interfaz_limpio);
+			log_error(logger, "Se ha conectado la interfaz %s y el tipo es %s", nombre_interfaz , tipo_interfaz_limpio);
+			agregar_interfaces(nombre_interfaz, conexion_obtenido,tipo_enum);
 
 			break;
 		case CREAR_PROCESO:
@@ -168,7 +173,7 @@ void procesar_conexion(void *conexion1){
 					//log_info(logger,"%s", nombre_de_interfaz_sleep);
 					int *unidad_trabajo_sleep = list_get(paquete,1);
 					t_pcb* pcb_sleep = running;
-					ejecutar_io_sleep(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,pcb_sleep);
+					ejecutar_io_sleep2(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,pcb_sleep);
 					//agregar_cola_ready(running);
 					break;
 
@@ -255,6 +260,7 @@ void procesar_conexion(void *conexion1){
 		case EJECUTAR_IO_SLEEP:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_a_sacar_sleep = list_get(paquete,0);
+			char* nombre_interfaz_sleep = list_get(paquete,1);
 			log_warning(logger, "me ha llegado ejecutar de vuelta a cpu el pid es %i",*pid_a_sacar_sleep);
 
 			//los elementos en la lista bloqueados son
@@ -263,7 +269,7 @@ void procesar_conexion(void *conexion1){
 				log_error(logger, "el pid es %i",pcb_aux->contexto->pid);
 			}
 			//log_error(logger, "%i",*pid_a_sacar_sleep);
-			io_sleep_ready(*pid_a_sacar_sleep);
+			io_sleep_ready2(*pid_a_sacar_sleep, nombre_interfaz_sleep);
 		break;
 		case EJECUTAR_STDIN_READ:
 			paquete = recibir_paquete(cliente_fd);
@@ -349,6 +355,23 @@ void procesar_conexion(void *conexion1){
 		}
 	}
 	return;
+}
+
+t_tipo_fs obtener_el_tipo_fs(char* tipo){
+
+	if(strcmp(tipo,"GENERICA")==0){
+		return GENERICA;
+	}
+	else if(strcmp(tipo,"STDIN")==0){
+		return STDIN;
+	}
+	else if(strcmp(tipo,"STDOUT")==0){
+		return STDOUT;
+	}else if (strcmp(tipo,"DIALFS")==0)
+	{
+		return DIALFS;
+	}
+	
 }
 
 void enviar_memoria_finalizar(int pid){

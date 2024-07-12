@@ -37,21 +37,25 @@ void iniciar_consola(){
         log_info(logger_consola,"Ingrese el nombre de la interfaz");
         interfaz_name = readline(">");
         interfaz_name = strtok(interfaz_name, "\n");
-        if(strcmp(interfaz_name, "GENERICA")){
+        if(strcmp(interfaz_name, "GENERICA")==0){
             path_configuracion = "generica.config";
             obtener_configuracion(path_configuracion);
+
             iniciar_interfaz_generica();
-        }else if(strcmp(interfaz_name, "MONITOR")){
+        }
+        log_error(logger_consola,"Interfaz generica llegue hasta aca");
+        if(strcmp(interfaz_name, "MONITOR")==0){
             path_configuracion = "monitor.config";
             obtener_configuracion(path_configuracion);
+            log_error(logger_consola,"Interfaz generica llegue hasta aca");
             iniciar_interfaz_stdout();
         }
-        else if(strcmp(interfaz_name, "TECLADO")){
+        if(strcmp(interfaz_name, "TECLADO")==0){
             path_configuracion = "teclado.config";
             obtener_configuracion(path_configuracion);
             iniciar_interfaz_stdin();
             }
-        else if (strcmp(interfaz_name, "FS") == 0)
+        if (strcmp(interfaz_name, "FS") == 0)
         {
             path_configuracion = "fs.config";
             obtener_configuracion(path_configuracion);
@@ -176,10 +180,12 @@ void procesar_conexion(void *conexion_ptr){
 	int cliente_fd = conexion;
 	t_contexto_ejecucion * contexto;
 	t_paquete * paquete;
-
     t_paquete* paquetre2 = crear_paquete(CONEXION_INTERFAZ);
+    char* nombre_interfaz = strtok(interfaz_name, "\n");
+    char* tipo_interfaz_usado = strtok(tipo_interfaz, "\n");
+    log_error(logger, "Interfaz: %s tipo: %s", nombre_interfaz, tipo_interfaz_usado);
     agregar_a_paquete(paquetre2, interfaz_name, strlen(interfaz_name)+1);
-	agregar_a_paquete(paquetre2, tipo_interfaz, strlen(interfaz_name)+1);
+	agregar_a_paquete(paquetre2, tipo_interfaz_usado, strlen(interfaz_name)+1);
 	enviar_paquete(paquetre2, cliente_fd);
 
     while (1) {
@@ -198,6 +204,7 @@ void procesar_conexion(void *conexion_ptr){
 
             t_paquete* paquete_finalizar_sleep = crear_paquete(EJECUTAR_IO_SLEEP);
             agregar_a_paquete(paquete_finalizar_sleep, pid, sizeof(int));
+            agregar_a_paquete(paquete_finalizar_sleep, nombre_interfaz, strlen(nombre_interfaz)+1);
 
             enviar_paquete(paquete_finalizar_sleep, conexion_kernel);
             log_warning(logger, "ya envie a kernel con el pid %i",*pid);
