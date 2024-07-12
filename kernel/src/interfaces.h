@@ -15,7 +15,7 @@ void agregar_interfaces(char * ,int,t_tipo_fs);
 t_interfaz * buscar_interfaz_por_pid(int pid, t_list * lista);
 void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb);
 void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb);
-void io_stdout_write_ready(int pid);
+void io_stdout_write_ready(int pid,char* nombre_interfaz);
 void ejecutar_io_fs_create(char *nombre_interfaz,char* nombre_archivo_f_create,t_pcb* pcb);
 void ejecutar_io_fs_delete(char *nombre_interfaz,char* nombre_archivo_f_delete,t_pcb* pcb);
 void enviar_a_io_f_delete(char *nombre_interfaz,char* nombre_archivo_f_delete,t_pcb* pcb,int codigo_cliente);
@@ -33,6 +33,8 @@ void enviar_a_io_fs_read(char *nombre_interfaz,char* nombre_archivo_f_read,int m
 
 void ejecutar_io_fs_truncate(char *nombre_interfaz,char* nombre_archivo_f_truncate,int tamanio,t_pcb* pcb);
 void enviar_a_io_f_truncate(char *nombre_interfaz,char* nombre_archivo_f_truncate,int tamanio,t_pcb* pcb,int codigo_cliente);
+
+void io_stdin_read_ready(int pid, char* nombre_interfaz);
 
 void control_acceso(t_interfaz * interfaz);
 

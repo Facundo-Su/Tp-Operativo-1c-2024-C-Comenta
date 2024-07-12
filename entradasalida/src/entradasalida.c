@@ -235,7 +235,7 @@ void procesar_conexion(void *conexion_ptr){
             
 			close(conexion_memoria);
         	//sem_wait(&sem_cont_lectura);
-        	enviar_kernel_ok_stdin(cliente_fd,*pid_stdin);//aviso q termine accion.
+        	enviar_kernel_ok_stdin(cliente_fd,*pid_stdin,nombre_interfaz);//aviso q termine accion.
 
         	break;
         case EJECUTAR_STDOUT_WRITE:
@@ -264,7 +264,7 @@ void procesar_conexion(void *conexion_ptr){
 			log_info(logger	, "El resultado de lo buscado en memoria es: < %s >",auxiliar);
 			//log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDOUT_WRITE >",*pid);
             //log_warning(logger,"el pid es %i",*pid_stdout);
-            enviar_kernel_ok_stdout(cliente_fd,*pid_stdout);
+            enviar_kernel_ok_stdout(cliente_fd,*pid_stdout,nombre_interfaz);
             free(informacion);//aviso q termine accio
         	break;
        /*case RESPUESTA_STDOUT_WRITE:
@@ -385,16 +385,18 @@ void enviar_direccion_memoria(int pid, int marco, int desplazamiento, int tamani
 	eliminar_paquete(paquete);
 }
 
-void enviar_kernel_ok_stdin(int cliente_fd,int pid){
+void enviar_kernel_ok_stdin(int cliente_fd,int pid,char *nombre_interfaz){
 	t_paquete *paquete = crear_paquete(EJECUTAR_STDIN_READ);//agregar a utils..
 	agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
 	enviar_paquete(paquete, cliente_fd);
 	eliminar_paquete(paquete);
 }
 
-void enviar_kernel_ok_stdout(int cliente_fd, int pid){
+void enviar_kernel_ok_stdout(int cliente_fd, int pid,char *nombre_interfaz){
 	t_paquete *paquete = crear_paquete(EJECUTAR_STDOUT_WRITE);
 	agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
 	enviar_paquete(paquete, cliente_fd);
 	eliminar_paquete(paquete);
 }

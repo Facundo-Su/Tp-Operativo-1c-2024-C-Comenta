@@ -274,14 +274,16 @@ void procesar_conexion(void *conexion1){
 		case EJECUTAR_STDIN_READ:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_stdin_read = list_get(paquete,0);
-			io_stdin_read_ready(*pid_stdin_read);
+			char* nombre_interfaz_stdin_read = list_get(paquete,1);
+			io_stdin_read_ready(*pid_stdin_read,nombre_interfaz_stdin_read);
 			break;
 
 		case EJECUTAR_STDOUT_WRITE:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_stdin_write = list_get(paquete,0);
+			char *nombre_interfaz_stdin_write = list_get(paquete,1);
 			//log_warning(logger, "el pid es %i",*pid_stdin_write);
-			io_stdout_write_ready(*pid_stdin_write);
+			io_stdout_write_ready(*pid_stdin_write,nombre_interfaz_stdin_write);
 			break;
 
 		case ENVIAR_DESALOJAR:
