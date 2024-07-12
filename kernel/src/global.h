@@ -25,6 +25,14 @@ typedef enum{
     STDOUT,
     DIALFS
 }t_tipo_fs;
+
+typedef enum{
+    CREATE,
+    DELETE,
+    TRUNCATE,
+    WRITE,
+    READ
+}t_operaciones_dialfs;
 typedef struct{
     int codigo_cliente;
     char* nombre_interface;
@@ -65,6 +73,7 @@ typedef struct{
     char* nombre_archivo_eliminar;
     char* nombre_archivo;
     int puntero;
+    t_operaciones_dialfs operacion;
 }t_blocked_io;
 
 extern sem_t sem_new;

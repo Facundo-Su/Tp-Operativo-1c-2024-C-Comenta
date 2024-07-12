@@ -595,9 +595,9 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		valor_uint3 = obtener_valor(registro_aux3);
 
 		t_traduccion* traducido_f_read = mmu_traducir(valor_uint1);
-
+		log_error(logger,"el valor traducido es %i",traducido_f_read->marco);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
-		enviar_io_fs_read(parametro,parametro2,traducido_f_write,valor_uint2,valor_uint3,cliente_fd);
+		enviar_io_fs_read(parametro,parametro2,traducido_f_read,valor_uint2,valor_uint3,cliente_fd);
 
 		break;
 

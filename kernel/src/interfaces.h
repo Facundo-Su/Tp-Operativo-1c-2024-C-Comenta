@@ -9,7 +9,7 @@ void enviar_dormir(int ,int ,int );
 void io_sleep_ready(int );
 t_interfaz * buscar_interfaz_por_nombre(char* , t_list * );
 void ejecutar_io_sleep2(char * ,int ,t_pcb * );
-void agregar_cola_bloqueados_interfaces(t_interfaz * , void * );
+void agregar_cola_bloqueados_interfaces(t_interfaz * , t_pcb * );
 void * quitar_cola_bloqueados_interfaces(t_interfaz * );
 void agregar_interfaces(char * ,int,t_tipo_fs);
 t_interfaz * buscar_interfaz_por_pid(int pid, t_list * lista);
@@ -37,5 +37,5 @@ void enviar_a_io_f_truncate(char *nombre_interfaz,char* nombre_archivo_f_truncat
 void io_stdin_read_ready(int pid, char* nombre_interfaz);
 
 void control_acceso(t_interfaz * interfaz);
-
+void dial_fs_ready(char* nombre_interfaz);
 #endif

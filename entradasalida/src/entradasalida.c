@@ -50,20 +50,21 @@ void iniciar_consola(){
             log_error(logger_consola,"Interfaz generica llegue hasta aca");
             iniciar_interfaz_stdout();
         }
-        if(strcmp(interfaz_name, "TECLADO")==0){
-            path_configuracion = "teclado.config";
-            obtener_configuracion(path_configuracion);
-            iniciar_interfaz_stdin();
-            }
         if (strcmp(interfaz_name, "FS") == 0)
         {
             path_configuracion = "fs.config";
             obtener_configuracion(path_configuracion);
             iniciar_interfaz_fs();
-        }else{
-            log_error(logger_consola,"Interfaz desconocidad");
         }
   
+
+        if(strcmp(interfaz_name, "TECLADO")==0){
+            path_configuracion = "teclado.config";
+            obtener_configuracion(path_configuracion);
+            iniciar_interfaz_stdin();
+        }
+
+
 
         /*
         log_info(logger_consola,"Ingrese la ubicacion del archivo de configuracion");
@@ -185,9 +186,10 @@ void procesar_conexion(void *conexion_ptr){
     char* tipo_interfaz_usado = strtok(tipo_interfaz, "\n");
     log_error(logger, "Interfaz: %s tipo: %s", nombre_interfaz, tipo_interfaz_usado);
     agregar_a_paquete(paquetre2, interfaz_name, strlen(interfaz_name)+1);
-	agregar_a_paquete(paquetre2, tipo_interfaz_usado, strlen(interfaz_name)+1);
+	agregar_a_paquete(paquetre2, tipo_interfaz_usado, strlen(tipo_interfaz_usado)+1);
+    
 	enviar_paquete(paquetre2, cliente_fd);
-
+    log_error(logger, "ya envie a kernel");
     while (1) {
         int cod_op = recibir_operacion(conexion);
         //log_warning(logger, "recibi una instruccion %i",cod_op);
@@ -282,17 +284,16 @@ void procesar_conexion(void *conexion_ptr){
 
 			log_info(logger, "PID: %i Crear Archivo: <%s>", *pid_f_create, nombre_archivo);
 			crear_archivo_metadata(nombre_archivo);
-            enviar_respuesta_crear_archivo(cliente_fd,*pid_f_create);
+            enviar_respuesta_crear_archivo(cliente_fd,*pid_f_create,nombre_interfaz);
         	break;
         case EJECUTAR_IO_FS_DELETE:
         	paquete=recibir_paquete(cliente_fd);
             char* nombre_arch=list_get(paquete,0);
             int* pid_f_delete = list_get(paquete,1);
 
-
 			log_info(logger, "Crear Archivo: <%s>",nombre_arch);
 			borrar_archivo(nombre_arch);
-            enviar_respuesta_borrar_archivo(cliente_fd,*pid_f_delete);
+            enviar_respuesta_borrar_archivo(cliente_fd,*pid_f_delete,nombre_interfaz);
         	break;
         case EJECUTAR_IO_FS_TRUNCATE:
             paquete=recibir_paquete(cliente_fd);
@@ -302,7 +303,7 @@ void procesar_conexion(void *conexion_ptr){
             log_info(logger, "Truncar Archivo: <%s>",nombre_archivo_truncar);
             log_warning(logger,"el tamanio es %i",*tamanio_truncar);
             truncar_archivo(nombre_archivo_truncar,*tamanio_truncar);
-            enviar_respuesta_truncar_archivo(cliente_fd,*pid_f_truncate);
+            enviar_respuesta_truncar_archivo(cliente_fd,*pid_f_truncate,nombre_interfaz);
             break;
         case EJECUTAR_IO_FS_WRITE:
             paquete = recibir_paquete(cliente_fd);
@@ -312,7 +313,7 @@ void procesar_conexion(void *conexion_ptr){
             int* tamanio_write = list_get(paquete,3);
             int* puntero_write = list_get(paquete,4);
             int* pid_f_write = list_get(paquete,5);
-            
+            log_warning(logger,"el puntero es %i",*puntero_write);
             conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
             enviar_direccion_memoria(*pid_f_write,*marco_write,*desplazamiento_write,*tamanio_write,conexion_memoria,EJECUTAR_IO_FS_WRITE);//agrego pid por si memoria lo necesita para sus logs en acceso de lectura.
            // void* informacion = malloc(*tamanio_write);
@@ -329,9 +330,10 @@ void procesar_conexion(void *conexion_ptr){
             //log_warning(logger,"PASEEEEEEEE");//recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
 			//usleep(tiempo_unidad_trabajo*1000);
             close(conexion_memoria);
+            log_warning(logger,"el puntero es %i",*puntero_write);
             escribir_archivo_bloque(*puntero_write,nomre_archivo_write,*tamanio_write,auxiliar_10);
 
-            enviar_respuesta_escribir_archivo(cliente_fd,*pid_f_write);
+            enviar_respuesta_escribir_archivo(cliente_fd,*pid_f_write,nombre_interfaz);
             break;
         case EJECUTAR_IO_FS_READ:
             paquete = recibir_paquete(cliente_fd);
@@ -356,7 +358,7 @@ void procesar_conexion(void *conexion_ptr){
             //log_warning(logger,"PASEEEEEEEE");//recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
 			//usleep(tiempo_unidad_trabajo*1000);
             close(conexion_memoria);
-            enviar_respuesta_leer_archivo(cliente_fd,*pid_f_read);
+            enviar_respuesta_leer_archivo(cliente_fd,*pid_f_read,nombre_interfaz);
             break;
 
         }
@@ -401,39 +403,44 @@ void enviar_kernel_ok_stdout(int cliente_fd, int pid,char *nombre_interfaz){
 	eliminar_paquete(paquete);
 }
 
-void enviar_respuesta_crear_archivo(int cliente_fd,int pid) {
+void enviar_respuesta_crear_archivo(int cliente_fd,int pid,char *nombre_interfaz){
 	t_paquete *paquete = crear_paquete(RESPUESTA_CREAR_ARCHIVO);
 	agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
 	enviar_paquete(paquete,cliente_fd);
     log_warning(logger, "Se ha creado el archivo con PID: %d y fue enviado CON EL CODIGO DE CLIENTE: %i", pid, cliente_fd);
 	eliminar_paquete(paquete);
 }
 
-void enviar_respuesta_borrar_archivo(int cliente_fd,int pid){
+void enviar_respuesta_borrar_archivo(int cliente_fd,int pid,char *nombre_interfaz){
     t_paquete *paquete = crear_paquete(RESPUESTA_BORRAR_ARCHIVO);
 	agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
 	enviar_paquete(paquete,cliente_fd);
 	eliminar_paquete(paquete);
 }
 
-void enviar_respuesta_escribir_archivo(int cliente_fd,int pid){
+void enviar_respuesta_escribir_archivo(int cliente_fd,int pid,char *nombre_interfaz){
     t_paquete *paquete = crear_paquete(RESPUESTA_ESCRIBIR_ARCHIVO);
     agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
     enviar_paquete(paquete,cliente_fd);
     eliminar_paquete(paquete);
 }
 
-void enviar_respuesta_leer_archivo(int cliente_fd,int pid){
+void enviar_respuesta_leer_archivo(int cliente_fd,int pid, char* nombre_interfaz){
     t_paquete *paquete = crear_paquete(RESPUESTA_LEER_ARCHIVO);
     agregar_a_paquete(paquete, &pid, sizeof(int));
+    agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
     enviar_paquete(paquete,cliente_fd);
     eliminar_paquete(paquete);
 }
 
-void  enviar_respuesta_truncar_archivo(int cliente_fd,int pid_f_truncate){
+void  enviar_respuesta_truncar_archivo(int cliente_fd,int pid_f_truncate,char* nombre_interfaz){
 
     t_paquete *paquete = crear_paquete(RESPUESTA_TRUNCAR_ARCHIVO);
     agregar_a_paquete(paquete, &pid_f_truncate, sizeof(int));
+    agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
     enviar_paquete(paquete,cliente_fd);
     eliminar_paquete(paquete);
 }

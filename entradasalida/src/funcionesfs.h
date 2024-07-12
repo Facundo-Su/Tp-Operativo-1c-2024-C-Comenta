@@ -17,6 +17,8 @@ extern char* rutita_prueba;
 typedef struct{
     char* nombre;
     uint32_t tamanio_archivo;
+    int cantidad_bloques;
+    void* datos;
     uint32_t bloq_inicial_archivo;
     //t_config* config; lo necesitaria?
 }t_metadata; 

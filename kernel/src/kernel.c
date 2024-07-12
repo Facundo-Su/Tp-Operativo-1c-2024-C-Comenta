@@ -140,7 +140,7 @@ void procesar_conexion(void *conexion1){
 			int conexion_obtenido = cliente_fd;
 			char * nombre_interfaz = strtok(n, "\n");
 			char *tipo_interfaz_limpio = strtok(tipo_interfaz, "\n");
-
+			log_error(logger,"el tipo de interfaz es %s",tipo_interfaz_limpio);
 			t_tipo_fs tipo_enum = obtener_el_tipo_fs(tipo_interfaz_limpio);
 			log_error(logger, "Se ha conectado la interfaz %s y el tipo es %s", nombre_interfaz , tipo_interfaz_limpio);
 			agregar_interfaces(nombre_interfaz, conexion_obtenido,tipo_enum);
@@ -298,35 +298,39 @@ void procesar_conexion(void *conexion1){
 		case RESPUESTA_CREAR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_crear_archivo = list_get(paquete,0);
+			char*nombre_interfaz_crear_archivo = list_get(paquete,1);
 			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
-			io_fs_create_ready(*pid_crear_archivo);
+			dial_fs_ready(nombre_interfaz_crear_archivo);
 			break;
 		case RESPUESTA_BORRAR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_eliminar_archivo = list_get(paquete,0);
 			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
-			io_fs_delete_ready(*pid_eliminar_archivo);
-		
+			//io_fs_delete_ready(*pid_eliminar_archivo);
+			dial_fs_ready(nombre_interfaz_crear_archivo);
 			break;
 
 		case RESPUESTA_ESCRIBIR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_escribir_archivo = list_get(paquete,0);
 			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
-			io_fs_write_ready(*pid_escribir_archivo);
+			//io_fs_write_ready(*pid_escribir_archivo);
+			dial_fs_ready(nombre_interfaz_crear_archivo);
 			break;
 		case RESPUESTA_LEER_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_leer_archivo = list_get(paquete,0);
 			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
-			io_fs_read_ready(*pid_leer_archivo);
+			//io_fs_read_ready(*pid_leer_archivo);
+			dial_fs_ready(nombre_interfaz_crear_archivo);
 			break;
 
 		case RESPUESTA_TRUNCAR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_truncar_archivo = list_get(paquete,0);
 			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
-			io_fs_truncate_ready(*pid_truncar_archivo);
+			//io_fs_truncate_ready(*pid_truncar_archivo);
+			dial_fs_ready(nombre_interfaz_crear_archivo);
 			break;
 		case ENVIAR_FINALIZAR:
 			paquete = recibir_paquete(cliente_fd);

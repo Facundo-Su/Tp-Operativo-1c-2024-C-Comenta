@@ -207,104 +207,110 @@ void io_stdin_read_ready(int pid, char* nombre_interfaz){
 	sem_post(&interfaz->semaforo_uso_ejecucion);
 }
 
-
-
-void io_stdin_write_ready(int pid){
-	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
-    t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
-	interfaz->en_uso = false;
-	interfaz->pid = -1;
-	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
-	vuelta_io_vrr(pcb);
-	//pthread_mutex_unlock(&sem_exec);
-	if(!queue_is_empty(interfaz->cola_espera->cola)){
-		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
-		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
-		//agregar_cola_ready(pcb_blocked);
-		ejecutar_io_stdin_write(interfaz->nombre_interface, blocked->nro_marco,blocked->desplazamiento, blocked->tamanio,blocked->pcb);
-	}
-}
-
-void io_fs_create_ready(int pid){
-	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
-    t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
-	interfaz->en_uso = false;
-	interfaz->pid = -1;
-	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
-	vuelta_io_vrr(pcb);
-	//pthread_mutex_unlock(&sem_exec);
-	if(!queue_is_empty(interfaz->cola_espera->cola)){
-		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
-		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
-		//agregar_cola_ready(pcb_blocked);
-		ejecutar_io_fs_create(interfaz->nombre_interface,blocked->nombre_archivo_crear,blocked->pcb);
-	}
+void dial_fs_ready(char* nombre_interfaz){
+	t_interfaz *interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
+	sem_post(&interfaz->semaforo_uso);
+	sem_post(&interfaz->semaforo_uso_ejecucion);
 }
 
 
-void io_fs_delete_ready(int pid){
-	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
-    t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
-	interfaz->en_uso = false;
-	interfaz->pid = -1;
-	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
-	vuelta_io_vrr(pcb);
-	//pthread_mutex_unlock(&sem_exec);
-	if(!queue_is_empty(interfaz->cola_espera->cola)){
-		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
-		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
-		//agregar_cola_ready(pcb_blocked);
-		ejecutar_io_fs_delete(interfaz->nombre_interface,blocked->nombre_archivo_eliminar,blocked->pcb);
-	}
-}
 
-void io_fs_write_ready(int pid){
-	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
-    t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
-	interfaz->en_uso = false;
-	interfaz->pid = -1;
-	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
-	vuelta_io_vrr(pcb);
-	//pthread_mutex_unlock(&sem_exec);
-	if(!queue_is_empty(interfaz->cola_espera->cola)){
-		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
-		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
-		//agregar_cola_ready(pcb_blocked);
-		ejecutar_io_fs_write(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb);
-	}
-}
+// void io_stdin_write_ready(int pid){
+// 	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
+//     t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
+// 	interfaz->en_uso = false;
+// 	interfaz->pid = -1;
+// 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
+// 	vuelta_io_vrr(pcb);
+// 	//pthread_mutex_unlock(&sem_exec);
+// 	if(!queue_is_empty(interfaz->cola_espera->cola)){
+// 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
+// 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
+// 		//agregar_cola_ready(pcb_blocked);
+// 		ejecutar_io_stdin_write(interfaz->nombre_interface, blocked->nro_marco,blocked->desplazamiento, blocked->tamanio,blocked->pcb);
+// 	}
+// }
 
-void io_fs_read_ready(int pid){
-	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
-	t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
-	interfaz->en_uso = false;
-	interfaz->pid = -1;
-	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
-	vuelta_io_vrr(pcb);
-	//pthread_mutex_unlock(&sem_exec);
-	if(!queue_is_empty(interfaz->cola_espera->cola)){
-		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
-		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
-		//agregar_cola_ready(pcb_blocked);
-		ejecutar_io_fs_read(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb);
-	}
-}
+// void io_fs_create_ready(int pid){
+// 	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
+//     t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
+// 	interfaz->en_uso = false;
+// 	interfaz->pid = -1;
+// 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
+// 	vuelta_io_vrr(pcb);
+// 	//pthread_mutex_unlock(&sem_exec);
+// 	if(!queue_is_empty(interfaz->cola_espera->cola)){
+// 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
+// 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
+// 		//agregar_cola_ready(pcb_blocked);
+// 		ejecutar_io_fs_create(interfaz->nombre_interface,blocked->nombre_archivo_crear,blocked->pcb);
+// 	}
+// }
 
-void io_fs_truncate_ready(int pid){
-	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
-	t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
-	interfaz->en_uso = false;
-	interfaz->pid = -1;
-	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
-	vuelta_io_vrr(pcb);
-	//pthread_mutex_unlock(&sem_exec);
-	if(!queue_is_empty(interfaz->cola_espera->cola)){
-		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
-		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
-		//agregar_cola_ready(pcb_blocked);
-		ejecutar_io_fs_truncate(interfaz->nombre_interface,blocked->nombre_archivo,blocked->tamanio,blocked->pcb);
-	}
-}
+
+// void io_fs_delete_ready(int pid){
+// 	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
+//     t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
+// 	interfaz->en_uso = false;
+// 	interfaz->pid = -1;
+// 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
+// 	vuelta_io_vrr(pcb);
+// 	//pthread_mutex_unlock(&sem_exec);
+// 	if(!queue_is_empty(interfaz->cola_espera->cola)){
+// 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
+// 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
+// 		//agregar_cola_ready(pcb_blocked);
+// 		ejecutar_io_fs_delete(interfaz->nombre_interface,blocked->nombre_archivo_eliminar,blocked->pcb);
+// 	}
+// }
+
+// void io_fs_write_ready(int pid){
+// 	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
+//     t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
+// 	interfaz->en_uso = false;
+// 	interfaz->pid = -1;
+// 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
+// 	vuelta_io_vrr(pcb);
+// 	//pthread_mutex_unlock(&sem_exec);
+// 	if(!queue_is_empty(interfaz->cola_espera->cola)){
+// 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
+// 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
+// 		//agregar_cola_ready(pcb_blocked);
+// 		ejecutar_io_fs_write(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb);
+// 	}
+// }
+
+// void io_fs_read_ready(int pid){
+// 	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
+// 	t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
+// 	interfaz->en_uso = false;
+// 	interfaz->pid = -1;
+// 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
+// 	vuelta_io_vrr(pcb);
+// 	//pthread_mutex_unlock(&sem_exec);
+// 	if(!queue_is_empty(interfaz->cola_espera->cola)){
+// 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
+// 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
+// 		//agregar_cola_ready(pcb_blocked);
+// 		ejecutar_io_fs_read(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb);
+// 	}
+// }
+
+// void io_fs_truncate_ready(int pid){
+// 	t_pcb* pcb= buscar_pcb_listas(pid,lista_bloqueado_io);
+// 	t_interfaz *interfaz = buscar_interfaz_por_pid(pid,lista_interfaces);
+// 	interfaz->en_uso = false;
+// 	interfaz->pid = -1;
+// 	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pcb->contexto->pid);
+// 	vuelta_io_vrr(pcb);
+// 	//pthread_mutex_unlock(&sem_exec);
+// 	if(!queue_is_empty(interfaz->cola_espera->cola)){
+// 		t_blocked_io * blocked= quitar_cola_bloqueados_interfaces(interfaz);
+// 		//log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: RUNNING",pcb->contexto->pid);
+// 		//agregar_cola_ready(pcb_blocked);
+// 		ejecutar_io_fs_truncate(interfaz->nombre_interface,blocked->nombre_archivo,blocked->tamanio,blocked->pcb);
+// 	}
+// }
 
 
 void ejecutar_io_sleep(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep,t_pcb * pcb){
@@ -359,192 +365,291 @@ void ejecutar_io_sleep2(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep
 }
 
 
+// void ejecutar_io_fs_create(char *nombre_interfaz,char* nombre_archivo_f_create,t_pcb* pcb){
+// 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
+// 	if(interfaz == NULL){
+// 			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+// 			finalizar_pcb(pcb);
+// 		}else{
+// 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
+// 			if(!interfaz->en_uso){
+// 				interfaz->en_uso = true;
+// 				interfaz->pid = pcb->contexto->pid;
+// 				pcb->estado = WAITING;
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				sigue = false;
+// 				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
+//             	list_add(lista_bloqueado_io,pcb);
+// 				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
+// 				enviar_a_io_f_create(nombre_interfaz,nombre_archivo_f_create,pcb,interfaz->codigo_cliente);
+// 				pthread_mutex_unlock(&sem_exec);
+
+// 			}else{
+// 				pcb->estado = WAITING;
+// 				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				blocked->pcb = pcb;
+// 				blocked->nombre_archivo_crear = nombre_archivo_f_create;
+// 				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo_crear);
+// 				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+// 				sigue = false;
+// 				agregar_cola_bloqueados_interfaces(interfaz,blocked);
+// 				pthread_mutex_unlock(&sem_exec);
+// 			}
+// 		}
+// }
+
 void ejecutar_io_fs_create(char *nombre_interfaz,char* nombre_archivo_f_create,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
 			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
-			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
-			if(!interfaz->en_uso){
-				interfaz->en_uso = true;
-				interfaz->pid = pcb->contexto->pid;
-				pcb->estado = WAITING;
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				sigue = false;
-				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
-            	list_add(lista_bloqueado_io,pcb);
-				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
-				enviar_a_io_f_create(nombre_interfaz,nombre_archivo_f_create,pcb,interfaz->codigo_cliente);
-				pthread_mutex_unlock(&sem_exec);
-
-			}else{
-				pcb->estado = WAITING;
-				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				blocked->pcb = pcb;
-				blocked->nombre_archivo_crear = nombre_archivo_f_create;
-				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo_crear);
-				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
-				sigue = false;
-				agregar_cola_bloqueados_interfaces(interfaz,blocked);
-				pthread_mutex_unlock(&sem_exec);
-			}
+			pcb->estado = WAITING;
+			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+			pcb->contexto->quantum= obtener_tiempo_vrr();
+			blocked->pcb = pcb;
+			blocked->operacion = CREATE;
+			blocked->nombre_archivo = nombre_archivo_f_create;
+			log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo_crear);
+			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+			sigue = false;
+			agregar_cola_bloqueados_interfaces(interfaz,blocked);
 		}
 }
+
+
+
+
+// void ejecutar_io_fs_write(char *nombre_interfaz,char* nombre_archivo_f_write,int marco,int desplazamiento,int tamanio,int puntero,t_pcb* pcb){
+// 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
+// 	if(interfaz == NULL){
+// 			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+// 			finalizar_pcb(pcb);
+// 		}else{
+// 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
+// 			if(!interfaz->en_uso){
+// 				interfaz->en_uso = true;
+// 				interfaz->pid = pcb->contexto->pid;
+// 				pcb->estado = WAITING;
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				sigue = false;
+// 				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
+//             	list_add(lista_bloqueado_io,pcb);
+// 				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
+// 				enviar_a_io_fs_write(nombre_interfaz,nombre_archivo_f_write,marco,desplazamiento,tamanio,puntero,pcb,interfaz->codigo_cliente);
+// 				pthread_mutex_unlock(&sem_exec);
+
+// 			}else{
+// 				pcb->estado = WAITING;
+// 				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				blocked->pcb = pcb;
+// 				blocked->nombre_archivo = nombre_archivo_f_write;
+// 				blocked->unidad_trabajo = 0;
+// 				blocked->nro_marco = marco;
+// 				blocked->tamanio = tamanio;
+// 				blocked->desplazamiento=desplazamiento;
+// 				blocked->puntero = puntero;
+
+// 				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE FWRITE %i, %i, %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
+// 				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_WRITE con el nombre de archivo %s",blocked->nombre_archivo);
+// 				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+// 				sigue = false;
+// 				agregar_cola_bloqueados_interfaces(interfaz,blocked);
+// 				pthread_mutex_unlock(&sem_exec);
+// 			}
+// 		}
+// }
+
 
 
 void ejecutar_io_fs_write(char *nombre_interfaz,char* nombre_archivo_f_write,int marco,int desplazamiento,int tamanio,int puntero,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
-			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
-			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
-			if(!interfaz->en_uso){
-				interfaz->en_uso = true;
-				interfaz->pid = pcb->contexto->pid;
-				pcb->estado = WAITING;
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				sigue = false;
-				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
-            	list_add(lista_bloqueado_io,pcb);
-				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
-				enviar_a_io_fs_write(nombre_interfaz,nombre_archivo_f_write,marco,desplazamiento,tamanio,puntero,pcb,interfaz->codigo_cliente);
-				pthread_mutex_unlock(&sem_exec);
-
-			}else{
-				pcb->estado = WAITING;
-				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				blocked->pcb = pcb;
-				blocked->nombre_archivo = nombre_archivo_f_write;
-				blocked->unidad_trabajo = 0;
-				blocked->nro_marco = marco;
-				blocked->tamanio = tamanio;
-				blocked->desplazamiento=desplazamiento;
-				blocked->puntero = puntero;
-
-				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE FWRITE %i, %i, %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
-				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_WRITE con el nombre de archivo %s",blocked->nombre_archivo);
-				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
-				sigue = false;
-				agregar_cola_bloqueados_interfaces(interfaz,blocked);
-				pthread_mutex_unlock(&sem_exec);
-			}
+			pcb->estado = WAITING;
+			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+			pcb->contexto->quantum= obtener_tiempo_vrr();
+			blocked->pcb = pcb;
+			blocked->nombre_archivo = nombre_archivo_f_write;
+			blocked->unidad_trabajo = 0;
+			blocked->nro_marco = marco;
+			blocked->tamanio = tamanio;
+			blocked->desplazamiento=desplazamiento;
+			blocked->puntero = puntero;
+			blocked->operacion = WRITE;
+			agregar_cola_bloqueados_interfaces(interfaz,blocked);
 		}
 }
 
+
+// void ejecutar_io_fs_read(char *nombre_interfaz,char* nombre_archivo_f_read,int marco,int desplazamiento,int tamanio,int puntero,t_pcb* pcb){
+// 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
+// 	if(interfaz == NULL){
+// 			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+// 			finalizar_pcb(pcb);
+// 		}else{
+// 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
+// 			if(!interfaz->en_uso){
+// 				interfaz->en_uso = true;
+// 				interfaz->pid = pcb->contexto->pid;
+// 				pcb->estado = WAITING;
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				sigue = false;
+// 				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
+//             	list_add(lista_bloqueado_io,pcb);
+// 				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
+// 				enviar_a_io_f_read(nombre_interfaz,nombre_archivo_f_read,marco,desplazamiento,tamanio,puntero,pcb,interfaz->codigo_cliente);
+// 				pthread_mutex_unlock(&sem_exec);
+
+// 			}else{
+// 				pcb->estado = WAITING;
+// 				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				blocked->pcb = pcb;
+// 				blocked->nombre_archivo = nombre_archivo_f_read;
+// 				blocked->unidad_trabajo = 0;
+// 				blocked->nro_marco = marco;
+// 				blocked->tamanio = tamanio;
+// 				blocked->desplazamiento=desplazamiento;
+// 				blocked->puntero = puntero;
+// 				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_read %i, %i, %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
+// 				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_WRITE con el nombre de archivo %s",blocked->nombre_archivo);
+// 				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+// 				sigue = false;
+// 				agregar_cola_bloqueados_interfaces(interfaz,blocked);
+// 				pthread_mutex_unlock(&sem_exec);
+// 			}
+// 		}
+// }
 
 void ejecutar_io_fs_read(char *nombre_interfaz,char* nombre_archivo_f_read,int marco,int desplazamiento,int tamanio,int puntero,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
-			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
-			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
-			if(!interfaz->en_uso){
-				interfaz->en_uso = true;
-				interfaz->pid = pcb->contexto->pid;
-				pcb->estado = WAITING;
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				sigue = false;
-				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
-            	list_add(lista_bloqueado_io,pcb);
-				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
-				enviar_a_io_f_read(nombre_interfaz,nombre_archivo_f_read,marco,desplazamiento,tamanio,puntero,pcb,interfaz->codigo_cliente);
-				pthread_mutex_unlock(&sem_exec);
-
-			}else{
-				pcb->estado = WAITING;
-				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				blocked->pcb = pcb;
-				blocked->nombre_archivo = nombre_archivo_f_read;
-				blocked->unidad_trabajo = 0;
-				blocked->nro_marco = marco;
-				blocked->tamanio = tamanio;
-				blocked->desplazamiento=desplazamiento;
-				blocked->puntero = puntero;
-				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_read %i, %i, %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
-				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_WRITE con el nombre de archivo %s",blocked->nombre_archivo);
-				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
-				sigue = false;
-				agregar_cola_bloqueados_interfaces(interfaz,blocked);
-				pthread_mutex_unlock(&sem_exec);
-			}
+			pcb->estado = WAITING;
+			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+			pcb->contexto->quantum= obtener_tiempo_vrr();
+			blocked->pcb = pcb;
+			blocked->nombre_archivo = nombre_archivo_f_read;
+			blocked->unidad_trabajo = 0;
+			blocked->nro_marco = marco;
+			blocked->tamanio = tamanio;
+			blocked->desplazamiento=desplazamiento;
+			blocked->puntero = puntero;
+			blocked->operacion = READ;
+			log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_read marco %i, desplazamiento %i, tamanio %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
+			agregar_cola_bloqueados_interfaces(interfaz,blocked);
 		}
 }
 
+// void ejecutar_io_fs_delete(char *nombre_interfaz,char* nombre_archivo_f_delete,t_pcb* pcb){
+// 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
+// 	if(interfaz == NULL){
+// 			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+// 			finalizar_pcb(pcb);
+// 		}else{
+// 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
+// 			if(!interfaz->en_uso){
+// 				interfaz->en_uso = true;
+// 				interfaz->pid = pcb->contexto->pid;
+// 				pcb->estado = WAITING;
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				sigue = false;
+// 				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
+//             	list_add(lista_bloqueado_io,pcb);
+// 				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
+// 				enviar_a_io_f_create(nombre_interfaz,nombre_archivo_f_delete,pcb,interfaz->codigo_cliente);
+// 				pthread_mutex_unlock(&sem_exec);
 
+// 			}else{
+// 				pcb->estado = WAITING;
+// 				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				blocked->pcb = pcb;
+// 				blocked->nombre_archivo_eliminar = nombre_archivo_f_delete;
+// 				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo_eliminar);
+// 				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+// 				sigue = false;
+// 				agregar_cola_bloqueados_interfaces(interfaz,blocked);
+// 				pthread_mutex_unlock(&sem_exec);
+// 			}
+// 		}
+// }
 
 void ejecutar_io_fs_delete(char *nombre_interfaz,char* nombre_archivo_f_delete,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
-			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
-			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
-			if(!interfaz->en_uso){
-				interfaz->en_uso = true;
-				interfaz->pid = pcb->contexto->pid;
-				pcb->estado = WAITING;
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				sigue = false;
-				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
-            	list_add(lista_bloqueado_io,pcb);
-				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
-				enviar_a_io_f_create(nombre_interfaz,nombre_archivo_f_delete,pcb,interfaz->codigo_cliente);
-				pthread_mutex_unlock(&sem_exec);
-
-			}else{
-				pcb->estado = WAITING;
-				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				blocked->pcb = pcb;
-				blocked->nombre_archivo_eliminar = nombre_archivo_f_delete;
-				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo_eliminar);
-				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
-				sigue = false;
-				agregar_cola_bloqueados_interfaces(interfaz,blocked);
-				pthread_mutex_unlock(&sem_exec);
-			}
+			pcb->estado = WAITING;
+			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+			pcb->contexto->quantum= obtener_tiempo_vrr();
+			blocked->pcb = pcb;
+			blocked->nombre_archivo_eliminar = nombre_archivo_f_delete;
+			log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo_eliminar);
+			blocked->operacion = DELETE;
+			agregar_cola_bloqueados_interfaces(interfaz,blocked);
 		}
 }
 
 
+// void ejecutar_io_fs_truncate(char *nombre_interfaz,char* nombre_archivo_f_truncate,int tamanio,t_pcb* pcb){
+// 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
+// 	if(interfaz == NULL){
+// 			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+// 			finalizar_pcb(pcb);
+// 		}else{
+// 			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
+// 			if(!interfaz->en_uso){
+// 				interfaz->en_uso = true;
+// 				interfaz->pid = pcb->contexto->pid;
+// 				pcb->estado = WAITING;
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				sigue = false;
+// 				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
+//             	list_add(lista_bloqueado_io,pcb);
+// 				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
+// 				enviar_a_io_f_truncate(nombre_interfaz,nombre_archivo_f_truncate,tamanio,pcb,interfaz->codigo_cliente);
+// 				pthread_mutex_unlock(&sem_exec);
+
+// 			}else{
+// 				pcb->estado = WAITING;
+// 				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+// 				pcb->contexto->quantum= obtener_tiempo_vrr();
+// 				blocked->pcb = pcb;
+// 				blocked->nombre_archivo = nombre_archivo_f_truncate;
+// 				blocked->tamanio = tamanio;
+// 				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo);
+// 				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
+// 				sigue = false;
+// 				agregar_cola_bloqueados_interfaces(interfaz,blocked);
+// 				pthread_mutex_unlock(&sem_exec);
+// 			}
+// 		}
+// }
+
 void ejecutar_io_fs_truncate(char *nombre_interfaz,char* nombre_archivo_f_truncate,int tamanio,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
-			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
-			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
-			if(!interfaz->en_uso){
-				interfaz->en_uso = true;
-				interfaz->pid = pcb->contexto->pid;
-				pcb->estado = WAITING;
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				sigue = false;
-				pthread_mutex_lock(&sem_lista_bloqueado_interfaces);
-            	list_add(lista_bloqueado_io,pcb);
-				pthread_mutex_unlock(&sem_lista_bloqueado_interfaces);
-				enviar_a_io_f_truncate(nombre_interfaz,nombre_archivo_f_truncate,tamanio,pcb,interfaz->codigo_cliente);
-				pthread_mutex_unlock(&sem_exec);
-
-			}else{
-				pcb->estado = WAITING;
-				t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
-				pcb->contexto->quantum= obtener_tiempo_vrr();
-				blocked->pcb = pcb;
-				blocked->nombre_archivo = nombre_archivo_f_truncate;
-				blocked->tamanio = tamanio;
-				log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo);
-				//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
-				sigue = false;
-				agregar_cola_bloqueados_interfaces(interfaz,blocked);
-				pthread_mutex_unlock(&sem_exec);
-			}
+			pcb->estado = WAITING;
+			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
+			pcb->contexto->quantum= obtener_tiempo_vrr();
+			blocked->pcb = pcb;
+			blocked->nombre_archivo = nombre_archivo_f_truncate;
+			blocked->tamanio = tamanio;
+			log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo);
+			blocked->operacion = TRUNCATE;
+			agregar_cola_bloqueados_interfaces(interfaz,blocked);
 		}
 }
 
@@ -582,7 +687,7 @@ void enviar_a_io_fs_write(char *nombre_interfaz,char* nombre_archivo_f_write,int
 }
 
 
-void enviar_a_io_f_read(char *nombre_interfaz,char* nombre_archivo_f_read,int marco,int desplazamiento,int tamanio,int puntero,t_pcb* pcb,int codigo_cliente){
+void enviar_a_io_fs_read(char *nombre_interfaz,char* nombre_archivo_f_read,int marco,int desplazamiento,int tamanio,int puntero,t_pcb* pcb,int codigo_cliente){
 	t_paquete * paquete = crear_paquete(EJECUTAR_IO_FS_READ);
 	agregar_a_paquete(paquete, nombre_archivo_f_read, strlen(nombre_archivo_f_read) + 1);
 	agregar_a_paquete(paquete, &marco, sizeof(int));
@@ -641,23 +746,27 @@ t_interfaz * buscar_interfaz_por_pid(int pid, t_list * lista){
 	return NULL;
 }
 
-/*void agregar_cola_bloqueados_interfaces(t_interfaz * interfaz, t_pcb * pcb){
+void agregar_cola_bloqueados_interfaces(t_interfaz * interfaz, t_pcb * pcb){
     pthread_mutex_lock(&(interfaz->cola_espera->sem_mutex));
     queue_push(interfaz->cola_espera->cola, pcb);
-    pthread_mutex_unlock(&(interfaz->cola_espera->sem_mutex));
-}
-t_pcb * quitar_cola_bloqueados_interfaces(t_interfaz * interfaz){
-    pthread_mutex_lock(&(interfaz->cola_espera->sem_mutex));
-    t_pcb* pcb = queue_pop(interfaz->cola_espera->cola);
-    pthread_mutex_unlock(&(interfaz->cola_espera->sem_mutex));
-    return pcb;
-}*/
-void agregar_cola_bloqueados_interfaces(t_interfaz * interfaz, void * dato){//t_blocked_io * blocked){
-    pthread_mutex_lock(&(interfaz->cola_espera->sem_mutex));
-    queue_push(interfaz->cola_espera->cola, dato);
 	sem_post(&interfaz->semaforo_contador);
     pthread_mutex_unlock(&(interfaz->cola_espera->sem_mutex));
 }
+
+// t_pcb * quitar_cola_bloqueados_interfaces(t_interfaz * interfaz){
+//     pthread_mutex_lock(&(interfaz->cola_espera->sem_mutex));
+//     t_pcb* pcb = queue_pop(interfaz->cola_espera->cola);
+//     pthread_mutex_unlock(&(interfaz->cola_espera->sem_mutex));
+//     return pcb;	int tiempo = 0;
+// 	while(1){
+		
+// 		sem_wait(&interfaz->semaforo_contador);
+// 		faces(t_interfaz * interfaz, void * dato){//t_blocked_io * blocked){
+//     pthread_mutex_lock(&(interfaz->cola_espera->sem_mutex));
+//     queue_push(interfaz->cola_espera->cola, dato);
+// 	sem_post(&interfaz->semaforo_contador);
+//     pthread_mutex_unlock(&(interfaz->cola_espera->sem_mutex));
+// }
 void * quitar_cola_bloqueados_interfaces(t_interfaz * interfaz){
     pthread_mutex_lock(&(interfaz->cola_espera->sem_mutex));
     void* dato = queue_pop(interfaz->cola_espera->cola);
@@ -697,19 +806,42 @@ void control_acceso(t_interfaz * interfaz){
 		t_blocked_io * blocked =quitar_cola_bloqueados_interfaces(interfaz);
 		t_tipo_fs tipo = interfaz->tipo_fs;
 		if(tipo == GENERICA){
-			
 			enviar_dormir(blocked->pcb->contexto->pid,blocked->unidad_trabajo,interfaz->codigo_cliente);
 
-		}else if(tipo == STDOUT){
+		}
+		if(tipo == STDOUT){
 			enviar_a_io_stdin_write(interfaz->nombre_interface,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->pcb,interfaz->codigo_cliente);
 			//TODO
-		}else if(tipo == STDIN){
+		}
+		if(tipo == STDIN){
 			
 			enviar_a_io_stdin_read(interfaz->nombre_interface,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->pcb,interfaz->codigo_cliente);
 
-		}else if(tipo == DIALFS){
-			//TODO
 		}
+		if(tipo == DIALFS){
+			switch(blocked->operacion){
+				case CREATE:
+					enviar_a_io_f_create(interfaz->nombre_interface,blocked->nombre_archivo,blocked->pcb,interfaz->codigo_cliente);
+					break;
+
+				case DELETE:
+					enviar_a_io_f_delete(interfaz->nombre_interface,blocked->nombre_archivo,blocked->pcb,interfaz->codigo_cliente);
+					break;
+				
+				case WRITE:
+					enviar_a_io_fs_write(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb,interfaz->codigo_cliente);
+					break;
+
+				case READ:
+					enviar_a_io_fs_read(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb,interfaz->codigo_cliente);
+					break;
+				case TRUNCATE:
+					enviar_a_io_f_truncate(interfaz->nombre_interface,blocked->nombre_archivo,blocked->tamanio,blocked->pcb,interfaz->codigo_cliente);
+					break;
+			}
+
+		}
+
 		queue_push(interfaz->cola_en_ejecucion,blocked->pcb);
 
 		sem_wait(&interfaz->semaforo_uso_ejecucion);

@@ -357,10 +357,6 @@ bool hay_bloques_libres_contiguos(int cant_nuevos_bloques,int ultimo_bloque_Actu
     return respuesta;
 }
 
-void compactar(){
-    log_warning(logger, "INICIANDO COMPACTACION....");
-}
-
 void reducir_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes){
     int cant_bloques_actuales;
     int ultimo_bloque_Actual;
@@ -450,7 +446,7 @@ void escribir_archivo_bloque(int puntero, char* nombre,int tamanio,void* a_escri
     t_metadata* meta = devolver_metadata(nombre);
     uint32_t numero_bloque = puntero / block_size;
     //me paro en el bloque que voy a escribir
-    uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque)-1;
+    uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque);
     log_warning(logger,"el bloque a escribir es %i",bloque_escribir);
     memcpy(archivo_de_bloques  + (bloque_escribir * block_size), a_escribir, tamanio);
     //escribo el tamaño de un bloque o uso el tamanio que me pasa kernel?
@@ -462,7 +458,8 @@ void *leer_archivo_bloque(int puntero, char* nombre,int tamanio)
 {
     t_metadata* meta = devolver_metadata(nombre);
     uint32_t numero_bloque = puntero / block_size;
-    uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque)-1;
+    log_error(logger,"el puntero es %i",puntero);
+    uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque);
     // log_debug(logger, "SE VA A LEER EN UN BLOQUE");
     void *datoLeido = malloc(block_size);//block size o tamanioleer?
     //void *datoLeido = malloc(tamanioALeer);//block size o tamanioleer?

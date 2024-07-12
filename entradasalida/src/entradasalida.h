@@ -45,7 +45,6 @@ void generar_conexion();
 void procesar_conexion(void *);
 void recibir_mensaje(int);
 void enviar_stdin_memoria(int , int , int , int ,void* , int , op_code);
-void enviar_respuesta_crear_archivo(int ,int);
 //void enviar_respuesta_borrar_archivo(int cliente_fd,int pid)
 
 #endif
