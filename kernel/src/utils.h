@@ -14,4 +14,6 @@ t_list * obtener_procesos_lista(t_list * );
 t_list * obtener_procesos_cola(t_cola*);
 void listar_proceso_por_estado();
 void eliminar_pcb(int pid);
+void finalizar_pcb(t_pcb * );
+void enviar_memoria_finalizar(int );
 #endif

@@ -190,7 +190,9 @@ void liberar_proceso(t_pcb * pcb){
 	log_info(logger,"PID: %i - Estado Anterior: %s - Estado Actual: TERMINATED",pcb->contexto->pid,estado_anterior);
 	//liberar_recursos(pcb->contexto->pid);
 	//enviar_pcb(pcb,conexion_memoria,FINALIZAR);
+	
 	pthread_mutex_unlock(&sem_exec);
+	
 	sem_post(&sem_grado_multiprogramacion);
 }
 char* estado_a_string(t_estado estado) {

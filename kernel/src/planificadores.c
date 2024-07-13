@@ -11,8 +11,16 @@ void agregar_cola_ready(t_pcb * pcb){
     pcb->estado = READY;
     pthread_mutex_lock(&(cola_ready->sem_mutex));
     queue_push(cola_ready->cola, pcb);
-    log_error(logger,"la cola ready tiene %i elementos",list_size(cola_ready->cola->elements));
     pthread_mutex_unlock(&(cola_ready->sem_mutex));
+    t_list *ready_cola = obtener_procesos_cola(cola_ready);
+    printf("Cola READY:\n");
+    if (ready_cola != NULL && list_size(ready_cola) > 0) {
+        for (int i = 0; i < list_size(ready_cola); i++) {
+            int pid = (int) list_get(ready_cola, i);
+            printf("%d\n", pid);
+        }
+    }
+
     sem_post(&sem_ready);
 }
 t_pcb * quitar_cola_ready(){
@@ -27,6 +35,14 @@ void agregar_cola_vrr(t_pcb * pcb){
     pthread_mutex_lock(&(cola_vrr->sem_mutex));
     queue_push(cola_vrr->cola, pcb);
     pthread_mutex_unlock(&(cola_vrr->sem_mutex));
+    t_list *ready_cola = obtener_procesos_cola(cola_vrr);
+    printf("Cola READY:\n");
+    if (ready_cola != NULL && list_size(ready_cola) > 0) {
+        for (int i = 0; i < list_size(ready_cola); i++) {
+            int pid = (int) list_get(ready_cola, i);
+            printf("%d\n", pid);
+        }
+    }
     sem_post(&sem_ready);
 }
 t_pcb * quitar_cola_vrr(){
@@ -45,13 +61,13 @@ void planificador_largo_plazo(){
     while (1)
     {
         sem_wait(&sem_new);
-        log_error(logger,"Se agrego el proceso =======================================");
+        
         sem_wait(&sem_grado_multiprogramacion);
         if(detener){
             pthread_mutex_lock(&sem_detener_largo);
         }
         t_pcb * pcb = quitar_cola_new();
-        log_info(logger,"Se agrego el proceso %i a la cola READY",pcb->contexto->pid);
+        log_info(logger,"PID: %i - Estado Anterior: NEW - Estado Actual: READY",pcb->contexto->pid);
         agregar_cola_ready(pcb);
 
     }
@@ -151,12 +167,13 @@ void *interrupcion_quantum_vrr(t_parametros_vrr * parametros)
 {   
     inicio_vrr = temporal_create();
     if(parametros->quantum_restante > 0){
-        log_warning(logger, "EJECUTANDO PID %i QUATUM RESTANTE DE %i",parametros->pid,parametros->quantum_restante);
+        //log_warning(logger, "EJECUTANDO PID %i QUATUM RESTANTE DE %i",parametros->pid,parametros->quantum_restante);
         usleep(parametros->quantum_restante * 1000);
         
     }else{
         usleep(quantum * 1000);
     }
+
     interrumpir_cpu(parametros->pid);
 
 }
@@ -199,7 +216,6 @@ void enviar_por_dispatch(t_pcb* pcb) {
         parametros->quantum_restante = pcb->contexto->quantum;
         iniciar_quantum_vrr(parametros);
     }
-    log_warning(logger,"==================================================");
     //pthread_mutex_unlock(&sem_quantum);
 }
 

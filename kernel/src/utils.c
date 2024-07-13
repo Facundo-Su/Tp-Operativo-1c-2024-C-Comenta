@@ -1,8 +1,15 @@
 #include "utils.h"
+void enviar_memoria_finalizar(int pid){
+	t_paquete* paquete = crear_paquete(FINALIZAR);
+	agregar_a_paquete(paquete, &pid, sizeof(int));
+	enviar_paquete(paquete,conexion_memoria);
+	eliminar_paquete(paquete);
+}
 void finalizar_pcb(t_pcb * pcb){
 	sigue = false;
     liberar_recursos(pcb->contexto->pid);
     liberar_proceso(pcb);
+	enviar_memoria_finalizar(pcb->contexto->pid);
 }
 void eliminar_pcb(int pid){
     t_pcb * pcb = encontrar_pcb(pid);
@@ -157,7 +164,7 @@ void ejecutar_script(char* ruta) {
     FILE* archivo = fopen(ruta_final, "r");
 
     if (archivo == NULL) {
-        log_error(logger, "El archivo %s no pudo ser abierto.", ruta); 
+        //log_error(logger, "El archivo %s no pudo ser abierto.", ruta); 
         return;
     }
 
@@ -165,7 +172,7 @@ void ejecutar_script(char* ruta) {
     fclose(archivo);
 
     int size = list_size(auxiliar);
-    log_error(logger, "Número de instrucciones: %i", size);
+    //log_error(logger, "Número de instrucciones: %i", size);
 
     for (int i = 0; i < size; i++) {
         char *instruccion = list_get(auxiliar, i);
@@ -175,13 +182,13 @@ void ejecutar_script(char* ruta) {
             continue;
         }
 
-        log_info(logger, "Instrucción: %s", instruccion);
+        //log_info(logger, "Instrucción: %s", instruccion);
 
         char *comando = NULL;
         char *argumento = NULL;
         char *instruccion_copia = strdup(instruccion); // Copia para evitar modificar el original
         if (instruccion_copia == NULL) {
-            log_error(logger, "Error al duplicar la instrucción en la posición %d", i);
+            //log_error(logger, "Error al duplicar la instrucción en la posición %d", i);
             continue;
         }
 
@@ -193,7 +200,7 @@ void ejecutar_script(char* ruta) {
             continue;
         }
 
-        log_error(logger, "Llegué hasta acá: %s", comando);
+        //log_error(logger, "Llegué hasta acá: %s", comando);
 
         if (strcmp(comando, "INICIAR_PROCESO") == 0) {
             if (argumento != NULL) {

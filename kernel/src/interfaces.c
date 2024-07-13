@@ -22,9 +22,9 @@ void io_sleep_ready(int pid){
 
 void io_sleep_ready2(int pid,char* nombre_interfaz){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
-	log_error(logger,"encontre la interfaz y es %s",interfaz->nombre_interface);
 	sem_post(&interfaz->semaforo_uso);
 	sem_post(&interfaz->semaforo_uso_ejecucion);
+	log_info(logger,"PID: %i - Estado Anterior: WAITING - Estado Actual: READY",pid);
 }
 
 // void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb){
@@ -68,6 +68,7 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,
 			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
+			log_info(logger,"PID: %i - Estado Anterior: RUNNING  - Estado Actual: WAITING",pcb->contexto->pid);
 			pcb->estado = WAITING;
 			t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
 			pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
@@ -76,7 +77,6 @@ void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,
 			blocked->desplazamiento=desplazamiento;
 			blocked->nro_marco = marco;
 			blocked->tamanio = tamanio;
-			log_error(logger, "++++++++++++++++++++++++++++++");
 			agregar_cola_bloqueados_interfaces(interfaz,blocked);
 		}
 }
@@ -133,6 +133,7 @@ void ejecutar_io_stdin_write(char* nombre_interfaz, int marco,int desplazamiento
 				blocked->tamanio = tamanio;
 				blocked->desplazamiento=desplazamiento;
 				agregar_cola_bloqueados_interfaces(interfaz,blocked);
+				log_info(logger,"PID: %i - Estado Anterior: RUNNING  - Estado Actual: WAITING",pcb->contexto->pid);
 		}
 }
 
@@ -184,6 +185,7 @@ void io_stdout_write_ready(int pid, char * nombre_interfaz){
 	t_interfaz *interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	sem_post(&interfaz->semaforo_uso);
 	sem_post(&interfaz->semaforo_uso_ejecucion);
+	log_info(logger,"PID: %i - Estado Anterior: WAITING  - Estado Actual: READY",pid);
 }
 
 // void io_stdin_read_ready(int pid){
@@ -206,12 +208,14 @@ void io_stdin_read_ready(int pid, char* nombre_interfaz){
 	t_interfaz *interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	sem_post(&interfaz->semaforo_uso);
 	sem_post(&interfaz->semaforo_uso_ejecucion);
+	log_info(logger,"PID: %i - Estado Anterior: WAITING  - Estado Actual: READY",pid);
 }
 
 void dial_fs_ready(char* nombre_interfaz){
 	t_interfaz *interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	sem_post(&interfaz->semaforo_uso);
 	sem_post(&interfaz->semaforo_uso_ejecucion);
+	//log_info(logger,"PID: %i - Estado Anterior: WAITING  - Estado Actual: READY",pid);
 }
 
 
@@ -359,7 +363,7 @@ void ejecutar_io_sleep2(char * nombre_de_interfaz_sleep,int unidad_trabajo_sleep
 		t_blocked_io * blocked = malloc(sizeof(t_blocked_io));
 		blocked->pcb = pcb;
 		blocked->unidad_trabajo = unidad_trabajo_sleep;
-		log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2 CON QUANTUM RESTANTE DE %i",pcb->contexto->pid,pcb->contexto->quantum);
+		log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 		sigue = false;
 		agregar_cola_bloqueados_interfaces(interfaz,blocked);
 	}
@@ -412,10 +416,11 @@ void ejecutar_io_fs_create(char *nombre_interfaz,char* nombre_archivo_f_create,t
 			blocked->pcb = pcb;
 			blocked->operacion = CREATE;
 			blocked->nombre_archivo = nombre_archivo_f_create;
-			log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo);
+			
 			//log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING2",pcb->contexto->pid);
 			sigue = false;
 			agregar_cola_bloqueados_interfaces(interfaz,blocked);
+			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 		}
 }
 
@@ -483,6 +488,7 @@ void ejecutar_io_fs_write(char *nombre_interfaz,char* nombre_archivo_f_write,int
 			blocked->puntero = puntero;
 			blocked->operacion = WRITE;
 			agregar_cola_bloqueados_interfaces(interfaz,blocked);
+			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 		}
 }
 
@@ -544,8 +550,9 @@ void ejecutar_io_fs_read(char *nombre_interfaz,char* nombre_archivo_f_read,int m
 			blocked->desplazamiento=desplazamiento;
 			blocked->puntero = puntero;
 			blocked->operacion = READ;
-			log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_read marco %i, desplazamiento %i, tamanio %i", blocked->nro_marco,blocked->desplazamiento,blocked->tamanio);
+			
 			agregar_cola_bloqueados_interfaces(interfaz,blocked);
+			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 		}
 }
 
@@ -594,9 +601,9 @@ void ejecutar_io_fs_delete(char *nombre_interfaz,char* nombre_archivo_f_delete,t
 			pcb->contexto->quantum= obtener_tiempo_vrr(pcb);
 			blocked->pcb = pcb;
 			blocked->nombre_archivo = nombre_archivo_f_delete;
-			log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo);
 			blocked->operacion = DELETE;
 			agregar_cola_bloqueados_interfaces(interfaz,blocked);
+			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 		}
 }
 
@@ -648,9 +655,9 @@ void ejecutar_io_fs_truncate(char *nombre_interfaz,char* nombre_archivo_f_trunca
 			blocked->pcb = pcb;
 			blocked->nombre_archivo = nombre_archivo_f_truncate;
 			blocked->tamanio = tamanio;
-			log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo);
 			blocked->operacion = TRUNCATE;
 			agregar_cola_bloqueados_interfaces(interfaz,blocked);
+			log_info(logger,"PID: %i - Estado Anterior: RUNNING - Estado Actual: WAITING",pcb->contexto->pid);
 		}
 }
 
@@ -660,7 +667,6 @@ void enviar_a_io_f_create(char *nombre_interfaz,char* nombre_archivo_f_create,t_
 	agregar_a_paquete(paquete, nombre_archivo_f_create, strlen(nombre_archivo_f_create) + 1);
 	agregar_a_paquete(paquete, &pcb->contexto->pid, sizeof(int));
 	enviar_paquete(paquete,codigo_cliente);
-	log_warning (logger, "envie el nombre de archivo %s", nombre_archivo_f_create);
 	free(paquete);
 }
 
@@ -670,7 +676,6 @@ void enviar_a_io_f_truncate(char *nombre_interfaz,char* nombre_archivo_f_truncat
 	agregar_a_paquete(paquete, &tamanio, sizeof(int));
 	agregar_a_paquete(paquete, &pcb->contexto->pid, sizeof(int));
 	enviar_paquete(paquete,codigo_cliente);
-	log_warning (logger, "envie el nombre de archivo %s", nombre_archivo_f_truncate);
 	free(paquete);
 }
 
@@ -683,7 +688,6 @@ void enviar_a_io_fs_write(char *nombre_interfaz,char* nombre_archivo_f_write,int
 	agregar_a_paquete(paquete, &puntero, tamanio);
 	agregar_a_paquete(paquete, &pcb->contexto->pid, sizeof(int));
 	enviar_paquete(paquete,codigo_cliente);
-	log_warning (logger, "envie el nombre de archivo %s", nombre_archivo_f_write);
 	free(paquete);
 }
 
@@ -697,7 +701,6 @@ void enviar_a_io_fs_read(char *nombre_interfaz,char* nombre_archivo_f_read,int m
 	agregar_a_paquete(paquete, &puntero, tamanio);
 	agregar_a_paquete(paquete, &pcb->contexto->pid, sizeof(int));
 	enviar_paquete(paquete,codigo_cliente);
-	log_warning (logger, "envie el nombre de archivo %s", nombre_archivo_f_read);
 	free(paquete);
 }
 
@@ -707,7 +710,6 @@ void enviar_a_io_f_delete(char *nombre_interfaz,char* nombre_archivo_f_delete,t_
 	agregar_a_paquete(paquete, nombre_archivo_f_delete, strlen(nombre_archivo_f_delete) + 1);
 	agregar_a_paquete(paquete, &pcb->contexto->pid, sizeof(int));
 	enviar_paquete(paquete,codigo_cliente);
-	log_warning (logger, "envie el nombre de archivo %s", nombre_archivo_f_delete);
 	free(paquete);
 }
 
@@ -790,9 +792,6 @@ void agregar_interfaces(char * nombre_interfaz, int conexion_obtenido, t_tipo_fs
 	pthread_t hilo_control;
 	pthread_create(&hilo_control, NULL, (void*) control_acceso, (void*) interfaz);
 	pthread_detach(hilo_control);
-
-	log_info(logger, "Se agrego la interfaz %s", interfaz->nombre_interface);
-	log_warning(logger, "el codigo de cliente que recibi es : %i ",interfaz->codigo_cliente);
     list_add(lista_interfaces, interfaz);
 }
 
@@ -829,7 +828,7 @@ void control_acceso(t_interfaz * interfaz){
 					break;
 
 				case DELETE:
-                    log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo);
+                   // log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo);
 					enviar_a_io_f_delete(interfaz->nombre_interface,blocked->nombre_archivo,blocked->pcb,interfaz->codigo_cliente);
 					pthread_mutex_unlock(&sem_exec);
 					break;
@@ -854,9 +853,6 @@ void control_acceso(t_interfaz * interfaz){
 		queue_push(interfaz->cola_en_ejecucion,blocked->pcb);
 
 		sem_wait(&interfaz->semaforo_uso_ejecucion);
-		log_error(logger, "LLEGUE HASTA ACA");
-		log_error(logger,"<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		log_error(logger,"el pcb que se va a ejecutar es: %i ",blocked->pcb->contexto->pid);
 		blocked->pcb->estado =READY;
 		vuelta_io_vrr(blocked->pcb);
 		
@@ -885,7 +881,6 @@ void vuelta_io_vrr(t_pcb * pcb){
 		if(pcb->contexto->quantum ==0){
 			agregar_cola_ready(pcb);
 		}else{
-			log_info(logger,"PID: %i - Agregado cola de prioridades vrr",pcb->contexto->pid);
 			agregar_cola_vrr(pcb);
 		}
 	}else{

@@ -4,7 +4,7 @@ int main(int argc, char* argv[]) {
     //iniciar_recurso();
 	iniciar();
 	//char * e = planificador_a_string(planificador);
-	log_info(logger,"%i", quantum);
+	//log_info(logger,"%i", quantum);
 	generar_conexion();
 	inciar_planificadores();
 	pthread_t iniciando_server;
@@ -64,6 +64,7 @@ void iniciar_consola(){
 				int pid_finalizar = atoi(valor);
 
 				eliminar_pcb(pid_finalizar);
+				log_warning(logger, "Finaliza el proceso %i - Motivo: INTERRUPTED_BY_USER",pid_finalizar);
 				break;
 			case '4':
 				log_info(logger,"PAUSA DE LA PLANIFICACIÓN");
@@ -89,7 +90,7 @@ void iniciar_consola(){
 				//sem_init(&sem_grado_multiprogramacion, 0, nuevo_grado);
 				if(grado_multiprogramacion_ini <nuevo_grado){
 					int cantidad_en_espera= list_size(cola_ready->cola->elements)+1;
-					log_error(logger,"cantidad de contador aux es %i, cantidad de cantidad esperada es %i", contador_aux, cantidad_en_espera);
+					//log_error(logger,"cantidad de contador aux es %i, cantidad de cantidad esperada es %i", contador_aux, cantidad_en_espera);
 					int cantidad_proceso_agregar = contador_aux-cantidad_en_espera;
 
 					for(int i=0;i<cantidad_proceso_agregar;i++){
@@ -157,9 +158,9 @@ void procesar_conexion(void *conexion1){
 			int conexion_obtenido = cliente_fd;
 			char * nombre_interfaz = strtok(n, "\n");
 			char *tipo_interfaz_limpio = strtok(tipo_interfaz, "\n");
-			log_error(logger,"el tipo de interfaz es %s",tipo_interfaz_limpio);
+			//log_error(logger,"el tipo de interfaz es %s",tipo_interfaz_limpio);
 			t_tipo_fs tipo_enum = obtener_el_tipo_fs(tipo_interfaz_limpio);
-			log_error(logger, "Se ha conectado la interfaz %s y el tipo es %s", nombre_interfaz , tipo_interfaz_limpio);
+			//log_error(logger, "Se ha conectado la interfaz %s y el tipo es %s", nombre_interfaz , tipo_interfaz_limpio);
 			agregar_interfaces(nombre_interfaz, conexion_obtenido,tipo_enum);
 
 			break;
@@ -181,8 +182,9 @@ void procesar_conexion(void *conexion1){
 				case OUT_OF_MEMORY:
 					paquete = recibir_paquete(cliente_fd);
 					exit = running;
-					log_warning(logger, "Finaliza el proceso %i - Motivo: OUT OF MEMORY",exit->contexto->pid);
 					finalizar_pcb(exit);
+					log_warning(logger, "Finaliza el proceso %i - Motivo: OUT OF MEMORY",exit->contexto->pid);
+					//pthread_mutex_unlock(&sem_exec);
 					break;
 				case IO_SLEEP:
 					paquete = recibir_paquete(cliente_fd);
@@ -212,13 +214,14 @@ void procesar_conexion(void *conexion1){
 					valor_uin32t2 =list_get(paquete,3); //tamanio
 					int valor_entero_io_stdin_read = (int) *valor_uin32t2;
 					t_pcb* pcb_io_stdin_read = running;
-					log_warning(logger,"zxczxczxczxczxczxczxczxczxczxc");
+					/*log_warning(logger,"zxczxczxczxczxczxczxczxczxczxc");
 					log_info(logger,"el nombre de la interfaz es %s",valor_char);
 					log_info(logger,"el valor de marco es %i",*valor_entero);
 					log_info(logger,"el valor de desplazamiento es %i",*desplzazamiento_stdin_read);
 					log_info(logger,"el valor de tamanio es %i",valor_entero_io_stdin_read);
 
 					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdin_read,valor_entero_io_stdin_read);
+					*/
 					ejecutar_io_stdin_read(valor_char,*valor_entero,*desplzazamiento_stdin_read,valor_entero_io_stdin_read,pcb_io_stdin_read);
 					break;
 				case IO_STDOUT_WRITE:
@@ -284,12 +287,12 @@ void procesar_conexion(void *conexion1){
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_a_sacar_sleep = list_get(paquete,0);
 			char* nombre_interfaz_sleep = list_get(paquete,1);
-			log_warning(logger, "me ha llegado ejecutar de vuelta a cpu el pid es %i",*pid_a_sacar_sleep);
+			//log_warning(logger, "me ha llegado ejecutar de vuelta a cpu el pid es %i",*pid_a_sacar_sleep);
 
 			//los elementos en la lista bloqueados son
 			for(int i=0;i<list_size(lista_bloqueado_io);i++){
 				t_pcb* pcb_aux = list_get(lista_bloqueado_io,i);
-				log_error(logger, "el pid es %i",pcb_aux->contexto->pid);
+				//log_error(logger, "el pid es %i",pcb_aux->contexto->pid);
 			}
 			//log_error(logger, "%i",*pid_a_sacar_sleep);
 			io_sleep_ready2(*pid_a_sacar_sleep, nombre_interfaz_sleep);
@@ -314,7 +317,9 @@ void procesar_conexion(void *conexion1){
 			contexto= desempaquetar_pcb(paquete);
 			running->contexto = contexto;
 			running->contexto->quantum=0;
-			log_error(logger, "el pid llegea desalojar es %i",running->contexto->pid);
+			log_info(logger,"PID: %i - Desalojado por fin de Quantum", running->contexto->pid);
+			log_info(logger, "PID: %i - Estado Anterior: RUNNING - Estado Actual: READY",running->contexto->pid);
+			//log_error(logger, "el pid llegea desalojar es %i",running->contexto->pid);
 			//log_pcb_info(pcb_aux);
 			agregar_cola_ready(running);
 			pthread_mutex_unlock(&sem_exec);
@@ -323,7 +328,7 @@ void procesar_conexion(void *conexion1){
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_crear_archivo = list_get(paquete,0);
 			char*nombre_interfaz_crear_archivo = list_get(paquete,1);
-			log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
+			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			dial_fs_ready(nombre_interfaz_crear_archivo);
 			break;
 		case RESPUESTA_BORRAR_ARCHIVO:
@@ -364,9 +369,9 @@ void procesar_conexion(void *conexion1){
 			contexto = desempaquetar_pcb(paquete);
 			running->contexto = contexto;
 			exit= running;
-			finalizar_pcb(exit);
-			enviar_memoria_finalizar(exit->contexto->pid);
-			log_warning(logger, "Finaliza el proceso %i - Motivo: INTERRUPTED_BY_USER",exit->contexto->pid);
+			//inalizar_pcb(exit);
+			//enviar_memoria_finalizar(exit->contexto->pid);
+			//log_warning(logger, "Finaliza el proceso %i - Motivo: INTERRUPTED_BY_USER",exit->contexto->pid);
 			break;
 		
 		case FINALIZAR:
@@ -375,8 +380,8 @@ void procesar_conexion(void *conexion1){
 			running->contexto = contexto;
 			exit= running;
 			finalizar_pcb(exit);
-			enviar_memoria_finalizar(exit->contexto->pid);
-			//log_warning(logger, "Finaliza el proceso %i - Motivo: SUCCESS",exit->contexto->pid);
+			//pthread_mutex_unlock(&sem_exec);
+			log_warning(logger, "Finaliza el proceso %i - Motivo: SUCCESS",exit->contexto->pid);
 			break;
 
 		case -1:
@@ -405,11 +410,4 @@ t_tipo_fs obtener_el_tipo_fs(char* tipo){
 		return DIALFS;
 	}
 	
-}
-
-void enviar_memoria_finalizar(int pid){
-	t_paquete* paquete = crear_paquete(FINALIZAR);
-	agregar_a_paquete(paquete, &pid, sizeof(int));
-	enviar_paquete(paquete,conexion_memoria);
-	eliminar_paquete(paquete);
 }
