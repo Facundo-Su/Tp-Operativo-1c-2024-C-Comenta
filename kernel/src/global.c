@@ -44,6 +44,7 @@ pthread_t hilo_conexion_memoria;
 pthread_t hilo_conexion_cpu;
 pthread_t hilo_conexion_cpu_interrupt;
 t_temporal* inicio_vrr;
+int contador_aux;
 
 t_config* config;
 t_log* logger;
@@ -113,6 +114,7 @@ void inicializar_estructuras(){
     lista_recursos = list_create();
     lista_recursos_pcb = list_create();
     lista_bloqueado_io = list_create();
+    contador_aux=0;
     
 }
 

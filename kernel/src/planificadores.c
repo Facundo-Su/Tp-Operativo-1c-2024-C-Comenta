@@ -11,6 +11,7 @@ void agregar_cola_ready(t_pcb * pcb){
     pcb->estado = READY;
     pthread_mutex_lock(&(cola_ready->sem_mutex));
     queue_push(cola_ready->cola, pcb);
+    log_error(logger,"la cola ready tiene %i elementos",list_size(cola_ready->cola->elements));
     pthread_mutex_unlock(&(cola_ready->sem_mutex));
     sem_post(&sem_ready);
 }
@@ -44,6 +45,7 @@ void planificador_largo_plazo(){
     while (1)
     {
         sem_wait(&sem_new);
+        log_error(logger,"Se agrego el proceso =======================================");
         sem_wait(&sem_grado_multiprogramacion);
         if(detener){
             pthread_mutex_lock(&sem_detener_largo);

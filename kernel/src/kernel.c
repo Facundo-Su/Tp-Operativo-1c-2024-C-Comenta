@@ -41,7 +41,7 @@ void iniciar_consola(){
 				"\n 4. Detener Planificacion"
 				"\n 5. Iniciar Planificacion"
 				"\n 6. Listar Procesos por Estado"
-				"\n 7. Terminar Programa");
+				"\n 7. Cambiar Grado De Multiprogramacion");
 		variable = readline(">");
 
 		switch (*variable) {
@@ -81,7 +81,24 @@ void iniciar_consola(){
 				listar_proceso_por_estado();
 				break;
 			case '7':
-				//finalizar_programa();
+				char* valor2 = readline(">");
+				int nuevo_grado = atoi(valor2);
+				log_info(logger,"Grado Anterior: %i - Grado Actual: %i",grado_multiprogramacion_ini,nuevo_grado);
+				//sem_destroy(&sem_grado_multiprogramacion);
+
+				//sem_init(&sem_grado_multiprogramacion, 0, nuevo_grado);
+				if(grado_multiprogramacion_ini <nuevo_grado){
+					int cantidad_en_espera= list_size(cola_ready->cola->elements)+1;
+					log_error(logger,"cantidad de contador aux es %i, cantidad de cantidad esperada es %i", contador_aux, cantidad_en_espera);
+					int cantidad_proceso_agregar = contador_aux-cantidad_en_espera;
+
+					for(int i=0;i<cantidad_proceso_agregar;i++){
+						sem_post(&sem_new);
+						sem_post(&sem_grado_multiprogramacion);
+						
+					}
+					
+				}
 				break;
 			default:
 				break;

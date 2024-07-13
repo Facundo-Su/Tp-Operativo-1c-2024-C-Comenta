@@ -118,6 +118,7 @@ void iniciar_proceso(char* ruta){
 	eliminar_paquete(paquete);
 	pthread_mutex_lock(&sem_memoria);
 	agregar_cola_new(pcb);
+	contador_aux++;
 	if(primero == true){
 		pthread_mutex_unlock(&sem_exec);
 	}

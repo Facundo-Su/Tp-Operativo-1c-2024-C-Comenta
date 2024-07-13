@@ -121,7 +121,7 @@ extern pthread_t hilo_conexion_cpu_interrupt;
 extern t_pcb * running;
 extern t_list* lista_interfaces;
 extern t_temporal* inicio_vrr;
-
+extern int contador_aux;
 
 //
 
