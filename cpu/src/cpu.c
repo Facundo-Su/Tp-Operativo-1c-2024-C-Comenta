@@ -96,16 +96,16 @@ void iniciar_servidor_interrupt(char * puerto){
 				//list_iterate(lista, (void*) iterator);
 				break;
 			case ENVIAR_DESALOJAR:
-				log_error(logger, "Instruccion DESALOJAR");
+				//log_error(logger, "Instruccion DESALOJAR");
 				//recibir_mensaje(cliente_fd);
 				lista = recibir_paquete(cliente_fd);
 				int* pid_aux = list_get(lista,0);
-				log_warning(logger,"los valores que comparo son: %d y %d",pcb->pid,*pid_aux);
+				//log_warning(logger,"los valores que comparo son: %d y %d",pcb->pid,*pid_aux);
 				if(*pid_aux == pcb->pid){
 					hay_desalojo = true;
 
 				}else{
-					log_error(logger, "No hay un proceso con ese PID por ende no desalojo");
+					//log_error(logger, "No hay un proceso con ese PID por ende no desalojo");
 				}
 				
 				//log_error(logger, "Instruccion DESALOJAR");
@@ -228,11 +228,9 @@ void ejecutar_ciclo_de_instruccion(int cliente_fd){
 
 		if(hay_desalojo){
 			enviar_pcb(pcb,cliente_fd,ENVIAR_DESALOJAR);
-			log_error(logger,"En desalojo el proceso pid %i",pcb->pid);
 			return;
 		}
 		fetch(cliente_fd);
-		log_error(logger,"En ejecucion");
 	}
 
 
@@ -501,6 +499,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		registro_aux2 = devolver_registro(parametro3);
 		valor_uint2 = obtener_valor(registro_aux2);
 		//log_info(logger,"ENVIO %u %u",valor_uint1, valor_uint2);
+		log_info(logger,"PID: %i , - ACCION: ESCRIBIR - DIRECCION: MARCO %i - DEZPLAZMIENTO: %i - TAMANIO: %i",pcb->pid,aux->marco, aux->desplazamiento, valor_uint2);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_io_stdin_read(parametro,aux,valor_uint2,cliente_fd);
 
@@ -521,7 +520,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 
 		registro_aux2 = devolver_registro(parametro3);
 		valor_uint2 = obtener_valor(registro_aux2);
-
+		log_info(logger,"PID: %i , - ACCION: LEER - DIRECCION: MARCO %i - DEZPLAZMIENTO: %i - TAMANIO: %i",pcb->pid,aux2->marco, aux2->desplazamiento, valor_uint2);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_io_stdout_write(parametro,aux2,valor_uint2,cliente_fd);
 		break;
@@ -570,9 +569,9 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		valor_uint1 = obtener_valor(registro_aux);
 		valor_uint2 = obtener_valor(registro_aux2);
 		valor_uint3 = obtener_valor(registro_aux3);
-
+		
 		t_traduccion* traducido_f_write = mmu_traducir(valor_uint1);
-
+		log_info(logger,"PID: %i , - ACCION: ESCRIBIR - DIRECCION: MARCO %i - DEZPLAZMIENTO: %i - PUNTERO: %i",pcb->pid,traducido_f_write->marco, traducido_f_write->desplazamiento, valor_uint3);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_io_fs_write(parametro,parametro2,traducido_f_write,valor_uint2,valor_uint3,cliente_fd);
 
@@ -593,9 +592,10 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		valor_uint1 = obtener_valor(registro_aux);
 		valor_uint2 = obtener_valor(registro_aux2);
 		valor_uint3 = obtener_valor(registro_aux3);
-
+		
 		t_traduccion* traducido_f_read = mmu_traducir(valor_uint1);
-		log_error(logger,"el valor traducido es %i",traducido_f_read->marco);
+		log_info(logger,"PID: %i , - ACCION: ESCRIBIR - DIRECCION: MARCO: %i - DEZPLAZMIENTO: %i - PUNTERO: %i",pcb->pid,traducido_f_read->marco, traducido_f_read->desplazamiento, valor_uint3);
+		//log_error(logger,"el valor traducido es %i",traducido_f_read->marco);
 		enviar_pcb(pcb,cliente_fd,RECIBIR_PCB);
 		enviar_io_fs_read(parametro,parametro2,traducido_f_read,valor_uint2,valor_uint3,cliente_fd);
 
@@ -611,6 +611,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	}
 	recibi_archivo = false;
 	instruccion_ejecutando= false;
+	
 }
 
 void enviar_traduccion_mov_out(t_traduccion* traducido,op_code operacion,uint32_t valor_int){
@@ -806,9 +807,9 @@ t_traduccion* mmu_traducir(int dir_logica){
 	t_traduccion* traducido= malloc(sizeof(t_traduccion));
 	int nro_pagina =  floor(dir_logica / tamanio_pagina);
 	int marco_encontrado;
-	log_warning(logger,"PID: %i - Ejecutando MMU TRADUCIR: %i",pcb->pid,dir_logica);
-	log_warning(logger,"PID: %i - Tamanio Pagina: %i",pcb->pid,tamanio_pagina);
-	log_warning(logger,"PID: %i - Pagina: %i",pcb->pid,nro_pagina);
+	// log_warning(logger,"PID: %i - Ejecutando MMU TRADUCIR: %i",pcb->pid,dir_logica);
+	// log_warning(logger,"PID: %i - Tamanio Pagina: %i",pcb->pid,tamanio_pagina);
+	// log_warning(logger,"PID: %i - Pagina: %i",pcb->pid,nro_pagina);
 	if(cantidad_entrada_tlb>0){
 		marco_encontrado = consultar_tlb(nro_pagina, pcb->pid);
 		if(marco_encontrado == -1){

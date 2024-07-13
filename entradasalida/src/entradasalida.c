@@ -432,7 +432,7 @@ void procesar_conexion(void *conexion_ptr){
             int* pid_f_truncate = list_get(paquete,2);
             log_info(logger, "Truncar Archivo: <%s>",nombre_archivo_truncar);
             log_warning(logger,"el tamanio es %i",*tamanio_truncar);
-            truncar_archivo(nombre_archivo_truncar,*tamanio_truncar);
+            truncar_archivo(nombre_archivo_truncar,*tamanio_truncar,*pid_f_truncate);
             enviar_respuesta_truncar_archivo(cliente_fd,*pid_f_truncate,nombre_interfaz);
             break;
         case EJECUTAR_IO_FS_WRITE:
