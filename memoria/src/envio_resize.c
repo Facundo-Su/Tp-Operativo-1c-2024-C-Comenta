@@ -224,6 +224,7 @@ void envio_resize(int cliente_fd){
 	int tamanio_proceso = tabla->tamanio_proceso;
 	//log_error(logger_memoria, "TAMAÑIO proceso %i", tamanio_proceso);
 	//log_error(logger_memoria, "TAMAÑIO memoria %i", memoria->espacio_disponible);
+	log_warning(logger_memoria, "PID - %i TAMAÑIO - %i", *pid, *tamanio);
 	
 	if(*tamanio<tamanio_proceso){
 		int tamanio_a_eliminar = tamanio_proceso-*tamanio;
@@ -232,6 +233,7 @@ void envio_resize(int cliente_fd){
 	}
 	else{
 		int tamanio_a_agregar = *tamanio - tamanio_proceso;
+		log_error(logger_memoria, "TAMAÑIO a agregar %i", tamanio_a_agregar);
 		//log_error(logger_memoria, "TAMAÑIO a agregar %i", tamanio_a_agregar);
 		if(tamanio_a_agregar > memoria->espacio_disponible){
 			//log_error(logger_memoria,"ERROR NO PUEDO AGRANDAR");
@@ -246,8 +248,10 @@ void envio_resize(int cliente_fd){
 void ejecutar_ampliacion(int tamanio_a_agregar, t_tabla_paginas * tabla){
 	memoria->espacio_disponible-=tamanio_a_agregar;
 	tabla->tamanio_proceso += tamanio_a_agregar;
+	log_error(logger_memoria,"tamanio de proceso  agrandar es %i", tamanio_a_agregar);
+	log_error(logger_memoria,"tamanio de proceso  actual es %i", tabla->tamanio_proceso);
 	int cant_paginas_nuevas = (tamanio_a_agregar + tam_pagina -1)/tam_pagina;
-	int cant_paginas = list_size(tabla);
+	int cant_paginas = list_size(tabla->paginas);
 	log_info(logger_memoria, "PID: %i - Tamaño Actual: %i - Tamaño a Ampliar: %i",tabla->pid, cant_paginas, tamanio_a_agregar);
 	crear_paginas(cant_paginas_nuevas,cant_paginas,tabla);
 	
@@ -290,15 +294,17 @@ void ejecutar_reduccion(int tamanio_a_eliminar, t_tabla_paginas * tabla){
 	tabla->tamanio_proceso -= tamanio_a_eliminar;
 	int cant_paginas_a_eliminar = (tamanio_a_eliminar + tam_pagina -1)/tam_pagina;
 	int i=0;
-	int cantidad_paginas = list_size(tabla->paginas);
+	int cantidad_paginas = list_size(tabla->paginas)-1;
 	log_info(logger_memoria, "PID: %i - Tamaño Actual: %i - Tamaño a Reducir: %i",tabla->pid, cantidad_paginas, cant_paginas_a_eliminar);
 	while(i!= cant_paginas_a_eliminar){
-		
-		t_pagina * pagina =list_get(tabla->paginas,(cantidad_paginas+i-cant_paginas_a_eliminar));
+		log_warning(logger_memoria, "Elimine la pagina %i", (cantidad_paginas + i) - cant_paginas_a_eliminar);
+		t_pagina * pagina =list_get(tabla->paginas,(cantidad_paginas - i));
+		log_error(logger_memoria,"la pagina que accedo es %i",(cantidad_paginas + i) - cant_paginas_a_eliminar);
 		liberar_marco(pagina);
+		log_error(logger_memoria,"===================================");
 		list_remove_element(tabla->paginas,pagina);
 		free(pagina);
-
+		i++;
 	}
 }
 void liberar_marco(t_pagina * pagina){

@@ -61,6 +61,7 @@ t_pcb * encontrar_pcb(int pid){
 		agregar_a_paquete(paquete, &(running->contexto->pid), sizeof(int));
 		enviar_paquete(paquete, conexion_cpu_interrupt);
 		eliminar_paquete(paquete);
+
 		return running;
 	}
 	t_pcb * bloqueado_io = buscar_pcb_listas(pid,lista_bloqueado_io);
@@ -141,14 +142,15 @@ t_list* leer_script(FILE* pseudocodigo){
     return instrucciones;
 }
 
-char** parsear_instruccion(char* instruccion){
-
-    // Parseo la instruccion
-    char** instruccion_parseada = string_split(instruccion, " ");
-
-    // Retorno la instruccion parseada
-    return instruccion_parseada;
+void destruir_instruccion(void* instruccion) {
+    free(instruccion);
 }
+
+void parsear_instruccion(char* instruccion, char** comando, char** argumento) {
+    *comando = strtok(instruccion, " ");
+    *argumento = strtok(NULL, " ");
+}
+
 void ejecutar_script(char* ruta) {
     char *ruta_final = obtener_ruta(ruta);
     FILE* archivo = fopen(ruta_final, "r");
@@ -174,39 +176,37 @@ void ejecutar_script(char* ruta) {
 
         log_info(logger, "Instrucción: %s", instruccion);
 
-        char** instruccion_parseada = parsear_instruccion(instruccion);
-
-        if (instruccion_parseada == NULL || instruccion_parseada[0] == NULL) {
-            log_error(logger, "Error al parsear la instrucción en la posición %d", i);
-            if (instruccion_parseada != NULL) {
-                for (char **temp = instruccion_parseada; *temp != NULL; temp++) {
-                    free(*temp);
-                }
-                free(instruccion_parseada);
-            }
+        char *comando = NULL;
+        char *argumento = NULL;
+        char *instruccion_copia = strdup(instruccion); // Copia para evitar modificar el original
+        if (instruccion_copia == NULL) {
+            log_error(logger, "Error al duplicar la instrucción en la posición %d", i);
             continue;
         }
 
-        log_error(logger, "Llegué hasta acá: %s", instruccion_parseada[0]);
+        parsear_instruccion(instruccion_copia, &comando, &argumento);
 
-        if (strcmp(instruccion_parseada[0], "INICIAR_PROCESO") == 0) {
-            if (instruccion_parseada[1] != NULL) {
-                iniciar_proceso(instruccion_parseada[1]);
+        if (comando == NULL) {
+            log_error(logger, "Error al parsear la instrucción en la posición %d", i);
+            free(instruccion_copia);
+            continue;
+        }
+
+        log_error(logger, "Llegué hasta acá: %s", comando);
+
+        if (strcmp(comando, "INICIAR_PROCESO") == 0) {
+            if (argumento != NULL) {
+                iniciar_proceso(argumento);
             } else {
                 log_error(logger, "Falta el argumento para INICIAR_PROCESO en la instrucción %d", i);
             }
         }
 
-        // Liberar la memoria asignada por string_split
-        for (char **temp = instruccion_parseada; *temp != NULL; temp++) {
-            free(*temp);
-        }
-        free(instruccion_parseada);
+        free(instruccion_copia);
     }
+
+    list_destroy_and_destroy_elements(auxiliar, destruir_instruccion);
 }
-
-
-
 
 char* obtener_ruta(char* valor_recibido) {
    
