@@ -74,7 +74,8 @@ void listFiles(const char *path) {
         tamanio_bloque_config = config_get_int_value(archivo, "TAMANIO_ARCHIVO");
 
         t_metadata * nueva_metadata = malloc(sizeof(t_metadata));
-        nueva_metadata->nombre=name;
+        nueva_metadata->nombre = malloc(string_length(name));
+        strcpy( nueva_metadata->nombre,name);
         nueva_metadata->tamanio_archivo=tamanio_bloque_config;
         nueva_metadata->bloq_inicial_archivo=bloque_inicial_config;
         list_add(metadatas, nueva_metadata);
@@ -89,7 +90,7 @@ void listFiles(const char *path) {
         log_error(logger, " ====================================================================\n");
         //nueva_metadata->nombre=name;
         //list_add(metadatas,nueva_metadata);
-        printf("%s\n", name);
+        ///printf("%s\n", name);
     }
 
         for(int j=0; j<list_size(metadatas); j++){
