@@ -197,7 +197,7 @@ void borrar_archivo(char* nombre_archivo){
     t_metadata* meta = devolver_metadata(nombre_archivo);
     //elimino elemento de la lista
     saco_metadata_de_lista(nombre_archivo);
-
+    log_error(logger,"la metadata es %s, el tamanio es %i ",meta->nombre, meta->tamanio_archivo);
     //libero sus bits del bitmap
     int cant_bloques_actuales =(int)ceil((double)meta->tamanio_archivo / block_size);
     int ultimo_bloque_Actual = (meta->bloq_inicial_archivo+cant_bloques_actuales)-1;
@@ -246,18 +246,12 @@ void truncar_archivo(char *nombre, int nuevo_tamanio_bytes) {
 }
 
 t_metadata* devolver_metadata(char *nombre) {
+    
+    char* aux = strtok(nombre, "\n");
     //log_info(logger, "llega el archivo %s",nombre);
-
-    for(int i=0;i<list_size(metadatas);i++){
-        t_metadata* meta_buscado = list_get(metadatas, i);
-        log_error(logger,"el nombre es %s",meta_buscado->nombre);
-    }
-
-
     for (int i = 0; i < list_size(metadatas); i++) {
         t_metadata* meta_buscado = list_get(metadatas, i);
-        log_warning(logger,"el nombre es %s",meta_buscado->nombre);
-        log_warning(logger,"el nombre es %s",nombre);
+
         if (strcmp(meta_buscado->nombre, nombre) == 0) {
             log_info(logger, "se encontro el archivo %s",meta_buscado->nombre);
 
@@ -339,7 +333,7 @@ void compactar(t_metadata* meta, int cant_bloq_necesarios){
         //void*datos_guardados = malloc(aux->tamanio_archivo);
 
         //memcpy(datos_guardados,archivo_de_bloques + (bloque_inicial*block_size),aux->tamanio_archivo);
-
+        
         memcpy(aux->datos,archivo_de_bloques+(bloque_inicial*block_size),aux->tamanio_archivo);
 
     }
@@ -605,9 +599,10 @@ void *leer_archivo_bloque(int puntero, char* nombre,int tamanio)
     log_error(logger,"el puntero es %i",puntero);
     log_error(logger,"el numero de bloque es %i",numero_bloque);
     log_error(logger,"el bloque inicial es %i",meta->bloq_inicial_archivo);
+    log_error(logger,"el tamanio que leo es %i",tamanio);
     uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque);
     // log_debug(logger, "SE VA A LEER EN UN BLOQUE");
-    void *datoLeido = malloc(block_size);//block size o tamanioleer?
+    void *datoLeido = malloc(tamanio);//block size o tamanioleer?
     //void *datoLeido = malloc(tamanioALeer);//block size o tamanioleer?
     memcpy(datoLeido, archivo_de_bloques  + (bloque_escribir * block_size), tamanio);
 

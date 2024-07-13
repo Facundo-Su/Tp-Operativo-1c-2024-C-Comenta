@@ -706,7 +706,8 @@ void enviar_io_stdin_read(char* parametro,t_traduccion* traducido,uint32_t param
 	agregar_a_paquete(paquete, parametro, strlen(parametro)+1);
 	agregar_a_paquete(paquete, &(traducido->marco), sizeof(int));
 	agregar_a_paquete(paquete,&(traducido->desplazamiento), sizeof(int));
-	agregar_a_paquete(paquete, &parametro3, sizeof(int));
+	agregar_a_paquete(paquete, &parametro3, sizeof(uint32_t));
+	log_error(logger, "enviando paquete %s,marco %i, despĺazamiento %i, tamanio %i",parametro,traducido->marco,traducido->desplazamiento,parametro3);
 	enviar_paquete(paquete, cliente_fd);
 }
 

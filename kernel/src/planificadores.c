@@ -186,8 +186,9 @@ void enviar_por_dispatch(t_pcb* pcb) {
     pcb->estado=RUNNING;
     running= pcb;
     enviar_pcb(pcb->contexto,conexion_cpu,RECIBIR_PCB);
-
+  
     if(planificador == RR){
+        
         iniciar_quantum(pcb->contexto->pid);
     }
     if(planificador == VRR){
@@ -196,8 +197,8 @@ void enviar_por_dispatch(t_pcb* pcb) {
         parametros->quantum_restante = pcb->contexto->quantum;
         iniciar_quantum_vrr(parametros);
     }
-
-    pthread_mutex_unlock(&sem_quantum);
+    log_warning(logger,"==================================================");
+    //pthread_mutex_unlock(&sem_quantum);
 }
 
 void inciar_planificadores(){

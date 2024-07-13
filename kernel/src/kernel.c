@@ -193,10 +193,16 @@ void procesar_conexion(void *conexion1){
 					valor_entero =list_get(paquete,1); // nro marco
 					int *desplzazamiento_stdin_read = list_get(paquete,2);
 					valor_uin32t2 =list_get(paquete,3); //tamanio
-					valor_entero2 = (int) valor_uin32t2;
+					int valor_entero_io_stdin_read = (int) *valor_uin32t2;
 					t_pcb* pcb_io_stdin_read = running;
-					//log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2);
-					ejecutar_io_stdin_read(valor_char,*valor_entero,*desplzazamiento_stdin_read,*valor_entero2,pcb_io_stdin_read);
+					log_warning(logger,"zxczxczxczxczxczxczxczxczxczxc");
+					log_info(logger,"el nombre de la interfaz es %s",valor_char);
+					log_info(logger,"el valor de marco es %i",*valor_entero);
+					log_info(logger,"el valor de desplazamiento es %i",*desplzazamiento_stdin_read);
+					log_info(logger,"el valor de tamanio es %i",valor_entero_io_stdin_read);
+
+					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdin_read,valor_entero_io_stdin_read);
+					ejecutar_io_stdin_read(valor_char,*valor_entero,*desplzazamiento_stdin_read,valor_entero_io_stdin_read,pcb_io_stdin_read);
 					break;
 				case IO_STDOUT_WRITE:
 					paquete = recibir_paquete(cliente_fd);
@@ -204,11 +210,11 @@ void procesar_conexion(void *conexion1){
 					valor_entero =list_get(paquete,1); // nro marco
 					int *desplzazamiento_stdout_write = list_get(paquete,2);//desplazamiento
 					valor_uin32t2 =list_get(paquete,3); //tamanio
-					valor_entero2 = (int) valor_uin32t2;
+					int valor_entero_io_stdin_write = (int) *valor_uin32t2;
 					t_pcb* pcb_io_stdout_write = running;
 					//log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2);
 					//log_warning(logger,"el pid es %i",running->contexto->pid);
-					ejecutar_io_stdin_write(valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2,pcb_io_stdout_write);
+					ejecutar_io_stdin_write(valor_char,*valor_entero,*desplzazamiento_stdout_write,valor_entero_io_stdin_write,pcb_io_stdout_write);
 					break;
 
 				case IO_FS_CREATE:
@@ -306,9 +312,10 @@ void procesar_conexion(void *conexion1){
 		case RESPUESTA_BORRAR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_eliminar_archivo = list_get(paquete,0);
+			char* nombre_interfaz_eliminar_archivo = list_get(paquete,1);
 			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			//io_fs_delete_ready(*pid_eliminar_archivo);
-			dial_fs_ready(nombre_interfaz_crear_archivo);
+			dial_fs_ready(nombre_interfaz_eliminar_archivo);
 			break;
 
 		case RESPUESTA_ESCRIBIR_ARCHIVO:
@@ -321,17 +328,19 @@ void procesar_conexion(void *conexion1){
 		case RESPUESTA_LEER_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_leer_archivo = list_get(paquete,0);
+			char* nombre_interfaz_leer_archivo = list_get(paquete,1);
 			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			//io_fs_read_ready(*pid_leer_archivo);
-			dial_fs_ready(nombre_interfaz_crear_archivo);
+			dial_fs_ready(nombre_interfaz_leer_archivo);
 			break;
 
 		case RESPUESTA_TRUNCAR_ARCHIVO:
 			paquete = recibir_paquete(cliente_fd);
 			int *pid_truncar_archivo = list_get(paquete,0);
+			char* nombre_interfaz_truncar_archivo = list_get(paquete,1);
 			//log_warning(logger, "el pid de crear archivo es %i",*pid_crear_archivo);
 			//io_fs_truncate_ready(*pid_truncar_archivo);
-			dial_fs_ready(nombre_interfaz_crear_archivo);
+			dial_fs_ready(nombre_interfaz_truncar_archivo);
 			break;
 		case ENVIAR_FINALIZAR:
 			paquete = recibir_paquete(cliente_fd);

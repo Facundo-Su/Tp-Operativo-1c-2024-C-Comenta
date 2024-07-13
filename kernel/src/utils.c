@@ -130,36 +130,84 @@ t_list* leer_script(FILE* pseudocodigo){
 	int j=0;
     // Recorro el archivo de pseudocodigo y parseo las instrucciones
     while (getline(&instruccion, &len, pseudocodigo) != -1){
-
     	char* valor_remplazo = strdup(instruccion);
+		log_warning(logger,"Instruccion: %s",instruccion);
         list_add(instrucciones,valor_remplazo);
         char *instruc_aux_nose23 = list_get(instrucciones,j);
         j++;
     }
+
+	
     return instrucciones;
 }
-void ejecutar_script(char* ruta){
-	char *ruta_final = obtener_ruta(ruta);
-	FILE* archivo = fopen(ruta_final, "r");
+
+char** parsear_instruccion(char* instruccion){
+
+    // Parseo la instruccion
+    char** instruccion_parseada = string_split(instruccion, " ");
+
+    // Retorno la instruccion parseada
+    return instruccion_parseada;
+}
+void ejecutar_script(char* ruta) {
+    char *ruta_final = obtener_ruta(ruta);
+    FILE* archivo = fopen(ruta_final, "r");
+
     if (archivo == NULL) {
         log_error(logger, "El archivo %s no pudo ser abierto.", ruta); 
-    } else {
-        t_list* auxiliar = leer_script(archivo);
-        fclose(archivo);
-		//log_info(logger, "%i",list_size(auxiliar));
-		for(int i =0; i< list_size(auxiliar);i++){
+        return;
+    }
 
-			char * instruccion = list_get(auxiliar, i);
-			char** instruccion_parseada = string_split(instruccion, " ");
-			//log_info(logger, "%s",instruccion_parseada[0]);
-			if (strcmp(instruccion_parseada[0], "INICIAR_PROCESO") == 0){
-				//log_info(logger, "%s",instruccion_parseada[1]);
-				//char *ruta_proceso = instruccion[1];
-				iniciar_proceso(instruccion_parseada[1]);
-			}
-		}
+    t_list* auxiliar = leer_script(archivo);
+    fclose(archivo);
+
+    int size = list_size(auxiliar);
+    log_error(logger, "Número de instrucciones: %i", size);
+
+    for (int i = 0; i < size; i++) {
+        char *instruccion = list_get(auxiliar, i);
+
+        if (instruccion == NULL) {
+            log_error(logger, "La instrucción en la posición %d es nula", i);
+            continue;
+        }
+
+        log_info(logger, "Instrucción: %s", instruccion);
+
+        char** instruccion_parseada = parsear_instruccion(instruccion);
+
+        if (instruccion_parseada == NULL || instruccion_parseada[0] == NULL) {
+            log_error(logger, "Error al parsear la instrucción en la posición %d", i);
+            if (instruccion_parseada != NULL) {
+                for (char **temp = instruccion_parseada; *temp != NULL; temp++) {
+                    free(*temp);
+                }
+                free(instruccion_parseada);
+            }
+            continue;
+        }
+
+        log_error(logger, "Llegué hasta acá: %s", instruccion_parseada[0]);
+
+        if (strcmp(instruccion_parseada[0], "INICIAR_PROCESO") == 0) {
+            if (instruccion_parseada[1] != NULL) {
+                iniciar_proceso(instruccion_parseada[1]);
+            } else {
+                log_error(logger, "Falta el argumento para INICIAR_PROCESO en la instrucción %d", i);
+            }
+        }
+
+        // Liberar la memoria asignada por string_split
+        for (char **temp = instruccion_parseada; *temp != NULL; temp++) {
+            free(*temp);
+        }
+        free(instruccion_parseada);
     }
 }
+
+
+
+
 char* obtener_ruta(char* valor_recibido) {
    
 

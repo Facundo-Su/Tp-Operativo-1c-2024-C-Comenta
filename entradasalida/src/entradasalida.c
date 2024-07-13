@@ -181,6 +181,17 @@ void iniciar_consola(){
             iniciar_interfaz_stdin();
         }
 
+        if(strcmp(interfaz_name,"SLP1")==0){
+            path_configuracion = "slp1.config";
+            obtener_configuracion(path_configuracion);
+            iniciar_interfaz_generica();
+        }
+
+        if(strcmp(interfaz_name,"ESPERA")==0){
+            path_configuracion = "espera.config";
+            obtener_configuracion(path_configuracion);
+            iniciar_interfaz_generica();
+        }
 
 
         /*
@@ -364,6 +375,7 @@ void procesar_conexion(void *conexion_ptr){
             int *marco_stdout = list_get(paquete, 1);
             int *desplazamiento_stdout = list_get(paquete, 2);
         	int *tamanio_stdout = list_get(paquete, 3);
+            log_warning(logger,"el tamanio es %i",*tamanio_stdout);
             //log_warning(logger,"RECIBI PID %i, marco %i, desplamiento %i, tamanio %i",*pid_stdout, *marco_stdout ,*desplazamiento_stdout,*tamanio_stdout);
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
             enviar_direccion_memoria(*pid_stdout,*marco_stdout,*desplazamiento_stdout,*tamanio_stdout,conexion_memoria,EJECUTAR_STDOUT_WRITE);//agrego pid por si memoria lo necesita para sus logs en acceso de lectura.
@@ -551,6 +563,7 @@ void enviar_respuesta_leer_archivo(int cliente_fd,int pid, char* nombre_interfaz
     agregar_a_paquete(paquete, &pid, sizeof(int));
     agregar_a_paquete(paquete, nombre_interfaz, strlen(nombre_interfaz)+1);
     enviar_paquete(paquete,cliente_fd);
+    log_error(logger,"se envio ");
     eliminar_paquete(paquete);
 }
 
