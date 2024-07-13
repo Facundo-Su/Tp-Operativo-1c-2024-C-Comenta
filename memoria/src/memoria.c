@@ -41,7 +41,7 @@ void procesar_conexion(void* socket){
 	                break;
 	            case PAQUETE:
 	                lista = recibir_paquete(cliente_fd);
-	                log_info(logger_memoria, "Me llegaron los siguientes valores:\n");
+	                //log_info(logger_memoria, "Me llegaron los siguientes valores:\n");
 	                list_iterate(lista, (void*) iterator);
 	                break;
 				case CREAR_PROCESO:
@@ -54,7 +54,7 @@ void procesar_conexion(void* socket){
 				case FINALIZAR:
 					t_list* paquete = recibir_paquete(cliente_fd);
 					int* pid_finalizar =list_get(paquete,0);
-					log_error(logger_memoria,"pid a finalizar %i",*pid_finalizar);
+					//log_error(logger_memoria,"pid a finalizar %i",*pid_finalizar);
 					//t_contexto_ejecucion* pcb = desempaquetar_pcb(paquete);
 					finalizar_proceso(*pid_finalizar);
 					break;
@@ -101,7 +101,7 @@ void procesar_conexion(void* socket){
 	                close(cliente_fd);
 	                return;
 	            	default:
-	                log_warning(logger_memoria, "Operación desconocida. No quieras meter la pata");
+	                log_warning(logger_memoria, "Operación desconocida.");
 	                break;
 	            }
 	        }

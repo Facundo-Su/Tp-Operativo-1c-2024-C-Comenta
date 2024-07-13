@@ -26,7 +26,7 @@ void cargar_lista_instruccion(int pid, char* ruta) {
     FILE* archivo = fopen(ruta, "r");
 
     if (archivo == NULL) {
-        log_error(logger, "El archivo %s no pudo ser abierto.", ruta);
+        //log_error(logger, "El archivo %s no pudo ser abierto.", ruta);
         free(instruccion);  // Liberar la memoria asignada a instruccion
     } else {
         t_list* auxiliar = leer_pseudocodigo(archivo);
@@ -44,7 +44,7 @@ char* obtener_ruta(char* valor_recibido) {
     strcat(ruta, valorRecibido);
     return ruta;*/
     if (path_instrucciones == NULL || valor_recibido == NULL) {
-        log_info(logger_memoria, "Error: path_instrucciones o valorRecibido es NULL\n");
+        //log_info(logger_memoria, "Error: path_instrucciones o valorRecibido es NULL\n");
         return NULL;
     }
 
@@ -55,7 +55,7 @@ char* obtener_ruta(char* valor_recibido) {
     // Asignar memoria suficiente para la ruta (incluyendo el carácter nulo)
     char* ruta = malloc(longitud_total);
     if (ruta == NULL) {
-        log_info(logger_memoria, "Error: No se pudo asignar memoria para la ruta\n");
+        //log_info(logger_memoria, "Error: No se pudo asignar memoria para la ruta\n");
         return NULL; // Manejar el error de asignación de memoria
     }
 
@@ -102,7 +102,7 @@ void enviar_instrucciones(int cliente_fd){
         char*valor_obtenido = list_get(instrucciones->instrucciones,*pc_recibido);
         enviar_mensaje_instrucciones(valor_obtenido,cliente_fd,INSTRUCCIONES_A_MEMORIA);
     } else {
-        log_info(logger_memoria, "No se encontraron instrucciones para el PID %i", *pid_recibido);
+        //log_info(logger_memoria, "No se encontraron instrucciones para el PID %i", *pid_recibido);
     }
 }
 

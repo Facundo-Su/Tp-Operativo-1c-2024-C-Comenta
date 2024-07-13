@@ -10,7 +10,7 @@ void finalizar_proceso(int pid) {
 
 void liberar_marcos(int pid, t_tabla_paginas* tabla) {
     int paginas = list_size(tabla->paginas);
-    log_info(logger,"PID: %i- Tamaño: %i", pid, paginas);
+    //log_info(logger,"PID: %i- Tamaño: %i", pid, paginas);
     for (int j = 0; j < paginas; j++)
     {
         t_pagina* pagina = list_get(tabla->paginas, j);
@@ -32,6 +32,6 @@ t_marco* marco_segun_pagina(t_pagina* pagina) {
             return aux;
     }
 
-	log_error(logger_memoria, "Pagina - %d No se encontro el marco", pagina->num_pagina);
+	//log_error(logger_memoria, "Pagina - %d No se encontro el marco", pagina->num_pagina);
     return NULL;
 }
