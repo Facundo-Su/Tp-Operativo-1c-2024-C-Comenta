@@ -307,7 +307,9 @@ void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes) {
         asignarBits(cant_nuevos_bloques,ultimo_bloque_Actual);
         modificar_config_tam(meta->nombre,tamanio_nuevo_bytes); //escribo en el config(txt) metadata
     }else{
+        //log_info(logger, “PID: <PID> - Inicio Compactación.",pid_f_truncate);
         compactar(meta,cant_nuevos_bloques);
+        //log_info(logger, “PID: <PID> - Fin Compactación.”,pid_f_truncate);
         usleep(retraso_compactacion * 1000);
         modificar_config_tam(meta->nombre,tamanio_nuevo_bytes);
     }
@@ -345,22 +347,22 @@ void compactar(t_metadata* meta, int cant_bloq_necesarios){
     int valor_calculado;
     for(int i=0;i<list_size(metadatas);i++){
         aux = list_get(metadatas,i);
-        log_error(logger,"el nombre del archivo es %s",aux->nombre);
-        log_error(logger,"el tamanio del archivo es %i",aux->tamanio_archivo);
+        //log_error(logger,"el nombre del archivo es %s",aux->nombre);
+        //log_error(logger,"el tamanio del archivo es %i",aux->tamanio_archivo);
     }
 
     for(int i=0;i<list_size(metadatas);i++){
         //bloque_libre_encontrado = proximoBitDisponible();
 
-        log_error(logger,"bloque libre encontrado es %i \n \n",bloque_libre_encontrado);
+        //log_error(logger,"bloque libre encontrado es %i \n \n",bloque_libre_encontrado);
 
         aux = list_get(metadatas,i);
         if(strcmp(aux->nombre,meta->nombre)==0){
-            log_error(logger," cantidad de bloque que asigno es %i \n \n",(aux->tamanio_archivo / block_size) + aux->cantidad_bloque_agrandar);
+            //log_error(logger," cantidad de bloque que asigno es %i \n \n",(aux->tamanio_archivo / block_size) + aux->cantidad_bloque_agrandar);
             valor_calculado = (aux->tamanio_archivo / block_size) + aux->cantidad_bloque_agrandar;
             asignarBits((aux->tamanio_archivo / block_size) + aux->cantidad_bloque_agrandar,bloque_libre_encontrado);
         }else{
-            log_error(logger," cantidad de bloque que asigno es %i \n \n",(aux->tamanio_archivo / block_size));
+            //log_error(logger," cantidad de bloque que asigno es %i \n \n",(aux->tamanio_archivo / block_size));
             asignarBits((aux->tamanio_archivo / block_size),bloque_libre_encontrado);
             valor_calculado = (aux->tamanio_archivo / block_size);
             if((aux->tamanio_archivo / block_size) == 0){
@@ -584,8 +586,8 @@ void *leer_archivo_bloque(int puntero, char* nombre,int tamanio)
     log_error(logger,"tamanio de metadata es  %i \n \n \n \n ",list_size(metadatas));
     for(int i=0;i<list_size(metadatas);i++){
         t_metadata* meta = list_get(metadatas,i);
-        log_error(logger,"el nombre del archivo es %s",meta->nombre);
-        log_error(logger,"el tamanio del archivo es %i",meta->tamanio_archivo);
+        //log_error(logger,"el nombre del archivo es %s",meta->nombre);
+        //log_error(logger,"el tamanio del archivo es %i",meta->tamanio_archivo);
 
     }
 
@@ -596,10 +598,10 @@ void *leer_archivo_bloque(int puntero, char* nombre,int tamanio)
         log_error(logger,"no se encontro el archivo %s",nombre);
     }
     uint32_t numero_bloque = puntero / block_size;
-    log_error(logger,"el puntero es %i",puntero);
-    log_error(logger,"el numero de bloque es %i",numero_bloque);
-    log_error(logger,"el bloque inicial es %i",meta->bloq_inicial_archivo);
-    log_error(logger,"el tamanio que leo es %i",tamanio);
+    //log_error(logger,"el puntero es %i",puntero);
+    //log_error(logger,"el numero de bloque es %i",numero_bloque);
+    //log_error(logger,"el bloque inicial es %i",meta->bloq_inicial_archivo);
+    //log_error(logger,"el tamanio que leo es %i",tamanio);
     uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque);
     // log_debug(logger, "SE VA A LEER EN UN BLOQUE");
     void *datoLeido = malloc(tamanio);//block size o tamanioleer?
