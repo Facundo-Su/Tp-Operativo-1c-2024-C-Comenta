@@ -76,7 +76,7 @@ void levantar_archivo_bloques(){
     metadatas=list_create();
 }*/
 void funcion_prueba_lista(){
-    log_warning(logger,"la lista tiene  %i archivos metadata",list_size(metadatas));
+    //log_warning(logger,"la lista tiene  %i archivos metadata",list_size(metadatas));
     //t_metadata* aux = (t_metadata*) malloc(sizeof(t_metadata));
     t_metadata* aux=list_get(metadatas,2);
     log_warning(logger,"el nombre de metadata es %s",aux->nombre);
@@ -127,7 +127,7 @@ void crear_archivo_metadata(char* nombre_archivo){
     //aca uso las commons del config?
     config_set_value(archivo, "TAMANIO_ARCHIVO", "0");
     config_set_value(archivo, "BLOQUE_INICIAL", bloqueInicialEnChar);
-    log_warning(logger, "bloque inicial es %s", bloqueInicialEnChar);
+    //log_warning(logger, "bloque inicial es %s", bloqueInicialEnChar);
     //log_warning(logger,"itoa:  %s",bloqueInicialEnChar);
     config_save(archivo);
     //log_warning(logger,"archivo:  %s",nueva_metadata->nombre);
@@ -153,7 +153,7 @@ int proximoBitDisponible(){
         i++;
     }
 
-    log_warning(logger,"el bit disponible es %i \n \n \n \n ",i);
+    //log_warning(logger,"el bit disponible es %i \n \n \n \n ",i);
     close(fd);
     bitarray_destroy(bitmap);
 
@@ -197,7 +197,7 @@ void borrar_archivo(char* nombre_archivo){
     t_metadata* meta = devolver_metadata(nombre_archivo);
     //elimino elemento de la lista
     saco_metadata_de_lista(nombre_archivo);
-    log_error(logger,"la metadata es %s, el tamanio es %i ",meta->nombre, meta->tamanio_archivo);
+    //log_error(logger,"la metadata es %s, el tamanio es %i ",meta->nombre, meta->tamanio_archivo);
     //libero sus bits del bitmap
     int cant_bloques_actuales =(int)ceil((double)meta->tamanio_archivo / block_size);
     int ultimo_bloque_Actual = (meta->bloq_inicial_archivo+cant_bloques_actuales)-1;
@@ -227,13 +227,13 @@ void saco_metadata_de_lista(char* nombre_archivo){
 
 }
 
-void truncar_archivo(char *nombre, int nuevo_tamanio_bytes) {
+void truncar_archivo(char *nombre, int nuevo_tamanio_bytes, int pid) {
 
     t_metadata* meta = devolver_metadata(nombre);
     log_info(logger,"los valores que estoy comparando son %i y %i",nuevo_tamanio_bytes,meta->tamanio_archivo);
     if (meta->tamanio_archivo < nuevo_tamanio_bytes) {
         //aqui podria verificar si hay o no bloques disponibles.
-        ampliar_tam_archivo(meta, nuevo_tamanio_bytes);
+        ampliar_tam_archivo(meta, nuevo_tamanio_bytes,pid);
 
     } else if(meta->tamanio_archivo>nuevo_tamanio_bytes){
         //si un archivo ocupa un bloque se puede reducir? noo creo que prueben eso.
@@ -268,7 +268,7 @@ t_metadata* devolver_metadata(char *nombre) {
 // ejemplo ampliar_tam_archivo(meta,280) cada bloque tiene 64bytes segun el config.
 // en el caso de 280 necesito 4,37 bloques lo redondeo a 5.
 
-void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes) {
+void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes, int pid) {
     bool espacio_contiguo;
     int cant_bloques_actuales;
     int ultimo_bloque_Actual;
@@ -284,10 +284,10 @@ void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes) {
         //el ultimo_bloque esta mal creo, capaz falta sumarle el meta->bloq_inicio_Archivo
         
     }
-    log_warning(logger, " los valores son %i y %i",tamanio_nuevo_bytes,meta->tamanio_archivo);
+    // log_warning(logger, " los valores son %i y %i",tamanio_nuevo_bytes,meta->tamanio_archivo);
     int bytes_nuevos_necesarios = tamanio_nuevo_bytes - meta->tamanio_archivo;  
-    log_warning(logger, "necesito %i bytes",bytes_nuevos_necesarios);
-    log_warning(logger, "el archivo me ocupa %i bloques",cant_bloques_actuales);
+    // log_warning(logger, "necesito %i bytes",bytes_nuevos_necesarios);
+    // log_warning(logger, "el archivo me ocupa %i bloques",cant_bloques_actuales);
     // cuantos bloques necesito agregar? multiplo o no? si es nuevo archivo?
 
     //----------parece funcionar hasta aca------------
@@ -298,18 +298,18 @@ void ampliar_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes) {
     
     espacio_contiguo = hay_bloques_libres_contiguos(cant_nuevos_bloques,ultimo_bloque_Actual);
     if(espacio_contiguo == true){
-        log_warning(logger, "hay bloques continuos libres suficientes");
-        log_warning(logger, "tengo que agregar %i bloques",cant_nuevos_bloques);
-        log_warning(logger, "ultimo bloque del archivo es %i ",ultimo_bloque_Actual);
+        // log_warning(logger, "hay bloques continuos libres suficientes");
+        // log_warning(logger, "tengo que agregar %i bloques",cant_nuevos_bloques);
+        // log_warning(logger, "ultimo bloque del archivo es %i ",ultimo_bloque_Actual);
 
         //meta->bloq_inicial_archivo=primerBloqueLibre;
         //el bloque inicial podria cambiar solo cuando compacto o no? 
         asignarBits(cant_nuevos_bloques,ultimo_bloque_Actual);
         modificar_config_tam(meta->nombre,tamanio_nuevo_bytes); //escribo en el config(txt) metadata
     }else{
-        //log_info(logger, “PID: <PID> - Inicio Compactación.",pid_f_truncate);
+        log_info(logger, "PID: %i - Inicio Compactación.",pid);
         compactar(meta,cant_nuevos_bloques);
-        //log_info(logger, “PID: <PID> - Fin Compactación.”,pid_f_truncate);
+        log_info(logger, "PID: %i - Fin Compactación.",pid);
         usleep(retraso_compactacion * 1000);
         modificar_config_tam(meta->nombre,tamanio_nuevo_bytes);
     }
@@ -388,12 +388,12 @@ void modificar_bloque_inicial(char* nombre_archivo,int bloque_inical){
     t_config* archivo;
 
     string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
-    log_warning(logger,"el nombre de archivo a modificar es%s",path_archivo);
+    //log_warning(logger,"el nombre de archivo a modificar es%s",path_archivo);
 
     archivo = config_create(path_archivo);
 
     char* nuevo_tam = string_itoa(bloque_inical);
-    log_error(logger,"el nuevo BLOQUE INICIAL es %s",nuevo_tam);
+    //log_error(logger,"el nuevo BLOQUE INICIAL es %s",nuevo_tam);
     config_set_value(archivo, "BLOQUE_INICIAL", nuevo_tam);
     //config_set_value(archivo, "BLOQUE_INICIAL", bloqueInicialEnChar);
     config_save(archivo);
@@ -404,7 +404,7 @@ void modificar_bloque_inicial(char* nombre_archivo,int bloque_inical){
 
 
 void vaciar_bit_map(){
-    log_warning(logger, "vaciar_bit_map");
+    //log_warning(logger, "vaciar_bit_map");
     int fd = open(rutita_prueba,O_RDWR);
     char* bitarray = malloc(block_count / 8);
     bitarray = mmap(NULL,block_count / 8,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0);
@@ -495,9 +495,9 @@ void reducir_tam_archivo(t_metadata* meta, int tamanio_nuevo_bytes){
 
 void asignarBits(int cant_nuevos_bits,int ultimo_bit){
 
-    log_error(logger, "el valor del ultimo bit es: %i",ultimo_bit);
+    //log_error(logger, "el valor del ultimo bit es: %i",ultimo_bit);
 
-    log_error("los valores que recibi son: %i y %i \n \n \n \n \n",cant_nuevos_bits,ultimo_bit);
+    //log_error("los valores que recibi son: %i y %i \n \n \n \n \n",cant_nuevos_bits,ultimo_bit);
     int fd = open(rutita_prueba,O_RDWR);
     char* bitarray = malloc(block_count / 8);
     bitarray = mmap(NULL,block_count / 8,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0);
@@ -517,7 +517,7 @@ void asignarBits(int cant_nuevos_bits,int ultimo_bit){
         proximo++;
     }
     
-    log_error(logger,"hasta %i tengo ocupado el bitmap",proximo);
+    //log_error(logger,"hasta %i tengo ocupado el bitmap",proximo);
 
     msync(bitarray,block_count / 8,MS_SYNC);//eso o fd? luego ver
     close(fd);
@@ -551,7 +551,7 @@ void modificar_config_tam(char* nombre_archivo, int tamanio_nuevo_bytes){
     t_config* archivo;
 
     string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
-    log_warning(logger,"el nombre de archivo a modificar es%s",path_archivo);
+    //log_warning(logger,"el nombre de archivo a modificar es%s",path_archivo);
 
     archivo = config_create(path_archivo);
 
@@ -565,12 +565,12 @@ void modificar_config_tam(char* nombre_archivo, int tamanio_nuevo_bytes){
 }
 
 void escribir_archivo_bloque(int puntero, char* nombre,int tamanio,void* a_escribir){
-    log_warning(logger,"dato %s",(char*)a_escribir);
+    //log_warning(logger,"dato %s",(char*)a_escribir);
     t_metadata* meta = devolver_metadata(nombre);
     uint32_t numero_bloque = puntero / block_size;
     //me paro en el bloque que voy a escribir
     uint32_t bloque_escribir=(meta->bloq_inicial_archivo+numero_bloque);
-    log_warning(logger,"el bloque a escribir es %i",bloque_escribir);
+    //log_warning(logger,"el bloque a escribir es %i",bloque_escribir);
     memcpy(archivo_de_bloques  + (bloque_escribir * block_size), a_escribir, tamanio);
     //escribo el tamaño de un bloque o uso el tamanio que me pasa kernel?
     
@@ -583,7 +583,7 @@ void *leer_archivo_bloque(int puntero, char* nombre,int tamanio)
         log_error(logger,"no hay metadatas");
     }
 
-    log_error(logger,"tamanio de metadata es  %i \n \n \n \n ",list_size(metadatas));
+    //log_error(logger,"tamanio de metadata es  %i \n \n \n \n ",list_size(metadatas));
     for(int i=0;i<list_size(metadatas);i++){
         t_metadata* meta = list_get(metadatas,i);
         //log_error(logger,"el nombre del archivo es %s",meta->nombre);
