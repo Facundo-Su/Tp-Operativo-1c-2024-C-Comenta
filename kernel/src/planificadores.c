@@ -79,10 +79,14 @@ void planificador_corto_plazo(){
 	// 	 pthread_create(&hilo_quantum, NULL, interrupcion_quantum, NULL);
 	// 	 pthread_detach(hilo_quantum);
 	// }
+    int sem_value;
     while (1)
     {
         sem_wait(&sem_ready);
+        sem_getvalue(&sem_ready, &sem_value);
+        log_error(logger,"Valor del semáforo después de sem_wait: %d\n", sem_value);
         pthread_mutex_lock(&sem_exec);
+        log_warning(logger,"Valor del semáforo después de sem_wait: %d\n", sem_value);
         if(detener){
             pthread_mutex_lock(&sem_detener);
         }

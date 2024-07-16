@@ -230,6 +230,7 @@ void ejecutar_ciclo_de_instruccion(int cliente_fd){
 			enviar_pcb(pcb,cliente_fd,ENVIAR_DESALOJAR);
 			return;
 		}
+		log_error(logger, "ejecutando");
 		fetch(cliente_fd);
 	}
 
@@ -437,11 +438,11 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		valor_uint1 = obtener_el_valor_de_memoria(traducido);
 		registro_aux = devolver_registro(parametro);
 
-		valor_uint1 = (uint32_t) registro_por_mov;
+		int valor_uint_8t = (uint8_t) registro_por_mov;
 
 		setear(registro_aux, valor_uint1);
 		int dir_fisica = traducido->marco* tamanio_pagina + traducido->desplazamiento;
-		log_info(logger, "PID: %i - Acción: LEER - Dirección Física: %i - Valor: %u",pcb->pid,dir_fisica,valor_uint1);
+		log_info(logger, "PID: %i - Acción: LEER - Dirección Física: %i - Valor: %u",pcb->pid,dir_fisica,valor_uint_8t);
 		break;
 	case MOV_OUT:
 		parametro= list_get(instrucciones->parametros,0);//REGISTROS  DATOS
@@ -606,12 +607,13 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 		log_info(logger,"PID: %i - Ejecutando EXIT:",pcb->pid);
 		//imprimir_valores_registros(pcb->contexto->registros_cpu);
 		enviar_pcb(pcb,cliente_fd,FINALIZAR);
+		log_error(logger,"fin de la instruccion");
 		hay_desalojo = false;
 		break;
 	}
 	recibi_archivo = false;
 	instruccion_ejecutando= false;
-	
+
 }
 
 void enviar_traduccion_mov_out(t_traduccion* traducido,op_code operacion,uint32_t valor_int){

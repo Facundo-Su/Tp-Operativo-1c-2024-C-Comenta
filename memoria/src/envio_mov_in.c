@@ -5,9 +5,11 @@ void envio_mov_in (int cliente_fd){
 	int *marco = list_get(lista,0);
 	int *desplazamiento = list_get(lista,1);
 	t_marco *marco_obtenido = list_get(memoria->marcos, *marco);
-	uint32_t *valor_leido = malloc(sizeof(uint32_t));
-	memcpy(valor_leido, memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, sizeof(uint32_t));
+	uint8_t *valor_leido = malloc(sizeof(uint8_t));
+	memcpy(valor_leido, memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, sizeof(uint8_t));
+
 	enviar_registro_leido(*valor_leido,ENVIO_MOV_IN,cliente_fd); 
+	log_error(logger, "valor leido es %i",*valor_leido);	
 	int dir = (*marco * tam_pagina) + *desplazamiento;
 	log_info(logger,"PID: %i- Accion: LEER - Direccion fisica: %i- Tamaño:  %i",marco_obtenido->pid, dir, tam_pagina); 
 	free(valor_leido);

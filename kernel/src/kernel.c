@@ -183,6 +183,7 @@ void procesar_conexion(void *conexion1){
 					paquete = recibir_paquete(cliente_fd);
 					exit = running;
 					finalizar_pcb(exit);
+					pthread_mutex_unlock(&sem_exec);
 					log_warning(logger, "Finaliza el proceso %i - Motivo: OUT OF MEMORY",exit->contexto->pid);
 					//pthread_mutex_unlock(&sem_exec);
 					break;
@@ -193,17 +194,21 @@ void procesar_conexion(void *conexion1){
 					int *unidad_trabajo_sleep = list_get(paquete,1);
 					t_pcb* pcb_sleep = running;
 					ejecutar_io_sleep2(nombre_de_interfaz_sleep,*unidad_trabajo_sleep,pcb_sleep);
+					pthread_mutex_unlock(&sem_exec);
 					//agregar_cola_ready(running);
 					break;
 
 				case EJECUTAR_WAIT:
 					paquete = recibir_paquete(cliente_fd);
 					char *nombre_recurso_wait =list_get(paquete,0);
+					pthread_mutex_unlock(&sem_exec);
 					ejecutar_wait(nombre_recurso_wait,running);
+					
 					break;
 				case EJECUTAR_SIGNAL:
 					paquete = recibir_paquete(cliente_fd);
 					char * nombre_recurso_signal =list_get(paquete,0);
+					pthread_mutex_unlock(&sem_exec);
 					ejecutar_signal(nombre_recurso_signal,running);
 					break;
 				case EJECUTAR_IO_STDIN_READ:
@@ -222,6 +227,7 @@ void procesar_conexion(void *conexion1){
 
 					log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdin_read,valor_entero_io_stdin_read);
 					*/
+					pthread_mutex_unlock(&sem_exec);
 					ejecutar_io_stdin_read(valor_char,*valor_entero,*desplzazamiento_stdin_read,valor_entero_io_stdin_read,pcb_io_stdin_read);
 					break;
 				case IO_STDOUT_WRITE:
@@ -234,6 +240,7 @@ void procesar_conexion(void *conexion1){
 					t_pcb* pcb_io_stdout_write = running;
 					//log_info(logger,"el nombre de interfaz es %s, marco %i, desplazamiento %i, tamanio %i",valor_char,*valor_entero,*desplzazamiento_stdout_write,*valor_entero2);
 					//log_warning(logger,"el pid es %i",running->contexto->pid);
+					pthread_mutex_unlock(&sem_exec);
 					ejecutar_io_stdin_write(valor_char,*valor_entero,*desplzazamiento_stdout_write,valor_entero_io_stdin_write,pcb_io_stdout_write);
 					break;
 
@@ -241,6 +248,7 @@ void procesar_conexion(void *conexion1){
 					paquete = recibir_paquete(cliente_fd);
 					char* nombre_interfaz_f_create = list_get(paquete,0);
 					char* nombre_archivo_f_create = list_get(paquete,1);
+					pthread_mutex_unlock(&sem_exec);
 					ejecutar_io_fs_create(nombre_interfaz_f_create,nombre_archivo_f_create,running);
 
 					break;
@@ -248,6 +256,7 @@ void procesar_conexion(void *conexion1){
 					paquete = recibir_paquete(cliente_fd);
 					char* nombre_interfaz_f_delete = list_get(paquete,0);
 					char* nombre_archivo_f_delete = list_get(paquete,1);
+					pthread_mutex_unlock(&sem_exec);
 					ejecutar_io_fs_delete(nombre_interfaz_f_delete,nombre_archivo_f_delete,running);
 					break;
 
@@ -256,6 +265,7 @@ void procesar_conexion(void *conexion1){
 					char* nombre_interfaz_f_truncate = list_get(paquete,0);
 					char* nombre_archivo_f_truncate = list_get(paquete,1);
 					int *tamanio_f_truncate = list_get(paquete,2);
+					pthread_mutex_unlock(&sem_exec);
 					ejecutar_io_fs_truncate(nombre_interfaz_f_truncate,nombre_archivo_f_truncate,*tamanio_f_truncate,running);
 					break;
 				case IO_FS_WRITE:
@@ -266,6 +276,7 @@ void procesar_conexion(void *conexion1){
 					int *desplazamiento_f_write = list_get(paquete,3);
 					int *tamanio_f_write = list_get(paquete,4);
 					int *puntero_f_write = list_get(paquete,5);
+					pthread_mutex_unlock(&sem_exec);
 					ejecutar_io_fs_write(nombre_interfaz_f_write,nombre_archivo_f_write,*marco_f_write,*desplazamiento_f_write,*tamanio_f_write,*puntero_f_write,running);
 					break;
 				case IO_FS_READ:
@@ -276,6 +287,7 @@ void procesar_conexion(void *conexion1){
 					int *desplazamiento_f_read = list_get(paquete,3);
 					int *tamanio_f_read = list_get(paquete,4);
 					int *puntero_f_read = list_get(paquete,5);
+					pthread_mutex_unlock(&sem_exec);
 					ejecutar_io_fs_read(nombre_interfaz_f_read,nombre_archivo_f_read,*marco_f_read,*desplazamiento_f_read,*tamanio_f_read,*puntero_f_read,running);
 					break;
 				default:

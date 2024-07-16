@@ -807,44 +807,44 @@ void control_acceso(t_interfaz * interfaz){
 		t_tipo_fs tipo = interfaz->tipo_fs;
 		if(tipo == GENERICA){
 			enviar_dormir(blocked->pcb->contexto->pid,blocked->unidad_trabajo,interfaz->codigo_cliente);
-			pthread_mutex_unlock(&sem_exec);
+			//pthread_mutex_unlock(&sem_exec);
 
 		}
 		if(tipo == STDOUT){
 			enviar_a_io_stdin_write(interfaz->nombre_interface,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->pcb,interfaz->codigo_cliente);
 			//TODO
-			pthread_mutex_unlock(&sem_exec);
+			//pthread_mutex_unlock(&sem_exec);
 		}
 		if(tipo == STDIN){
 			
 			enviar_a_io_stdin_read(interfaz->nombre_interface,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->pcb,interfaz->codigo_cliente);
-			pthread_mutex_unlock(&sem_exec);
+			//pthread_mutex_unlock(&sem_exec);
 		}
 		if(tipo == DIALFS){
 			switch(blocked->operacion){
 				case CREATE:
 					enviar_a_io_f_create(interfaz->nombre_interface,blocked->nombre_archivo,blocked->pcb,interfaz->codigo_cliente);
-					pthread_mutex_unlock(&sem_exec);
+					//pthread_mutex_unlock(&sem_exec);
 					break;
 
 				case DELETE:
                    // log_error(logger, "ESTOY ENTRANDO A BLOQUEADO DE F_CREATE con el nombre de archivo %s",blocked->nombre_archivo);
 					enviar_a_io_f_delete(interfaz->nombre_interface,blocked->nombre_archivo,blocked->pcb,interfaz->codigo_cliente);
-					pthread_mutex_unlock(&sem_exec);
+					//pthread_mutex_unlock(&sem_exec);
 					break;
 				
 				case WRITE:
 					enviar_a_io_fs_write(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb,interfaz->codigo_cliente);
-					pthread_mutex_unlock(&sem_exec);
+					//pthread_mutex_unlock(&sem_exec);
 					break;
 
 				case READ:
 					enviar_a_io_fs_read(interfaz->nombre_interface,blocked->nombre_archivo,blocked->nro_marco,blocked->desplazamiento,blocked->tamanio,blocked->puntero,blocked->pcb,interfaz->codigo_cliente);
-					pthread_mutex_unlock(&sem_exec);
+					//pthread_mutex_unlock(&sem_exec);
 					break;
 				case TRUNCATE:
 					enviar_a_io_f_truncate(interfaz->nombre_interface,blocked->nombre_archivo,blocked->tamanio,blocked->pcb,interfaz->codigo_cliente);
-					pthread_mutex_unlock(&sem_exec);
+					//pthread_mutex_unlock(&sem_exec);
 					break;
 			}
 
