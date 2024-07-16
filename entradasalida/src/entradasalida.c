@@ -375,25 +375,31 @@ void procesar_conexion(void *conexion_ptr){
             int *marco_stdout = list_get(paquete, 1);
             int *desplazamiento_stdout = list_get(paquete, 2);
         	int *tamanio_stdout = list_get(paquete, 3);
-            log_warning(logger,"el tamanio es %i",*tamanio_stdout);
+            
             //log_warning(logger,"RECIBI PID %i, marco %i, desplamiento %i, tamanio %i",*pid_stdout, *marco_stdout ,*desplazamiento_stdout,*tamanio_stdout);
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
             enviar_direccion_memoria(*pid_stdout,*marco_stdout,*desplazamiento_stdout,*tamanio_stdout,conexion_memoria,EJECUTAR_STDOUT_WRITE);//agrego pid por si memoria lo necesita para sus logs en acceso de lectura.
-            void* informacion = malloc(*tamanio_stdout);
+           // void* informacion = malloc(*tamanio_stdout);
+            
             int cop2;
             recv(conexion_memoria, &cop2, sizeof(cop), 0);
 			//log_info(logger,"recibi el codigo de operacion %i",cop2);
 			t_list* lista2=list_create();
 			//log_error(logger,"el codigo socket es %i",cliente_fd);
 			lista2= recibir_paquete(conexion_memoria);
-			void* auxiliar = list_get(lista2,0);
+			void* informacion = list_get(lista2,0);
 			//paquete2 = recibir_paquete(conexion_memoria);
             //void* informacion = malloc(R_tamanio);
             //pthread_mutex_lock(&mutex_respuesta_stdout_write);
             //log_warning(logger,"PASEEEEEEEE");//recibe la informacion, no es necesario empaquetar porque ya sabemos el tamanio?
 			//usleep(tiempo_unidad_trabajo*1000);
             close(conexion_memoria);
-			log_info(logger	, "El resultado de lo buscado en memoria es: < %s >",auxiliar);
+            //int nose = *tamanio_stdout
+            //log_warning(logger,"el tamanio es %i",*tamanio_stdout);
+            char* buffer = (char*)malloc((*tamanio_stdout + 1) * sizeof(char));
+            strncpy(buffer, (char*)informacion, *tamanio_stdout);
+            buffer[*tamanio_stdout] = '\0';
+			log_info(logger	, "El resultado de lo buscado en memoria es: < %s >",buffer);
 			//log_info(logger_consola	, "PID: < %i > - Operacion: < IO_STDOUT_WRITE >",*pid);
             //log_warning(logger,"el pid es %i",*pid_stdout);
             enviar_kernel_ok_stdout(cliente_fd,*pid_stdout,nombre_interfaz);
@@ -431,7 +437,7 @@ void procesar_conexion(void *conexion_ptr){
             int* tamanio_truncar = list_get(paquete,1);
             int* pid_f_truncate = list_get(paquete,2);
             log_info(logger, "Truncar Archivo: <%s>",nombre_archivo_truncar);
-            log_warning(logger,"el tamanio es %i",*tamanio_truncar);
+            //log_warning(logger,"el tamanio es %i",*tamanio_truncar);
             truncar_archivo(nombre_archivo_truncar,*tamanio_truncar,*pid_f_truncate);
             enviar_respuesta_truncar_archivo(cliente_fd,*pid_f_truncate,nombre_interfaz);
             break;

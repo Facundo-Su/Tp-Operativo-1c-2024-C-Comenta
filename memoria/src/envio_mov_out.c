@@ -20,7 +20,7 @@ void envio_mov_out (int cliente_fd){
 	log_error(logger_memoria, "valor leido es %i",prueba);
 	void *valor_leido = malloc(36);
     memcpy(valor_leido, memoria->espacio_usuario+ (*marco * tam_pagina) + *desplazamiento, 36);
-	log_info(logger_memoria,"PID: %i- Accion: ESCRIBIR - Direccion fisica: %i- Tamaño:  %i",*pid,dir_mov, tamanio);
+	log_info(logger_memoria,"PID: %i- Accion: ESCRIBIR - Direccion fisica: %i",*pid,dir_mov);
 	
 }
 

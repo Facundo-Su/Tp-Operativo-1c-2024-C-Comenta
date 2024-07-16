@@ -148,7 +148,8 @@ void procesar_conexion(void *conexion1){
 			break;
 		case INSTRUCCIONES_A_MEMORIA:
 			char* auxiliar =recibir_instruccion(cliente_fd);
-			//log_info(logger,"me llego la siguiente instruccion %s",auxiliar);
+			
+			log_info(logger,"me llego la siguiente instruccion %s",auxiliar);
 			transformar_en_instrucciones(auxiliar);
 //			hayInterrupcion = false;
 			recibi_archivo=true;
@@ -244,6 +245,7 @@ void fetch(int cliente_fd){
 
 	solicitar_instruccion_ejecutar_segun_pc(pc, pid);
 	sem_wait(&contador_instruccion);
+	//log_warning(logger,"%i",instrucciones->nombre);
 	pcb->pc+=1;
 	decode(instruccion_a_realizar,cliente_fd);
 	
@@ -277,7 +279,7 @@ void decode(t_instruccion* instrucciones,int cliente_fd){
 	uint32_t valor_origen;
 	uint32_t resultado;
 	int valor_int;
-	//log_warning(logger,"%i",instrucciones->nombre);
+	log_warning(logger,"%i",instrucciones->nombre);
 	switch(instrucciones->nombre){
 	case SET:
 

@@ -9,7 +9,7 @@ void envio_mov_in (int cliente_fd){
 	memcpy(valor_leido, memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, sizeof(uint8_t));
 
 	enviar_registro_leido(*valor_leido,ENVIO_MOV_IN,cliente_fd); 
-	log_error(logger, "valor leido es %i",*valor_leido);	
+	//log_error(logger, "valor leido es %i",*valor_leido);	
 	int dir = (*marco * tam_pagina) + *desplazamiento;
 	log_info(logger,"PID: %i- Accion: LEER - Direccion fisica: %i- Tamaño:  %i",marco_obtenido->pid, dir, tam_pagina); 
 	free(valor_leido);

@@ -11,6 +11,7 @@ void stdout_write(int cliente_fd,op_code codigo_respuesta){
 	void *valor_leido = malloc(*tamanio);
     memcpy(valor_leido, memoria->espacio_usuario + (*marco *tam_pagina) + *desplazamiento, *tamanio);
 	//log_error(logger, "me llego para fwrite");
+	//log_warning(logger,"dato leido es %s",valor_leido);
 	enviar_registro_leido_IO(valor_leido, codigo_respuesta,*tamanio,cliente_fd);
 	//log_error(logger, "me llego para fwrite");
 	int dir = (*marco * tam_pagina) + *desplazamiento;
@@ -21,7 +22,7 @@ void stdout_write(int cliente_fd,op_code codigo_respuesta){
 
 void enviar_registro_leido_IO(void* valor_encontrado, op_code operacion,int tamanio, int cliente_fd){
 	t_paquete* paquete = crear_paquete(operacion);
-	//log_info(logger,"EL DATO ES %s",valor_encontrado);
+	log_info(logger,"EL DATO ES %s",valor_encontrado);
 	agregar_a_paquete(paquete, valor_encontrado, tamanio);
 	enviar_paquete(paquete, cliente_fd);
 	eliminar_paquete(paquete);

@@ -21,8 +21,13 @@ void cargar_lista_instruccion(int pid, char* ruta) {
     instruccion->pid = pid;
     instruccion->instrucciones = list_create();
 
-    //ruta = "./prueba.txt";
+    //ruta = "./prueba2.txt";
     //log_info(logger, "%s",ruta);
+
+    if(strcmp(ruta,"/scripts_memoria/MEMORIA_2") == 0){
+        ruta = "./prueba.txt";
+    }
+
     FILE* archivo = fopen(ruta, "r");
 
     if (archivo == NULL) {
@@ -34,6 +39,7 @@ void cargar_lista_instruccion(int pid, char* ruta) {
         list_add(lista_instrucciones, instruccion);
         //log_info(logger_consola_memoria, "La lista total total de general es %i", cantidad2);
        // log_info(logger_consola_memoria, "El valor de la pid primero es %i", instruuu->pid);
+       log_error(logger_memoria, "cantidad de instrucciones es %i", list_size(instruccion->instrucciones));
         fclose(archivo);
     }
 }

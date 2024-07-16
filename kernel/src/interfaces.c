@@ -65,7 +65,7 @@ void io_sleep_ready2(int pid,char* nombre_interfaz){
 void ejecutar_io_stdin_read(char* nombre_interfaz, int marco,int desplazamiento,int tamanio,t_pcb* pcb){
 	t_interfaz * interfaz = buscar_interfaz_por_nombre(nombre_interfaz,lista_interfaces);
 	if(interfaz == NULL){
-			//log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
+			log_error(logger,"No se encontro la interfaz %s", nombre_interfaz);
 			finalizar_pcb(pcb);
 		}else{
 			log_info(logger,"PID: %i - Estado Anterior: RUNNING  - Estado Actual: WAITING",pcb->contexto->pid);
