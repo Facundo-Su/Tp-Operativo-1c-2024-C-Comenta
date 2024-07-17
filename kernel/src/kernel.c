@@ -90,16 +90,28 @@ void iniciar_consola(){
 				//sem_init(&sem_grado_multiprogramacion, 0, nuevo_grado);
 				if(grado_multiprogramacion_ini <nuevo_grado){
 					int cantidad_en_espera= list_size(cola_ready->cola->elements)+1;
+					int cantidad_proceso_grado_multiprogramacion = nuevo_grado-grado_multiprogramacion_ini;
+
+					for(int i=0;i<cantidad_proceso_grado_multiprogramacion;i++){
+						sem_post(&sem_grado_multiprogramacion);
+					}
+					//int contador_aux = list_size(cola_new->cola->elements)+1;
+
 					//log_error(logger,"cantidad de contador aux es %i, cantidad de cantidad esperada es %i", contador_aux, cantidad_en_espera);
 					int cantidad_proceso_agregar = contador_aux-cantidad_en_espera;
 
-					for(int i=0;i<cantidad_proceso_agregar;i++){
-						sem_post(&sem_new);
-						sem_post(&sem_grado_multiprogramacion);
+					// for(int i=0;i<cantidad_proceso_agregar;i++){
+					// 	sem_post(&sem_new);
+					// 	//sem_post(&sem_grado_multiprogramacion);
 						
-					}
+					// }
 					
+				}else{
+					for(int i=0;i<grado_multiprogramacion_ini-nuevo_grado;i++){
+						sem_wait(&sem_grado_multiprogramacion);
+					}
 				}
+				grado_multiprogramacion_ini = nuevo_grado;
 				break;
 			default:
 				break;

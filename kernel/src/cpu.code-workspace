@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "../../cpu"
+		},
+		{
+			"path": "../../entradasalida"
+		},
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../memoria"
+		}
+	],
+	"settings": {
+		"debug.onTaskErrors": "abort",
+		"files.associations": {
+			"*.h": "c"
+		}
+	}
+}
