@@ -59,15 +59,15 @@ void listFiles(const char *path) {
         name[sizeof(name) - 1] = '\0';  // Asegurar que la cadena esté terminada en '\0'
 
         // Encontrar la última ocurrencia de '.'
-        char *dot = strrchr(name, '.');
+        /*char *dot = strrchr(name, '.');
         if (dot && strcmp(dot, ".txt") == 0) {
             *dot = '\0';  // Truncar la cadena en el punto para eliminar la extensión
         }
 
-        char* extension = "txt";
+        char* extension = "txt";*/
         char* path_archivo = string_new();
 
-        string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, name,extension);
+        string_append_with_format(&path_archivo, "%s/%s", path_base_dialfs, name);
         log_error(logger, "%s", path_archivo);
         t_config* archivo = config_create(path_archivo);
         bloque_inicial_config =config_get_int_value(archivo, "BLOQUE_INICIAL");

@@ -93,18 +93,18 @@ void funcion_prueba_lista(){
 void crear_archivo_metadata(char* nombre_archivo){
     char* escribo_key = string_new();
     FILE* archivo_MD;
-    char* extension = "txt";
+    //char* extension = "txt";
     char* path_archivo = string_new();
     t_metadata* nueva_metadata = (t_metadata*) malloc(sizeof(t_metadata));
     t_config* archivo;
 
-    string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
+    string_append_with_format(&path_archivo, "%s/%s", path_base_dialfs, nombre_archivo);
     //log_warning(logger,"la path es  %s",path_archivo);  
     int primerBloqueLibre = proximoBitDisponible();//probar funcion
     //log_warning(logger,"bit libre %i",primerBloqueLibre); 
     asignarProximoBitDisponible();
     //OCUPAR NO ES NECESARIO
-    ocupar_un_bloque_incio(primerBloqueLibre);
+    //ocupar_un_bloque_incio(primerBloqueLibre); funcion que era para probar bloques.(innecesario)
     char* bloqueInicialEnChar = string_itoa(primerBloqueLibre);
     log_warning(logger,"el nombre de archivo es%s",path_archivo);
     archivo_MD = fopen(path_archivo, "w");
@@ -192,7 +192,7 @@ void ocupar_un_bloque_incio(int bloque){
     //free(buffer);
 }
 void borrar_archivo(char* nombre_archivo){
-    char* extension = "txt";
+    //char* extension = "txt";
     char* path_archivo = string_new();
     t_metadata* meta = devolver_metadata(nombre_archivo);
     //elimino elemento de la lista
@@ -203,7 +203,7 @@ void borrar_archivo(char* nombre_archivo){
     int ultimo_bloque_Actual = (meta->bloq_inicial_archivo+cant_bloques_actuales)-1;
     liberarBits(cant_bloques_actuales, ultimo_bloque_Actual);
     //elimino archivo metadata(txt)
-    string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
+    string_append_with_format(&path_archivo, "%s/%s", path_base_dialfs, nombre_archivo);
     if (remove(path_archivo) == 0) {
         log_info(logger,"El archivo %s ha sido eliminado exitosamente.\n", nombre_archivo);
 
@@ -383,11 +383,11 @@ void compactar(t_metadata* meta, int cant_bloq_necesarios){
 }
 
 void modificar_bloque_inicial(char* nombre_archivo,int bloque_inical){
-    char* extension = "txt";
+    //char* extension = "txt";
     char* path_archivo = string_new();
     t_config* archivo;
 
-    string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
+    string_append_with_format(&path_archivo, "%s/%s", path_base_dialfs, nombre_archivo);
     //log_warning(logger,"el nombre de archivo a modificar es%s",path_archivo);
 
     archivo = config_create(path_archivo);
@@ -546,11 +546,11 @@ void liberarBits(int cant_bloq_a_liberar,int ultimo_bloque_Actual){
 }
 
 void modificar_config_tam(char* nombre_archivo, int tamanio_nuevo_bytes){
-    char* extension = "txt";
+    //char* extension = "txt";
     char* path_archivo = string_new();
     t_config* archivo;
 
-    string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo,extension);
+    string_append_with_format(&path_archivo, "%s/%s.%s", path_base_dialfs, nombre_archivo);
     //log_warning(logger,"el nombre de archivo a modificar es%s",path_archivo);
 
     archivo = config_create(path_archivo);
