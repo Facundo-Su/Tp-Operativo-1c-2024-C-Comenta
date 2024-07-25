@@ -127,7 +127,7 @@ void de_ready_a_vrr(){
 void *interrupcion_quantum(){
     while(1){
         //if(!queue_is_empty(cola_ready->cola)){
-                pthread_mutex_lock(&sem_interrupcion);
+                //pthread_mutex_lock(&sem_interrupcion);
                 if(planificador == VRR){
                     inicio_vrr = temporal_create();
                 }

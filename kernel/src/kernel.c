@@ -213,14 +213,14 @@ void procesar_conexion(void *conexion1){
 				case EJECUTAR_WAIT:
 					paquete = recibir_paquete(cliente_fd);
 					char *nombre_recurso_wait =list_get(paquete,0);
-					pthread_mutex_unlock(&sem_exec);
+					//pthread_mutex_unlock(&sem_exec);
 					ejecutar_wait(nombre_recurso_wait,running);
 					
 					break;
 				case EJECUTAR_SIGNAL:
 					paquete = recibir_paquete(cliente_fd);
 					char * nombre_recurso_signal =list_get(paquete,0);
-					pthread_mutex_unlock(&sem_exec);
+					//pthread_mutex_unlock(&sem_exec);
 					ejecutar_signal(nombre_recurso_signal,running);
 					break;
 				case EJECUTAR_IO_STDIN_READ:
