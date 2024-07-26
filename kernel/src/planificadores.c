@@ -11,16 +11,15 @@ void agregar_cola_ready(t_pcb * pcb){
     pcb->estado = READY;
     pthread_mutex_lock(&(cola_ready->sem_mutex));
     queue_push(cola_ready->cola, pcb);
+    t_list *ready_cola = obtener_procesos_cola(cola_ready);
+    printf("Cola READY:\n");
+    if (ready_cola != NULL && list_size(ready_cola) > 0) {
+        for (int i = 0; i < list_size(ready_cola); i++) {
+            int pid = (int) list_get(ready_cola, i);
+            printf("%d\n", pid);
+        }
+    }
     pthread_mutex_unlock(&(cola_ready->sem_mutex));
-    // t_list *ready_cola = obtener_procesos_cola(cola_ready);
-    // printf("Cola READY:\n");
-    // if (ready_cola != NULL && list_size(ready_cola) > 0) {
-    //     for (int i = 0; i < list_size(ready_cola); i++) {
-    //         int pid = (int) list_get(ready_cola, i);
-    //         printf("%d\n", pid);
-    //     }
-    // }
-
     sem_post(&sem_ready);
 }
 t_pcb * quitar_cola_ready(){
@@ -34,15 +33,15 @@ void agregar_cola_vrr(t_pcb * pcb){
     pcb->estado = READY;
     pthread_mutex_lock(&(cola_vrr->sem_mutex));
     queue_push(cola_vrr->cola, pcb);
+    t_list *ready_cola = obtener_procesos_cola(cola_vrr);
+    printf("Cola READY:\n");
+    if (ready_cola != NULL && list_size(ready_cola) > 0) {
+        for (int i = 0; i < list_size(ready_cola); i++) {
+            int pid = (int) list_get(ready_cola, i);
+            printf("%d\n", pid);
+        }
+    }
     pthread_mutex_unlock(&(cola_vrr->sem_mutex));
-    // t_list *ready_cola = obtener_procesos_cola(cola_vrr);
-    // printf("Cola READY:\n");
-    // if (ready_cola != NULL && list_size(ready_cola) > 0) {
-    //     for (int i = 0; i < list_size(ready_cola); i++) {
-    //         int pid = (int) list_get(ready_cola, i);
-    //         printf("%d\n", pid);
-    //     }
-    // }
     sem_post(&sem_ready);
 }
 t_pcb * quitar_cola_vrr(){

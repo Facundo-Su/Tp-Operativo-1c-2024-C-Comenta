@@ -1,7 +1,7 @@
 #ifndef PLANIFICADORES_H_
 #define PLANIFICADORES_H_
 #include "global.h"
-#include "planificadores.h"
+#include "utils.h"
 typedef struct {
     int pid;
     int quantum_restante;

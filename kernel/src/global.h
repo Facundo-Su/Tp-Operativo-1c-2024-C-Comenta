@@ -82,7 +82,6 @@ extern sem_t sem_grado_multiprogramacion;
 extern pthread_mutex_t sem_exec;
 extern pthread_mutex_t sem_detener;
 extern pthread_mutex_t sem_detener_largo;
-extern pthread_mutex_t sem_interrupcion;
 extern pthread_mutex_t sem_detener_conexion;
 extern pthread_mutex_t sem_vrr;
 extern pthread_mutex_t sem_quantum;
