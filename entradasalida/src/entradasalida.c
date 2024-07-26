@@ -7,6 +7,7 @@ char* palabra_usuario;
 t_list* metadatas;
 
 int main(int argc, char* argv[]) {
+    
     metadatas=list_create();
     logger = log_create("./entradasalida.log", "I/O", true, LOG_LEVEL_INFO);
     log_info(logger, "Soy el I/O!");
@@ -31,6 +32,13 @@ int main(int argc, char* argv[]) {
 
     return EXIT_SUCCESS;
 }
+
+int cantidad_de_bloques_necesarios2(int tamanio_archivo)
+{
+    int bloques_necesarios = 1 + (tamanio_archivo - 1) / block_size;
+    return bloques_necesarios;
+}
+
 
 void listFiles(const char *path) {
 
@@ -78,6 +86,9 @@ void listFiles(const char *path) {
         strcpy( nueva_metadata->nombre,name);
         nueva_metadata->tamanio_archivo=tamanio_bloque_config;
         nueva_metadata->bloq_inicial_archivo=bloque_inicial_config;
+        nueva_metadata->cantidad_bloques= cantidad_de_bloques_necesarios2(nueva_metadata->tamanio_archivo);
+
+
         list_add(metadatas, nueva_metadata);
 
         
@@ -242,6 +253,10 @@ void iniciar_interfaz_stdin() {
 void  iniciar_interfaz_fs() {
     log_info(logger, "Ingreso a la interfaz FS");
     listFiles("./dialfs");
+
+    // void *aux =malloc(69);
+    // memcpy(aux,archivo_de_bloques+(block_size*0),69);
+    // log_warning(logger, "el dato es %s",aux);
     generar_conexion_con_kernel();
 }
 
@@ -376,7 +391,7 @@ void procesar_conexion(void *conexion_ptr){
             int *desplazamiento_stdout = list_get(paquete, 2);
         	int *tamanio_stdout = list_get(paquete, 3);
             
-            //log_warning(logger,"RECIBI PID %i, marco %i, desplamiento %i, tamanio %i",*pid_stdout, *marco_stdout ,*desplazamiento_stdout,*tamanio_stdout);
+            log_warning(logger,"RECIBI PID %i, marco %i, desplamiento %i, tamanio %i",*pid_stdout, *marco_stdout ,*desplazamiento_stdout,*tamanio_stdout);
         	conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
             enviar_direccion_memoria(*pid_stdout,*marco_stdout,*desplazamiento_stdout,*tamanio_stdout,conexion_memoria,EJECUTAR_STDOUT_WRITE);//agrego pid por si memoria lo necesita para sus logs en acceso de lectura.
            // void* informacion = malloc(*tamanio_stdout);
@@ -396,6 +411,7 @@ void procesar_conexion(void *conexion_ptr){
             close(conexion_memoria);
             //int nose = *tamanio_stdout
             //log_warning(logger,"el tamanio es %i",*tamanio_stdout);
+            log_warning(logger,"el valor es %s",informacion);
             char* buffer = (char*)malloc((*tamanio_stdout + 1) * sizeof(char));
             strncpy(buffer, (char*)informacion, *tamanio_stdout);
             buffer[*tamanio_stdout] = '\0';
@@ -420,6 +436,20 @@ void procesar_conexion(void *conexion_ptr){
 
 			log_info(logger, "PID: %i Crear Archivo: <%s>", *pid_f_create, nombre_archivo);
 			crear_archivo_metadata(nombre_archivo);
+            // int fd = open(rutita_prueba,O_RDWR);
+            // char* bitarray = malloc(block_count / 8);
+            // bitarray = mmap(NULL,block_count / 8,PROT_READ | PROT_WRITE,MAP_SHARED,fd,0);
+            // if(bitarray == MAP_FAILED)
+            // {
+            //     log_error(logger,"no se pudo mapear el archivo de bitmap");
+            //     exit(EXIT_FAILURE);
+            // }
+            // t_bitarray* bitmap = bitarray_create_with_mode(bitarray,block_count / 8,MSB_FIRST);
+
+            // for(int i=0;i<32;i++){
+            //     log_warning(logger,"el bloque %i y su valor es %i",i,bitarray_test_bit(bitmap,i));
+            // }
+
             enviar_respuesta_crear_archivo(cliente_fd,*pid_f_create,nombre_interfaz);
         	break;
         case EJECUTAR_IO_FS_DELETE:
@@ -479,9 +509,9 @@ void procesar_conexion(void *conexion_ptr){
             int* tamanio_read = list_get(paquete,3);
             int* puntero_read = list_get(paquete,4);
             int* pid_f_read = list_get(paquete,5);
-            
-            void* auxiliar_read = leer_archivo_bloque(*puntero_read,nomre_archivo_read,*tamanio_read);
 
+            void* auxiliar_read = leer_archivo_bloque(*puntero_read,nomre_archivo_read,*tamanio_read);
+            log_warning(logger,"el dato que paso es %s, el puntero es %i",auxiliar_read,*puntero_read);
             conexion_memoria= crear_conexion(ip_memoria, puerto_memoria);
             enviar_stdin_memoria(*pid_f_read,*marco_read,*desplazamiento_read,*tamanio_read,auxiliar_read,conexion_memoria,EJECUTAR_IO_FS_READ);//pid_stdin es el PID para el log de memoria cuando escribe.
             //void* informacion = malloc(*tamanio_read);

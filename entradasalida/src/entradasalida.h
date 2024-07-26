@@ -4,6 +4,8 @@
 #include <utils/hello.h>
 #include <funcionesfs.h>
 
+extern void* archivo_de_bloques;
+
 char* tipo_interfaz;
 int tiempo_unidad_trabajo;
 char* ip_kernel;
